@@ -63,7 +63,8 @@ const INITIAL_GOALS: Goal[] = [
   },
 ];
 
-export const CUSTOMERS: Record<CustomerId, { label: string; sub: string; user: UserFinancialState; goals: Goal[] }> = {
+export type CustomerRecord = { label: string; sub: string; user: UserFinancialState; goals: Goal[] };
+export const CUSTOMERS: Record<string, CustomerRecord> = {
   spender: {
     label: 'Rahul Verma',
     sub: 'Spender • Food 32% ↑',
@@ -133,7 +134,7 @@ export const useFinanceStore = create<FinanceStore>()(
   customProfiles: {},
   switchCustomer: (id) => {
     const custom = get().customProfiles[id];
-    const c = (CUSTOMERS as Record<string, any>)[id] || custom;
+    const c = (CUSTOMERS as Record<string, CustomerRecord>)[id] || custom;
     if (!c) return;
     set({ activeCustomer: id, user: c.user, goals: c.goals, currentSimulation: null });
   },
@@ -163,10 +164,14 @@ export const useFinanceStore = create<FinanceStore>()(
     return id;
   },
   deleteProfile: (id) => {
-    const { customProfiles } = get();
+    const { customProfiles, activeCustomer } = get();
     const next = { ...customProfiles };
     delete next[id];
-    set({ customProfiles: next, activeCustomer: 'spender', user: CUSTOMERS.spender.user, goals: CUSTOMERS.spender.goals });
+    if (activeCustomer === id) {
+      set({ customProfiles: next, activeCustomer: 'spender', user: CUSTOMERS.spender.user, goals: CUSTOMERS.spender.goals, currentSimulation: null });
+    } else {
+      set({ customProfiles: next });
+    }
   },
 
   runSimulation: (input: SimulationInput): SimulationResult => {
@@ -314,7 +319,7 @@ export const useFinanceStore = create<FinanceStore>()(
       partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles }),
       onRehydrateStorage: () => (state) => {
         if (state && state.activeCustomer) {
-          const c = (CUSTOMERS as Record<string, any>)[state.activeCustomer] || state.customProfiles[state.activeCustomer];
+          const c = (CUSTOMERS as Record<string, CustomerRecord>)[state.activeCustomer] || state.customProfiles[state.activeCustomer];
           if (c) {
             state.user = c.user;
             state.goals = c.goals;
