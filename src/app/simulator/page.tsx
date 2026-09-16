@@ -14,8 +14,13 @@ export default function SimulatorPage() {
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
 
+  const priceError = price <= 0 ? 'Amount must be > ₹0' : price > user.totalBalance * 3 ? 'Amount unusually high vs balance' : null;
+  const nameError = !itemName.trim() ? 'Item name required' : null;
+  const canSimulate = !priceError && !nameError;
+
   const handleSimulate = () => {
-    runSimulation({ itemName, price, mode });
+    if (!canSimulate) return;
+    runSimulation({ itemName: itemName.trim(), price, mode });
   };
 
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
@@ -62,18 +67,21 @@ export default function SimulatorPage() {
             <input
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              className="mt-1.5 w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-100 focus:outline-none focus:border-violet-600"
+              className={`mt-1.5 w-full bg-slate-950 border rounded-xl px-4 py-3 text-sm font-medium text-slate-100 focus:outline-none ${nameError ? 'border-rose-500 focus:border-rose-500' : 'border-slate-700 focus:border-violet-600'}`}
               placeholder="e.g., iPhone 16 Pro"
             />
+            {nameError && <p className="text-[11px] text-rose-400 mt-1">{nameError}</p>}
           </div>
           <div>
             <label className="text-xs font-semibold text-slate-400 tracking-widest">AMOUNT (₹)</label>
             <input
               type="number"
               value={price}
+              min={1}
               onChange={(e) => setPrice(Number(e.target.value) || 0)}
-              className="mt-1.5 w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 focus:outline-none focus:border-violet-600"
+              className={`mt-1.5 w-full bg-slate-950 border rounded-xl px-4 py-3 text-sm font-bold text-slate-100 focus:outline-none ${priceError ? 'border-rose-500 focus:border-rose-500' : 'border-slate-700 focus:border-violet-600'}`}
             />
+            {priceError && <p className="text-[11px] text-rose-400 mt-1">{priceError}</p>}
             <div className="flex gap-1.5 mt-2">
               {[50000, 80000, 120000].map((v) => (
                 <button
@@ -105,10 +113,12 @@ export default function SimulatorPage() {
 
         <button
           onClick={handleSimulate}
-          className="mt-6 w-full py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-extrabold text-sm hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg"
+          disabled={!canSimulate}
+          className={`mt-6 w-full py-3.5 rounded-2xl font-extrabold text-sm transition-all shadow-lg ${canSimulate ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}
         >
           ⚡ Simulate Before You Swipe — Run Engine
         </button>
+        {!canSimulate && <p className="text-[11px] text-amber-400 mt-2 text-center">Fix errors above to simulate</p>}
         {currentSimulation && (
           <button onClick={clearSimulation} className="mt-2 w-full py-2 text-xs text-slate-400 hover:text-slate-200">
             Clear simulation

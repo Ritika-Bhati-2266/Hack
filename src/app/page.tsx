@@ -21,10 +21,11 @@ import FinancialFirewall from '@/components/FinancialFirewall';
 export default function DashboardPage() {
   const { user, goals, activeCustomer, switchCustomer } = useFinanceStore();
 
-  const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0); // ₹60,000
-  const buffer = user.totalBalance - totalEarmarked; // ₹80,000
-  const monthlyBurn = user.dailyBurnRate * 30; // ₹45,000
-  const safeRunway = (buffer / monthlyBurn).toFixed(1); // 1.8 - 3.2 Mo
+  const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
+  const buffer = user.totalBalance - totalEarmarked;
+  const monthlyBurn = user.dailyBurnRate * 30;
+  const safeRunway = (buffer / Math.max(1, monthlyBurn)).toFixed(1);
+  const isLowBalance = buffer <= 0 || Number(safeRunway) < 1.0;
   
   // Safe-to-spend today formula: Buffer - (DaysRemaining * DailyBurn) — dynamic
   const daysRemainingInMonth = (() => {
@@ -34,6 +35,20 @@ export default function DashboardPage() {
   })();
   const remainingBurn = daysRemainingInMonth * user.dailyBurnRate;
   const safeToSpendToday = Math.max(0, buffer - remainingBurn);
+
+  if (isLowBalance) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-3xl bg-rose-500/10 border border-rose-500/30 p-8 text-center">
+          <AlertCircle className="w-10 h-10 text-rose-400 mx-auto mb-3" />
+          <h2 className="text-xl font-bold text-rose-200">Buffer Exhausted — Immediate Attention Needed</h2>
+          <p className="text-sm text-rose-300/80 mt-2">Your earmarked obligations (₹{totalEarmarked.toLocaleString('en-IN')}) exceed balance (₹{user.totalBalance.toLocaleString('en-IN')}). No safe-to-spend available.</p>
+          <Link href="/simulator" className="inline-flex mt-4 px-6 py-3 rounded-xl bg-rose-600 text-white font-bold text-sm">Open Simulator — Plan Recovery</Link>
+        </div>
+        <FinancialFirewall />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
