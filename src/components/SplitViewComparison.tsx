@@ -155,15 +155,24 @@ export default function SplitViewComparison({ simulation }: SplitViewProps) {
               <p className="text-[11px] text-slate-400 mt-1">Runway drop of {(simulation.todayRunwayMonths - simulation.simulatedRunwayMonths).toFixed(1)} months</p>
             </div>
 
-            {/* Goal Delay Impact */}
-            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
-              <div>
+            {/* Goal Delay Impact — per-goal breakdown */}
+            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium">Goal Delay Impact</span>
-                <p className="text-sm font-semibold text-slate-200 mt-0.5">Overall Portfolio Targets</p>
+                <span className="text-xs font-bold text-amber-400 font-mono bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                  +{simulation.goalDelayMonths} Mo avg
+                </span>
               </div>
-              <span className="text-xs font-bold text-amber-400 font-mono bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
-                Delayed +{simulation.goalDelayMonths} Months
-              </span>
+              {simulation.perGoalDelays && (
+                <div className="space-y-1 pt-1 border-t border-slate-800">
+                  {simulation.perGoalDelays.map((g) => (
+                    <div key={g.goalId} className="flex justify-between text-[11px]">
+                      <span className="text-slate-400">{g.goalName.split(' ').slice(0,2).join(' ')}</span>
+                      <span className="font-mono text-amber-400">+{g.delayMonths} Mo</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

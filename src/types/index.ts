@@ -62,6 +62,9 @@ export interface SimulationResult {
   verdictReasoning: string;
   recommendation: string;
 
+  // Per-goal delay (Phase 2: real delay per goal, not global only)
+  perGoalDelays?: Array<{ goalId: string; goalName: string; delayMonths: number }>;
+
   // 36 month trajectory array
   trajectory: Array<{
     month: string;

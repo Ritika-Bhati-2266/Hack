@@ -217,6 +217,13 @@ export const useFinanceStore = create<FinanceStore>()(
       });
     }
 
+    // Per-goal delay — each goal's contribution vs impact
+    const perGoalDelays = goals.map(g => ({
+      goalId: g.id,
+      goalName: g.name,
+      delayMonths: Number((impactAmount / Math.max(2000, g.monthlyContribution * 2.5)).toFixed(1)),
+    }));
+
     const result: SimulationResult = {
       itemName: input.itemName || 'Custom Item',
       purchasePrice: input.price,
@@ -234,6 +241,7 @@ export const useFinanceStore = create<FinanceStore>()(
       simulatedRunwayMonths,
       simulatedSafeSpendToday,
       goalDelayMonths,
+      perGoalDelays,
       verdict,
       verdictTitle,
       verdictBadge,
