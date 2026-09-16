@@ -9,7 +9,7 @@ import TrajectoryChart from '@/components/TrajectoryChart';
 import { PaymentMode } from '@/types';
 
 export default function SimulatorPage() {
-  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user } = useFinanceStore();
+  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
   const [itemName, setItemName] = useState('iPhone 16 Pro Max');
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
@@ -122,7 +122,7 @@ export default function SimulatorPage() {
           <TrajectoryChart simulation={currentSimulation} />
 
           <div
-            className={`rounded-3xl p-6 border flex gap-4 ${
+            className={`rounded-3xl p-6 border ${
               currentSimulation.verdict === 'WAIT'
                 ? 'bg-rose-500/10 border-rose-500/30'
                 : currentSimulation.verdict === 'EMI'
@@ -130,17 +130,60 @@ export default function SimulatorPage() {
                 : 'bg-emerald-500/10 border-emerald-500/30'
             }`}
           >
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 ${
-                currentSimulation.verdict === 'WAIT' ? 'bg-rose-500' : currentSimulation.verdict === 'EMI' ? 'bg-amber-500' : 'bg-emerald-500'
-              }`}
-            >
-              {currentSimulation.verdict === 'WAIT' ? <AlertTriangle className="w-5 h-5" /> : currentSimulation.verdict === 'EMI' ? <Clock className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+            <div className="flex gap-4">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 ${
+                  currentSimulation.verdict === 'WAIT' ? 'bg-rose-500' : currentSimulation.verdict === 'EMI' ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+              >
+                {currentSimulation.verdict === 'WAIT' ? <AlertTriangle className="w-5 h-5" /> : currentSimulation.verdict === 'EMI' ? <Clock className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold tracking-widest text-slate-100">{currentSimulation.verdictTitle}</p>
+                <p className="text-xs text-slate-300 mt-1 leading-4">{currentSimulation.verdictReasoning}</p>
+                <p className="text-xs text-slate-400 mt-2 italic">{currentSimulation.recommendation}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold tracking-widest text-slate-100">{currentSimulation.verdictTitle}</p>
-              <p className="text-xs text-slate-300 mt-1 leading-4">{currentSimulation.verdictReasoning}</p>
-              <p className="text-xs text-slate-400 mt-2 italic">{currentSimulation.recommendation}</p>
+            {/* Phase 1: Wired verdict actions */}
+            <div className="mt-4 flex flex-col sm:flex-row gap-3">
+              {currentSimulation.verdict === 'WAIT' ? (
+                <>
+                  <button
+                    onClick={acceptWaitRecommendation}
+                    className="flex-1 py-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs hover:bg-slate-800 transition"
+                  >
+                    ✓ Accept — Wait 6 Weeks
+                  </button>
+                  <button
+                    onClick={confirmPurchaseAnyway}
+                    className="flex-1 py-3 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-500 transition"
+                  >
+                    Buy Anyway — Deduct ₹{currentSimulation.purchasePrice.toLocaleString('en-IN')}
+                  </button>
+                </>
+              ) : currentSimulation.verdict === 'EMI' ? (
+                <>
+                  <button
+                    onClick={() => runSimulation({ itemName, price, mode: 'EMI_6' })}
+                    className="flex-1 py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-xs hover:bg-amber-400 transition"
+                  >
+                    Switch to 6 EMI
+                  </button>
+                  <button
+                    onClick={confirmPurchaseAnyway}
+                    className="flex-1 py-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs hover:bg-slate-800 transition"
+                  >
+                    Buy with Cash Anyway
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={confirmPurchaseAnyway}
+                  className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition"
+                >
+                  ✓ Confirm Purchase — ₹{currentSimulation.purchasePrice.toLocaleString('en-IN')} (Safe)
+                </button>
+              )}
             </div>
           </div>
         </>

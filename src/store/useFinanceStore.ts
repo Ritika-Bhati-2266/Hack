@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { UserFinancialState, Goal, SimulationInput, SimulationResult, PaymentMode } from '@/types';
 
 export type CustomerId = 'spender' | 'saver' | 'chaser';
@@ -119,7 +120,9 @@ export const CUSTOMERS: Record<CustomerId, { label: string; sub: string; user: U
   },
 };
 
-export const useFinanceStore = create<FinanceStore>((set, get) => ({
+export const useFinanceStore = create<FinanceStore>()(
+  persist(
+    (set, get) => ({
   user: INITIAL_USER,
   goals: INITIAL_GOALS,
   currentSimulation: null,
@@ -130,15 +133,17 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
   },
 
   runSimulation: (input: SimulationInput): SimulationResult => {
-    const { user } = get();
-    const totalEarmarked = user.earmarkedExpenses.reduce((acc, curr) => acc + curr.amount, 0); // 60,000
-    const todayBuffer = user.totalBalance - totalEarmarked; // 80,000
-    const monthlyBurn = user.dailyBurnRate * 30; // 45,000
-    const todayRunway = Number((todayBuffer / monthlyBurn).toFixed(1)); // ~1.8 to 3.2 based on income minus burn
+    const { user, goals } = get();
+    const totalEarmarked = user.earmarkedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+    const todayBuffer = user.totalBalance - totalEarmarked;
+    const monthlyBurn = user.dailyBurnRate * 30;
+    const todayRunway = Number((todayBuffer / monthlyBurn).toFixed(1));
     
-    // Days remaining in month calculation (assuming day 15 for standard demo)
-    const daysRemaining = 15;
-    const remainingDailyBurn = daysRemaining * user.dailyBurnRate; // 22,500
+    // Dynamic days remaining in month (not hardcoded 15)
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysRemaining = Math.max(1, daysInMonth - now.getDate() + 1);
+    const remainingDailyBurn = daysRemaining * user.dailyBurnRate;
     const todaySafeSpendToday = Math.max(0, todayBuffer - remainingDailyBurn);
 
     // Calculate Payment Mode details
@@ -165,11 +170,15 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
     const simulatedRunwayMonths = Number((simulatedBuffer / monthlyBurn).toFixed(1));
     const simulatedSafeSpendToday = Math.max(0, simulatedBuffer - remainingDailyBurn);
 
-    // Goal delay estimation
+    // Goal delay estimation — customer-aware, no negative denominator
     const impactAmount = input.mode === 'CASH' ? input.price : monthlyEMI * emiMonths;
-    const goalDelayMonths = Number((impactAmount / (user.monthlyIncome - totalEarmarked - monthlyBurn || 15000)).toFixed(1));
+    const rawNetSavings = user.monthlyIncome - totalEarmarked - monthlyBurn;
+    const effectiveMonthlySavings = rawNetSavings > 0 ? rawNetSavings : Math.max(5000, Math.round(user.monthlyIncome * 0.08 + goals.reduce((a, g) => a + g.monthlyContribution, 0) * 0.2));
+    const goalDelayMonths = Number((impactAmount / effectiveMonthlySavings).toFixed(1));
 
-    // Decision Logic Engine
+    // Decision Logic Engine — dynamic values, no hardcoded ₹35k/₹15k/₹80k
+    const rentAmt = user.earmarkedExpenses.find(e => e.category === 'rent')?.amount ?? 0;
+    const sipAmt = user.earmarkedExpenses.find(e => e.category === 'sip')?.amount ?? 0;
     let verdict: 'WAIT' | 'EMI' | 'BUY' = 'BUY';
     let verdictTitle = 'Safe to Buy Now';
     let verdictBadge = 'GREEN LIGHT';
@@ -180,23 +189,22 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       verdict = 'WAIT';
       verdictTitle = 'Wait 6 Weeks — Keep Buffer Safe';
       verdictBadge = 'HIGH RISK';
-      verdictReasoning = `Immediate cash purchase drops your safe runway to ${simulatedRunwayMonths} months (< 2.0 months emergency threshold). This exposes you to risk if rent (₹35k) or SIPs (₹15k) are due.`;
-      recommendation = `Pause purchase for 6 weeks until next salary cycle of ₹80,000 adds back ₹35,000+ to your liquid buffer.`;
+      verdictReasoning = `Immediate cash purchase drops your safe runway to ${simulatedRunwayMonths} months (< 2.0 months emergency threshold). This exposes you to risk if rent (₹${rentAmt.toLocaleString('en-IN')}) or SIPs (₹${sipAmt.toLocaleString('en-IN')}) are due.`;
+      recommendation = `Pause purchase for 6 weeks until next salary cycle of ₹${user.monthlyIncome.toLocaleString('en-IN')} adds back ₹${effectiveMonthlySavings.toLocaleString('en-IN')}+ to your liquid buffer.`;
     } else if (simulatedRunwayMonths >= 2.0 && simulatedRunwayMonths <= 3.0) {
       verdict = 'EMI';
       verdictTitle = 'EMI Recommended (3 to 6 Months)';
       verdictBadge = 'MODERATE RISK';
-      verdictReasoning = `Full cash purchase reduces buffer significantly. Spreading payment over 6 months at ₹${Math.round(input.price/6).toLocaleString('en-IN')}/mo keeps your upfront buffer protected above ₹80,000.`;
+      verdictReasoning = `Full cash purchase reduces buffer significantly. Spreading payment over 6 months at ₹${Math.round(input.price/6).toLocaleString('en-IN')}/mo keeps your upfront buffer protected above ₹${Math.round(todayBuffer * 0.6).toLocaleString('en-IN')}.`;
       recommendation = `Choose No-Cost EMI (6 Months) to preserve runway liquidity while acquiring the item.`;
     }
 
-    // 36-Month Trajectory data generation
+    // 36-Month Trajectory data generation — customer-aware growth
     const trajectory = [];
     let baselineAccumulated = user.totalBalance;
     let simulatedAccumulated = simulatedBalance;
-    const monthlyNetSavings = user.monthlyIncome - totalEarmarked - monthlyBurn; // e.g. 80k - 60k - 45k = -25k? Wait: net savings = 80k income - 60k earmarked - monthly burn.
-    // Realistically monthly savings after fixed burn: 80,000 - 60,000 (rent+sips+bills) - 15,000 discretionary = 5,000 positive balance growth
-    const monthlyGrowth = 8000;
+    // Use effectiveMonthlySavings derived above — personalised per customer profile, never negative
+    const monthlyGrowth = effectiveMonthlySavings;
 
     for (let month = 0; month <= 36; month += 3) {
       baselineAccumulated += monthlyGrowth * 3;
@@ -255,4 +263,17 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       currentSimulation: null,
     });
   },
-}));
+}),
+    {
+      name: 'previse-customer',
+      partialize: (state) => ({ activeCustomer: state.activeCustomer }),
+      onRehydrateStorage: () => (state) => {
+        if (state && state.activeCustomer && CUSTOMERS[state.activeCustomer]) {
+          const c = CUSTOMERS[state.activeCustomer];
+          state.user = c.user;
+          state.goals = c.goals;
+        }
+      },
+    }
+  )
+);

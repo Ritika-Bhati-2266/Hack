@@ -26,9 +26,13 @@ export default function DashboardPage() {
   const monthlyBurn = user.dailyBurnRate * 30; // ₹45,000
   const safeRunway = (buffer / monthlyBurn).toFixed(1); // 1.8 - 3.2 Mo
   
-  // Safe-to-spend today formula: Buffer - (DaysRemaining * DailyBurn)
-  const daysRemainingInMonth = 15;
-  const remainingBurn = daysRemainingInMonth * user.dailyBurnRate; // ₹22,500
+  // Safe-to-spend today formula: Buffer - (DaysRemaining * DailyBurn) — dynamic
+  const daysRemainingInMonth = (() => {
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return Math.max(1, daysInMonth - now.getDate() + 1);
+  })();
+  const remainingBurn = daysRemainingInMonth * user.dailyBurnRate;
   const safeToSpendToday = Math.max(0, buffer - remainingBurn);
 
   return (
@@ -158,7 +162,7 @@ export default function DashboardPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-2">
-            After 15 days remaining burn (₹22.5k)
+            After {daysRemainingInMonth} days remaining burn (₹{remainingBurn.toLocaleString('en-IN')})
           </p>
         </div>
 

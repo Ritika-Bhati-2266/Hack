@@ -61,7 +61,7 @@ export default function SplitViewComparison({ simulation }: SplitViewProps) {
                 </span>
                 <span className="text-xs text-slate-400 font-mono">₹{simulation.todayBuffer.toLocaleString('en-IN')}</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Total ₹1.4L - ₹60k Earmarked</p>
+              <p className="text-[11px] text-slate-400 mt-1">Total ₹{simulation.todayBalance.toLocaleString('en-IN')} - ₹{simulation.todayEarmarked.toLocaleString('en-IN')} Earmarked</p>
             </div>
 
             {/* Safe Runway */}
@@ -75,7 +75,7 @@ export default function SplitViewComparison({ simulation }: SplitViewProps) {
                   Healthy (&gt;3.0 Mo)
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Based on ₹1,500/day burn rate</p>
+              <p className="text-[11px] text-slate-400 mt-1">Based on ₹{Math.round(simulation.todayBuffer / Math.max(1, simulation.todayRunwayMonths) / 30).toLocaleString('en-IN')}/day burn rate</p>
             </div>
 
             {/* Goal Impact */}

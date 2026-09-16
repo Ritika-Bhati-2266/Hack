@@ -127,11 +127,11 @@ export default function FinancialFirewall() {
           </div>
         </div>
 
-        {/* RBI AA Notice */}
+        {/* RBI AA Notice — dynamic, no hardcoded ₹1.4L */}
         <div className="mt-4 p-3 bg-slate-950/40 rounded-xl border border-slate-800/50 flex items-center justify-between text-xs text-slate-400">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Deterministic Firewall Rule: Total Balance (₹1.4L) - Earmarked (₹60k) = ₹80k Liquid Buffer.</span>
+            <span>Deterministic Firewall Rule: Total Balance (₹{user.totalBalance.toLocaleString('en-IN')}) - Earmarked (₹{totalEarmarked.toLocaleString('en-IN')}) = ₹{safeBuffer.toLocaleString('en-IN')} Liquid Buffer.</span>
           </div>
           <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">Rule ID: FW-RBI-2026</span>
         </div>
