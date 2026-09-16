@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   ShieldCheck,
   TrendingUp,
@@ -13,13 +14,20 @@ import {
   Layers,
   ChevronRight,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Plus,
+  X,
+  Trash2
 } from 'lucide-react';
 import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
 import FinancialFirewall from '@/components/FinancialFirewall';
 
 export default function DashboardPage() {
-  const { user, goals, activeCustomer, switchCustomer } = useFinanceStore();
+  const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile } = useFinanceStore();
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 });
+  const allProfiles: Record<string, { label: string; sub: string }> = { ...CUSTOMERS, ...customProfiles };
+  const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.totalBalance > 0;
 
   const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
   const buffer = user.totalBalance - totalEarmarked;
@@ -53,29 +61,96 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* CUSTOMER SWITCHER — proves "every customer" personalisation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold tracking-widest text-slate-400">DEMO: SWITCH CUSTOMER</span>
-          <span className="text-xs text-slate-500 hidden sm:inline">— same iPhone → different verdict per profile</span>
+      <div className="flex flex-col gap-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold tracking-widest text-slate-400">DEMO: SWITCH CUSTOMER</span>
+            <span className="text-xs text-slate-500 hidden sm:inline">— same iPhone → different verdict per profile</span>
+          </div>
+          <button onClick={() => setShowCreate(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-600 text-white text-xs font-bold hover:bg-violet-500">
+            <Plus className="w-3.5 h-3.5" /> Apni Profile Banao
+          </button>
         </div>
-        <div className="flex gap-2">
-          {(Object.keys(CUSTOMERS) as CustomerId[]).map((id) => (
+        <div className="flex flex-wrap gap-2">
+          {Object.keys(CUSTOMERS).map((id) => (
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-full text-xs font-bold border transition ${
+              className={`px-4 py-2 rounded-full text-xs font-bold border transition ${
                 activeCustomer === id ? 'bg-white text-slate-900 border-white shadow' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
               }`}
             >
-              <span>{CUSTOMERS[id].label.split(' ')[0]}</span>
+              <span>{CUSTOMERS[id as CustomerId].label.split(' ')[0]}</span>
               <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-70">{id === 'spender' ? 'Spender' : id === 'saver' ? 'Saver' : 'Chaser'}</span>
+            </button>
+          ))}
+          {Object.keys(customProfiles).map((id) => (
+            <button
+              key={id}
+              onClick={() => switchCustomer(id)}
+              className={`group px-4 py-2 rounded-full text-xs font-bold border transition flex items-center gap-2 ${
+                activeCustomer === id ? 'bg-emerald-500 text-slate-900 border-emerald-500 shadow' : 'bg-slate-800 text-emerald-300 border-emerald-500/30 hover:bg-slate-700'
+              }`}
+            >
+              <span>{customProfiles[id].label.split(' ')[0]}</span>
+              <span onClick={(e) => { e.stopPropagation(); deleteProfile(id); }} className="opacity-60 hover:opacity-100"><Trash2 className="w-3 h-3" /></span>
             </button>
           ))}
         </div>
       </div>
       <p className="text-xs text-slate-500 -mt-6">
-        Active: <span className="font-bold text-violet-400">{CUSTOMERS[activeCustomer].label}</span> • {CUSTOMERS[activeCustomer].sub} • Balance ₹{user.totalBalance.toLocaleString('en-IN')} • Income ₹{user.monthlyIncome.toLocaleString('en-IN')}
+        Active: <span className="font-bold text-violet-400">{allProfiles[activeCustomer]?.label || activeCustomer}</span> • {allProfiles[activeCustomer]?.sub || ''} • Balance ₹{user.totalBalance.toLocaleString('en-IN')} • Income ₹{user.monthlyIncome.toLocaleString('en-IN')}
       </p>
+
+      {/* Create Profile Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-100">Apni Profile Banao</h3>
+              <button onClick={() => setShowCreate(false)} className="p-1 rounded-full hover:bg-slate-800"><X className="w-5 h-5 text-slate-400" /></button>
+            </div>
+            <p className="text-xs text-slate-400">Apna balance/income bharo — engine tumhara personalised verdict देगा (persisted via localStorage)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">NAME</label>
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., Ritika" className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">MONTHLY INCOME (₹)</label>
+                <input type="number" value={form.monthlyIncome} onChange={(e) => setForm({ ...form, monthlyIncome: Number(e.target.value) || 0 })} className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">TOTAL BALANCE (₹)</label>
+                <input type="number" value={form.totalBalance} onChange={(e) => setForm({ ...form, totalBalance: Number(e.target.value) || 0 })} className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">DAILY BURN (₹)</label>
+                <input type="number" value={form.dailyBurnRate} onChange={(e) => setForm({ ...form, dailyBurnRate: Number(e.target.value) || 0 })} className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">RENT (₹)</label>
+                <input type="number" value={form.rent} onChange={(e) => setForm({ ...form, rent: Number(e.target.value) || 0 })} className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">SIP (₹)</label>
+                <input type="number" value={form.sip} onChange={(e) => setForm({ ...form, sip: Number(e.target.value) || 0 })} className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+              <div>
+                <label className="text-[11px] font-bold tracking-widest text-slate-400">BILLS (₹)</label>
+                <input type="number" value={form.bills} onChange={(e) => setForm({ ...form, bills: Number(e.target.value) || 0 })} className="mt-1 w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-violet-600 outline-none" />
+              </div>
+            </div>
+            <button
+              disabled={!canCreate}
+              onClick={() => { createProfile(form); setShowCreate(false); setForm({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 }); }}
+              className={`w-full py-3 rounded-xl font-bold text-sm ${canCreate ? 'bg-violet-600 text-white hover:bg-violet-500' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
+            >
+              Create & Switch
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Hero Welcome Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-6 md:p-8">

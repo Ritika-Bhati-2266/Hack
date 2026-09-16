@@ -2,14 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserFinancialState, Goal, SimulationInput, SimulationResult, PaymentMode } from '@/types';
 
-export type CustomerId = 'spender' | 'saver' | 'chaser';
+export type CustomerId = 'spender' | 'saver' | 'chaser' | string;
 
 interface FinanceStore {
   user: UserFinancialState;
   goals: Goal[];
   currentSimulation: SimulationResult | null;
   activeCustomer: CustomerId;
+  customProfiles: Record<string, { label: string; sub: string; user: UserFinancialState; goals: Goal[] }>;
   switchCustomer: (id: CustomerId) => void;
+  createProfile: (data: { name: string; monthlyIncome: number; totalBalance: number; dailyBurnRate: number; rent: number; sip: number; bills: number }) => string;
+  deleteProfile: (id: string) => void;
   runSimulation: (input: SimulationInput) => SimulationResult;
   clearSimulation: () => void;
   acceptWaitRecommendation: () => void;
@@ -127,9 +130,43 @@ export const useFinanceStore = create<FinanceStore>()(
   goals: INITIAL_GOALS,
   currentSimulation: null,
   activeCustomer: 'spender',
+  customProfiles: {},
   switchCustomer: (id) => {
-    const c = CUSTOMERS[id];
+    const custom = get().customProfiles[id];
+    const c = (CUSTOMERS as Record<string, any>)[id] || custom;
+    if (!c) return;
     set({ activeCustomer: id, user: c.user, goals: c.goals, currentSimulation: null });
+  },
+  createProfile: (data) => {
+    const id = `custom_${Date.now()}`;
+    const newUser: UserFinancialState = {
+      totalBalance: data.totalBalance,
+      monthlyIncome: data.monthlyIncome,
+      dailyBurnRate: data.dailyBurnRate,
+      earmarkedExpenses: [
+        { id: '1', name: 'Apartment Rent', amount: data.rent, category: 'rent', dueDate: '1st of month', autoDebit: true },
+        { id: '2', name: 'Mutual Fund SIPs', amount: data.sip, category: 'sip', dueDate: '5th of month', autoDebit: true },
+        { id: '3', name: 'Electricity & Wifi', amount: data.bills, category: 'bill', dueDate: '10th of month', autoDebit: true },
+      ],
+    };
+    const newGoals: Goal[] = [
+      { id: 'g1', name: 'Emergency Shield Fund', targetAmount: 300000, currentAmount: Math.round(data.totalBalance * 0.6), monthlyContribution: Math.round(data.monthlyIncome * 0.15), targetDate: '2026-12-31', category: 'emergency', delayInMonths: 0 },
+      { id: 'g2', name: 'Custom Goal', targetAmount: 100000, currentAmount: Math.round(data.totalBalance * 0.2), monthlyContribution: Math.round(data.monthlyIncome * 0.1), targetDate: '2026-11-20', category: 'tech', delayInMonths: 0 },
+    ];
+    set((s) => ({
+      customProfiles: { ...s.customProfiles, [id]: { label: data.name, sub: `Custom • ₹${(data.monthlyIncome/1000).toFixed(0)}k/mo`, user: newUser, goals: newGoals } },
+      activeCustomer: id,
+      user: newUser,
+      goals: newGoals,
+      currentSimulation: null,
+    }));
+    return id;
+  },
+  deleteProfile: (id) => {
+    const { customProfiles } = get();
+    const next = { ...customProfiles };
+    delete next[id];
+    set({ customProfiles: next, activeCustomer: 'spender', user: CUSTOMERS.spender.user, goals: CUSTOMERS.spender.goals });
   },
 
   runSimulation: (input: SimulationInput): SimulationResult => {
@@ -274,12 +311,14 @@ export const useFinanceStore = create<FinanceStore>()(
 }),
     {
       name: 'previse-customer',
-      partialize: (state) => ({ activeCustomer: state.activeCustomer }),
+      partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles }),
       onRehydrateStorage: () => (state) => {
-        if (state && state.activeCustomer && CUSTOMERS[state.activeCustomer]) {
-          const c = CUSTOMERS[state.activeCustomer];
-          state.user = c.user;
-          state.goals = c.goals;
+        if (state && state.activeCustomer) {
+          const c = (CUSTOMERS as Record<string, any>)[state.activeCustomer] || state.customProfiles[state.activeCustomer];
+          if (c) {
+            state.user = c.user;
+            state.goals = c.goals;
+          }
         }
       },
     }
