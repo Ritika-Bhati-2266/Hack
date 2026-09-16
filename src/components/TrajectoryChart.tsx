@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import {
   LineChart,
   Line,
@@ -19,6 +20,33 @@ interface Props {
 
 export default function TrajectoryChart({ simulation }: Props) {
   const data = simulation.trajectory;
+  const [showFirewall, setShowFirewall] = useState(true);
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleExport = () => {
+    // Simple SVG export for PPT — captures chart wrapper
+    if (!chartRef.current) return;
+    const svg = chartRef.current.querySelector('svg');
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+      if (ctx) {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+      const a = document.createElement('a');
+      a.download = `previse-trajectory-${simulation.itemName.replace(/\s+/g, '-')}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  };
 
   return (
     <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 shadow-xl">
@@ -32,20 +60,29 @@ export default function TrajectoryChart({ simulation }: Props) {
             Baseline vs Simulated savings over 36 months • Earmarked firewall ₹{simulation.todayEarmarked.toLocaleString('en-IN')} never counted
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-emerald-400 inline-block" /> Baseline
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-rose-400 inline-block" /> Simulated
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-amber-400/60 border-dashed border-t border-amber-400 inline-block" /> Firewall
-          </span>
+          <button
+            onClick={() => setShowFirewall(!showFirewall)}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-full border text-[11px] ${showFirewall ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}
+          >
+            <span className="w-3 h-0.5 bg-amber-400/60 border-dashed border-t border-amber-400 inline-block" /> Firewall {showFirewall ? 'ON' : 'OFF'}
+          </button>
+          <button
+            onClick={handleExport}
+            className="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[11px] hover:bg-slate-700"
+          >
+            ⤓ Export PNG
+          </button>
         </div>
       </div>
 
-      <div className="h-[300px] w-full">
+      <div ref={chartRef} className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -69,12 +106,14 @@ export default function TrajectoryChart({ simulation }: Props) {
               ]}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-            <ReferenceLine
-              y={data[0]?.earmarkedThreshold}
-              stroke="#f59e0b"
-              strokeDasharray="6 4"
-              label={{ value: 'Firewall ₹60k', fill: '#f59e0b', fontSize: 10, position: 'right' }}
-            />
+            {showFirewall && (
+              <ReferenceLine
+                y={data[0]?.earmarkedThreshold}
+                stroke="#f59e0b"
+                strokeDasharray="6 4"
+                label={{ value: `Firewall ₹${(data[0]?.earmarkedThreshold / 1000).toFixed(0)}k`, fill: '#f59e0b', fontSize: 10, position: 'right' }}
+              />
+            )}
             <Line
               type="monotone"
               dataKey="baselineSavings"
@@ -113,7 +152,7 @@ export default function TrajectoryChart({ simulation }: Props) {
         <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
           <span className="text-slate-400">Recovery</span>
           <p className="font-bold text-slate-200">~{Math.ceil(simulation.goalDelayMonths * 4)} weeks</p>
-          <p className="text-slate-500">With ₹80k income cycle</p>
+          <p className="text-slate-500">With ₹{simulation.todayBalance.toLocaleString('en-IN')} balance</p>
         </div>
       </div>
     </div>
