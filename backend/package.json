@@ -1,0 +1,17 @@
+{
+  "name": "previse-backend",
+  "version": "0.1.0",
+  "description": "Previse Financial Decision Engine — Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.0.0",
+    "multer": "^2.4.0"
+  }
+}
