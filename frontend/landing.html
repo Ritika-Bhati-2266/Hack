@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Previse — Know Before You Decide</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .landing { max-width: 640px; margin: 0 auto; padding: 3rem 1rem; text-align: center; }
+    .landing h1 { font-size: 2.25rem; font-weight: 900; letter-spacing: -0.02em; margin: 1rem 0 0.5rem; }
+    .landing .tagline { color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem; }
+    .landing .card { text-align: left; }
+    .landing .form-row { margin-bottom: 1rem; }
+    .landing select {
+      background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.65rem 0.85rem; color: var(--text); font-size: 0.9rem; font-family: inherit;
+      outline: none; width: 100%;
+    }
+    .landing select:focus { border-color: var(--primary); }
+    #beta-success { display: none; background: var(--green-bg); border: 1px solid rgba(34,197,94,0.3);
+      color: var(--green); padding: 1rem; border-radius: 8px; font-weight: 600; }
+    #beta-error { display: none; }
+    .landing .app-link { margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); }
+    .landing .app-link a { color: var(--primary); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="landing">
+      <div class="logo" style="justify-content:center;">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="logo-text">Previse</span>
+      </div>
+      <h1>Know Before You Decide</h1>
+      <p class="tagline">Simulate any purchase before you swipe — see what happens to your buffer, runway &amp; goals.</p>
+
+      <div class="card">
+        <div class="card-label">Beta access — first 50 users</div>
+        <form id="beta-form">
+          <div class="form-row">
+            <label for="beta-name">Name</label>
+            <input type="text" id="beta-name" placeholder="Your name" required maxlength="100" />
+          </div>
+          <div class="form-row">
+            <label for="beta-email">Email</label>
+            <input type="email" id="beta-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-row">
+            <label for="beta-usecase">What do you want to use Previse for?</label>
+            <select id="beta-usecase">
+              <option value="big-purchase">Big purchase decision</option>
+              <option value="budgeting">Monthly budgeting</option>
+              <option value="emi">EMI decisions</option>
+              <option value="goals">Goal tracking</option>
+            </select>
+          </div>
+          <div class="sim-error" id="beta-error"></div>
+          <button class="sim-btn" type="submit" id="beta-btn" style="width:100%;justify-content:center;">Request Beta Access</button>
+        </form>
+        <div id="beta-success"></div>
+      </div>
+
+      <p class="app-link">Already have access? <a href="/">Open the app →</a></p>
+    </div>
+    <footer class="footer">Previse — Simulate before you spend. · Phase 2 · India Stack</footer>
+  </div>
+
+  <script>
+    document.getElementById("beta-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("beta-btn");
+      const errEl = document.getElementById("beta-error");
+      const okEl = document.getElementById("beta-success");
+      errEl.style.display = "none";
+
+      const body = {
+        name: document.getElementById("beta-name").value.trim(),
+        email: document.getElementById("beta-email").value.trim(),
+        usecase: document.getElementById("beta-usecase").value,
+      };
+      if (!body.name || !body.email) {
+        errEl.textContent = "Name and email are required.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Requesting…";
+      try {
+        const res = await fetch("/api/beta/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Signup failed.");
+        document.getElementById("beta-form").style.display = "none";
+        okEl.textContent = `${data.message} You are #${data.position} on the list.`;
+        okEl.style.display = "block";
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Request Beta Access";
+      }
+    });
+  </script>
+</body>
+</html>

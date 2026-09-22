@@ -10,6 +10,7 @@ const multer = require("multer");
 const crypto = require("crypto");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
+const fs = require("fs");
 
 const { calculateFinancialState } = require("./engine/rules");
 const { simulate, calculateEMI } = require("./engine/simulator");
@@ -112,10 +113,10 @@ app.get("/api/firewall", (req, res) => {
  * Create a new AA consent request
  * Body: { customerId?, purpose? }
  */
-app.post("/api/aa/consent", apiLimiter, (req, res) => {
+app.post("/api/aa/consent", apiLimiter, async (req, res) => {
   try {
     const sessionId = getOrCreateSessionId(req);
-    const session = createConsent({ customerId: sessionId, ...req.body });
+    const session = await createConsent({ customerId: sessionId, ...req.body });
     res.json(session);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -154,13 +155,13 @@ app.get("/api/aa/consent/:consentId", (req, res) => {
  * Body: { consentId, sessionToken }
  * Returns: { accounts, transactions, liveProfile }
  */
-app.post("/api/aa/fetch", (req, res) => {
+app.post("/api/aa/fetch", async (req, res) => {
   try {
     const { consentId, sessionToken } = req.body;
     if (!consentId) return res.status(400).json({ error: "consentId required" });
     if (!sessionToken) return res.status(400).json({ error: "sessionToken required" });
 
-    const { accounts, transactions } = fetchLiveData(consentId, sessionToken);
+    const { accounts, transactions } = await fetchLiveData(consentId, sessionToken);
     const { profile, meta } = buildLiveProfile({ accounts, transactions });
 
     const sessionId = getOrCreateSessionId(req);
@@ -420,6 +421,69 @@ app.delete("/api/user/data", (req, res) => {
     liveProfiles.delete(sessionId);
   }
   res.json({ message: "All your data has been deleted." });
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  BETA SIGNUP (persist to JSON file — PII, gitignored)
+// ═══════════════════════════════════════════════════════════════
+
+const SIGNUPS_FILE = path.join(__dirname, "data", "beta-signups.json");
+
+function readSignups() {
+  try {
+    return JSON.parse(fs.readFileSync(SIGNUPS_FILE, "utf-8"));
+  } catch (err) {
+    if (err.code !== "ENOENT") {
+      // File exists but is unreadable/corrupt — back it up instead of silently dropping signups
+      try {
+        const backup = `${SIGNUPS_FILE}.corrupt-${Date.now()}`;
+        fs.renameSync(SIGNUPS_FILE, backup);
+        console.error(`[beta-signup] Corrupt signups file backed up to ${backup}: ${err.message}`);
+      } catch (backupErr) {
+        console.error(`[beta-signup] Could not back up corrupt file: ${backupErr.message}`);
+      }
+    }
+    return [];
+  }
+}
+
+/**
+ * POST /api/beta/signup
+ * Body: { name, email, usecase? }
+ */
+app.post("/api/beta/signup", apiLimiter, (req, res) => {
+  const { name, email, usecase = "" } = req.body || {};
+
+  if (!name || typeof name !== "string" || !name.trim()) {
+    return res.status(400).json({ error: "name is required" });
+  }
+  if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    return res.status(400).json({ error: "valid email is required" });
+  }
+
+  const signups = readSignups();
+  const normalizedEmail = email.trim().toLowerCase();
+  if (signups.some((s) => s.email === normalizedEmail)) {
+    return res.status(409).json({ error: "email already registered" });
+  }
+
+  signups.push({
+    name: name.trim().slice(0, 100),
+    email: normalizedEmail,
+    usecase: String(usecase).slice(0, 100),
+    createdAt: new Date().toISOString(),
+  });
+
+  try {
+    // Atomic write: temp file + rename, so a crash mid-write never leaves a torn file
+    const tmp = `${SIGNUPS_FILE}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(signups, null, 2));
+    fs.renameSync(tmp, SIGNUPS_FILE);
+  } catch (err) {
+    return res.status(500).json({ error: "could not save signup" });
+  }
+
+  res.json({ message: "You're on the list!", position: signups.length });
 });
 
 // ─── Catch-all: serve frontend ───────────────────────────────
