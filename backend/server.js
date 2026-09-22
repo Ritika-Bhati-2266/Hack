@@ -54,14 +54,15 @@ function getOrCreateSessionId(req) {
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: ["http://localhost:3001", "http://localhost:3000"], credentials: true }));
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+app.use(cors({ origin: ["http://localhost:3000", FRONTEND_URL], credentials: true }));
 app.use(express.json());
 
 // Rate limiting — 30 requests per minute per IP on mutation endpoints
 const apiLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
 
-// Serve static frontend
-app.use(express.static(path.join(__dirname, "../frontend")));
+// NOTE (Option B): backend is API-only. Next.js UI runs on :3000.
+// Legacy vanilla UI kept in frontend-legacy/ for reference, NOT served.
 
 // ─── API Routes ──────────────────────────────────────────────
 
@@ -486,9 +487,14 @@ app.post("/api/beta/signup", apiLimiter, (req, res) => {
   res.json({ message: "You're on the list!", position: signups.length });
 });
 
-// ─── Catch-all: serve frontend ───────────────────────────────
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+// ─── Root: point to Next.js UI ───────────────────────────────
+app.get("/", (req, res) => {
+  res.json({ service: "previse-api", ui: FRONTEND_URL, health: "/api/health" });
+});
+
+// ─── Catch-all: JSON 404 for unknown API routes ──────────────
+app.use((req, res) => {
+  res.status(404).json({ error: "not found — Next.js UI runs on " + FRONTEND_URL });
 });
 
 // ─── Start ───────────────────────────────────────────────────

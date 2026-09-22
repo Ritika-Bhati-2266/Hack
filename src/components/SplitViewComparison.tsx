@@ -18,8 +18,7 @@ export default function SplitViewComparison({ simulation }: SplitViewProps) {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-            <span>Split View Comparison</span>
-            <span className="text-xs font-normal text-slate-400 font-mono">(PPT Slide 5 Spec)</span>
+            <span>Before vs After</span>
           </h3>
           <p className="text-xs text-slate-400">Comparing financial state BEFORE vs AFTER purchase of {simulation.itemName}</p>
         </div>

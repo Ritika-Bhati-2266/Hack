@@ -1,18 +1,35 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server } from 'lucide-react';
 import Link from 'next/link';
 import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
 import TrajectoryChart from '@/components/TrajectoryChart';
 import { PaymentMode } from '@/types';
+import { simulateOnBackend, BackendVerdict } from '@/lib/api';
 
 export default function SimulatorPage() {
-  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
+  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, goals, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
   const [itemName, setItemName] = useState('iPhone 16 Pro Max');
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
+  const [backendVerdict, setBackendVerdict] = useState<BackendVerdict | null>(null);
+  const [backendLoading, setBackendLoading] = useState(false);
+  const [backendError, setBackendError] = useState<string | null>(null);
+
+  const handleVerifyBackend = async () => {
+    setBackendLoading(true);
+    setBackendError(null);
+    try {
+      const res = await simulateOnBackend(user, goals, itemName.trim(), price, mode);
+      setBackendVerdict(res);
+    } catch (e) {
+      setBackendError(e instanceof Error ? e.message : 'Backend unreachable — is Express running on :3001?');
+    } finally {
+      setBackendLoading(false);
+    }
+  };
 
   const priceError = price <= 0 ? 'Amount must be > ₹0' : price > user.totalBalance * 3 ? 'Amount unusually high vs balance' : null;
   const nameError = !itemName.trim() ? 'Item name required' : null;
@@ -119,8 +136,32 @@ export default function SimulatorPage() {
           ⚡ Simulate Before You Swipe — Run Engine
         </button>
         {!canSimulate && <p className="text-[11px] text-amber-400 mt-2 text-center">Fix errors above to simulate</p>}
+        <button
+          onClick={handleVerifyBackend}
+          disabled={!canSimulate || backendLoading}
+          className="mt-3 w-full py-2.5 rounded-2xl font-bold text-xs border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <Server className="w-4 h-4" />
+          {backendLoading ? 'Verifying with backend engine…' : 'Verify with backend engine (:3001)'}
+        </button>
+        {backendError && <p className="text-[11px] text-rose-400 mt-2 text-center">{backendError}</p>}
+        {backendVerdict && (
+          <div className="mt-3 p-4 rounded-2xl bg-slate-950 border border-emerald-500/20 text-xs space-y-1">
+            <p className="font-bold text-emerald-300 tracking-widest">BACKEND VERDICT — {backendVerdict.verdict.action.toUpperCase()} ({backendVerdict.verdict.severity})</p>
+            <p className="text-slate-300">{backendVerdict.verdict.message}</p>
+            <p className="text-slate-400">{backendVerdict.verdict.detail}</p>
+            <p className="text-slate-500 font-mono">
+              Runway {backendVerdict.before.runwayDisplay} → {backendVerdict.after.runwayDisplay} • Buffer ₹{backendVerdict.before.buffer.toLocaleString('en-IN')} → ₹{backendVerdict.after.buffer.toLocaleString('en-IN')} • source: {backendVerdict.profileSource}
+            </p>
+            {currentSimulation && (
+              <p className={`font-bold ${backendVerdict.verdict.action.toLowerCase() === currentSimulation.verdict.toLowerCase() || (backendVerdict.verdict.action === 'buy' && currentSimulation.verdict === 'BUY') || (backendVerdict.verdict.action === 'wait' && currentSimulation.verdict === 'WAIT') || (backendVerdict.verdict.action === 'emi' && currentSimulation.verdict === 'EMI') ? 'text-emerald-400' : 'text-amber-400'}`}>
+                Local UI verdict: {currentSimulation.verdict} — {backendVerdict.verdict.action.toUpperCase() === currentSimulation.verdict || (backendVerdict.verdict.action === 'buy' && currentSimulation.verdict === 'BUY') ? 'MATCH ✓' : 'MISMATCH — backend is source of truth'}
+              </p>
+            )}
+          </div>
+        )}
         {currentSimulation && (
-          <button onClick={clearSimulation} className="mt-2 w-full py-2 text-xs text-slate-400 hover:text-slate-200">
+          <button onClick={() => { clearSimulation(); setBackendVerdict(null); }} className="mt-2 w-full py-2 text-xs text-slate-400 hover:text-slate-200">
             Clear simulation
           </button>
         )}

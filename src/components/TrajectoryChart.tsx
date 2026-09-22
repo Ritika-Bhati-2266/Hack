@@ -24,7 +24,7 @@ export default function TrajectoryChart({ simulation }: Props) {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const handleExport = () => {
-    // Simple SVG export for PPT — captures chart wrapper
+    // Export chart as PNG image — captures chart wrapper
     if (!chartRef.current) return;
     const svg = chartRef.current.querySelector('svg');
     if (!svg) return;
@@ -54,7 +54,6 @@ export default function TrajectoryChart({ simulation }: Props) {
         <div>
           <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
             3-Year Wealth Trajectory
-            <span className="text-xs font-normal text-slate-400 font-mono">(PPT Slide 6 Spec)</span>
           </h3>
           <p className="text-xs text-slate-400">
             Baseline vs Simulated savings over 36 months • Earmarked firewall ₹{simulation.todayEarmarked.toLocaleString('en-IN')} never counted

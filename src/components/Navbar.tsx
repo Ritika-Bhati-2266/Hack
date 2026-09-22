@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Cpu, Target, ArrowUpRight, Zap, RefreshCw } from 'lucide-react';
+import { Shield, Cpu, Target, Landmark, Zap } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 
 export default function Navbar() {
@@ -15,6 +15,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/', label: 'Dashboard', icon: Shield },
     { href: '/simulator', label: 'What-If Simulator', icon: Cpu, badge: 'MOST IMPORTANT' },
+    { href: '/connect', label: 'Connect', icon: Landmark },
     { href: '/goals', label: 'Goals', icon: Target },
   ];
 

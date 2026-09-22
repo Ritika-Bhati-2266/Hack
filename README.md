@@ -1,61 +1,83 @@
-# PREVISE — Personal Financial Decision Engine
+# PREVISE — Know Before You Decide
 
-> Don't just track past spend. **Simulate your future.** RBI Account Aggregator ready.
+> Expense trackers show the **past**. Previse simulates the **future** — before you swipe.
+> Answers one question: **"What will happen to my money if I buy this?"**
 
-Prevents impulse purchases by simulating impact on **Safe Buffer + Runway + Goal delays** BEFORE you swipe. Same iPhone ₹80k → different verdict per customer profile (deterministic firewall).
+iPhone ₹80,000 cash → runway drops from **2.9 → 1.2 months** → verdict: **WAIT**.
+Same purchase, different profile → different verdict. Deterministic rules, no LLM hallucination.
 
-**Live:** `http://localhost:3000` · **Stack:** Next.js 16.3.5 (Turbopack) + Zustand (persist) + Recharts + Tailwind v4
+## Demo in 60 seconds (Judges) — Option B: Next.js UI + Express API
 
-### Demo in 30s (Judges)
-1. `npm run dev` → open `/` → Click **Demo: Switch Customer** (Rahul/Priya/Aman) — observe buffer/runway change `src/store/useFinanceStore.ts:62`
-2. `Launch What-If Simulator` → `iPhone 16 Pro Max ₹80,000` → **Run Engine**
-3. See **SplitView** (Today vs Simulated) `src/components/SplitViewComparison.tsx:10` + **3Y Trajectory** `src/components/TrajectoryChart.tsx:20` + verdict `WAIT|EMI|BUY`
-4. `WAIT` → *Wait 6 Weeks* / `EMI` → *Switch to 6 EMI* / `BUY` → *Confirm* (balance deducts `src/store/useFinanceStore.ts:252`)
-5. Toggle Firewall ON/OFF + Export PNG for PPT
-
-### Financial Firewall Rule (Deterministic)
-```
-totalEarmarked = rent + sip + bills  (auto-locked via RBI AA mock)
-safeBuffer = totalBalance - totalEarmarked
-safeRunway = safeBuffer / (dailyBurn*30)
-safeToSpendToday = safeBuffer - (daysRemainingInMonth * dailyBurn)  // dynamic, not hardcoded 15
-verdict: <2.0mo→WAIT, 2-3mo→EMI, >3mo→BUY
-monthlyGrowth = max(5000, income*0.08 + goals*0.2) per customer  // not 8000
-perGoalDelay = impactAmount / (monthlyContribution*2.5)
-```
-
-### Customers (Every-Customer Personalisation)
-- **Rahul Verma (Spender)** Bal 2.4L, Income 85k, Burn 1.5k/day
-- **Priya Sharma (Saver)** Bal 2.9L, Income 95k, Burn 1266/day
-- **Aman Singh (Chaser)** Bal 98k, Tight Buffer — always WAIT
-
-### Project Structure
-```
-src/app/page.tsx              Dashboard + Firewall visualization
-src/app/simulator/page.tsx    What-If engine + validation
-src/store/useFinanceStore.ts  Engine + persist (previse-customer)
-src/components/FinancialFirewall.tsx  Firewall bar + ledger
-src/components/TrajectoryChart.tsx    3Y chart + export PNG
-src/components/SplitViewComparison.tsx  PPT Slide 5
-src/types/index.ts            SimulationResult + perGoalDelays
-```
-
-### Scripts
 ```bash
-npm run dev    # http://localhost:3000
-npm run build  # static build (3 routes)
-npm run lint
+cd backend && npm install && node server.js   # API → http://localhost:3001
+npm install && npm run dev                     # UI  → http://localhost:3000
 ```
 
-### Gaps Fixed (Roadmap Phase 0-2)
-- Dynamic `daysRemaining` + customer-aware `monthlyGrowth` + per-goal delays
-- Removed hardcoded ₹1.4L/₹60k/₹1,500 texts → dynamic `src/components/*`
-- Zustand persist + wired verdict actions
-- Trajectory toggle + Export PNG + validation + empty-balance guard
+1. **Dashboard** (`/`) — Emergency Buffer · Runway · Financial Firewall bar · Goals · customer switcher
+2. **Simulator** (`/simulator`) — type `iPhone 16`, amount `80000`, mode Cash → **Simulate** (instant local engine) → **Verify with backend engine (:3001)** → MATCH badge proves single source of truth
+3. **Connect** (`/connect`) — AA mock 3-step flow (consent → approve → fetch) or CSV upload (`date, narration, amount, type`) → live profile + Delete My Data (DPDP)
+4. **Goals** (`/goals`) — progress + per-goal delay impact
 
-### Next (Phase 2-3)
-- `src/app/api/simulations` history + Supabase
-- RBI AA real SDK consent flow + NLP auto-earmark
-- Compare 3 customers side-by-side analytics + PWA + cron daily burn
+> Legacy vanilla UI in `frontend/` is ARCHIVED reference only — backend no longer serves it (API-only mode).
 
-Built for Hackathon — deterministic, no LLM hallucination, India Stack AA ready (mock).
+## How it works
+
+```
+AA / CSV raw data ──▶ Parser (61 categories) ──▶ Feature profile ──▶ Rules engine ──▶ Verdict
+                                                        │                              │
+                                              Firewall (earmark rent/      BUY · WAIT · EMI OK
+                                              EMIs/SIPs first)             + severity + rebuild timer
+```
+
+**Verdict rules (deterministic):** runway <1mo → WAIT/critical · <2mo → WAIT/warning ·
+goals delayed 2+mo → WAIT/caution · EMI >30% income → WAIT · runway ≥3mo → BUY/safe.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Node.js + Express API-only (no static serve, CORS for :3000) |
+| Frontend | Next.js 16 + React 19 + Tailwind 4 + Zustand + Recharts (`src/`) |
+| Engine | Deterministic rules (buffer / runway / safe-to-spend / firewall) |
+| Data | RBI Account Aggregator (mock TSP; Setu/OneMoney stubbed) + CSV fallback |
+| Security | Helmet, CORS allowlist, rate limiting (30 req/min), input validation |
+
+## Project structure
+
+```
+backend/
+  server.js            # 15 API endpoints + session store (1h TTL)
+  engine/              # rules.js, simulator.js, firewall.js, types.js
+  ledger/              # parser.js (61 categories), ledger.js, qa-parse-audit.js
+  aa/                  # consent.js, tsp.js (mock works, real stubbed)
+  autopay/             # stub.js (API-compatible, no real money)
+  data/                # mock.js (Priya Sharma profile)
+  qa-gate.js           # automated QA
+src/
+  app/                 # /, /simulator, /connect, /goals
+  components/          # Firewall, SplitView, TrajectoryChart, Navbar
+  store/               # useFinanceStore (local instant engine)
+  lib/api.ts           # backend client + adapter (single source of truth via /api/simulate/custom)
+frontend/              # ARCHIVED vanilla reference — NOT served
+```
+
+## API (main endpoints)
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/health` | Health check |
+| GET | `/api/profile/live` | Profile + financial state (live or mock fallback) |
+| POST | `/api/simulate` | `{name, amount, mode, emiMonths?, interestRate?}` → verdict |
+| POST | `/api/aa/consent` → `/approve` → `/fetch` | 3-step AA flow |
+| POST | `/api/upload/csv` | Bank statement upload + parse |
+| DELETE | `/api/user/data` | DPDP right-to-erasure |
+| POST | `/api/beta/signup` | Beta signup capture |
+
+## QA status
+
+| Suite | Result |
+|---|---|
+| `node qa-gate.js` | **24/24** (verdicts, EMI math, firewall, 1000-sim load, security hygiene) |
+| `node ledger/qa-parse-audit.js` | **5/5** — 96 ground-truth samples (HDFC/SBI/ICICI/Axis/Kotak/Yes Bank), 96% coverage, 96% correctness |
+
+Built for hackathon — Phase 2 (India Stack) complete, beta-ready. Real AA/AutoPay providers stubbed pending contracts.
