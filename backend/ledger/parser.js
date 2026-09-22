@@ -23,9 +23,9 @@ const CATEGORIES = [
   { name: "rent", patterns: [/rent/i, /house rent/i, /flat rent/i], type: "expense" },
 
   // Subscriptions
-  { name: "gym", patterns: [/gym/i, /fitness/i, /cult\.fit/i, /gold.*gym/i], type: "expense" },
+  { name: "gym", patterns: [/\bgym\b/i, /fitness/i, /cult\.fit/i, /gold.*gym/i], type: "expense" },
   { name: "netflix", patterns: [/netflix/i], type: "expense" },
-  { name: "ott", patterns: [/hotstar/i, /prime video/i, /zee5/i, /sonyliv/i, /voot/i, /jio cinema/i], type: "expense" },
+  { name: "ott", patterns: [/hotstar/i, /prime video/i, /zee5/i, /sonyliv/i, /voot/i, /jio cinema/i, /jiocinema/i], type: "expense" },
   { name: "amazon-prime", patterns: [/amazon prime/i], type: "expense" },
   { name: "music", patterns: [/spotify/i, /apple music/i, /gaana/i, /wynk/i], type: "expense" },
   { name: "software", patterns: [/adobe/i, /microsoft 365/i, /canva/i, /notion/i], type: "expense" },
@@ -37,18 +37,18 @@ const CATEGORIES = [
   { name: "dineout", patterns: [/restaurant/i, /cafe/i, /dineout/i, /eating house/i], type: "expense" },
 
   // Investments
-  { name: "sip", patterns: [/sip/i, /systematic investment/i], type: "expense" },
+  { name: "sip", patterns: [/\bsip\b/i, /systematic investment/i], type: "expense" },
   { name: "mutual-fund", patterns: [/mutual fund/i, /nippon/i, /hdfc amc/i, /icici prudential/i], type: "expense" },
-  { name: "insurance", patterns: [/insurance/i, /premium.*life/i, /lic/i, /health insurance/i], type: "expense" },
+  { name: "insurance", patterns: [/insurance/i, /life premium/i, /lic/i, /health insurance/i], type: "expense" },
   { name: "nps", patterns: [/nps/i, /national pension/i], type: "expense" },
 
-  // EMIs
+  // EMIs (specific before generic)
   { name: "phone-emi", patterns: [/phone emi/i, /mobile emi/i, /iphone emi/i], type: "expense" },
-  { name: "personal-loan", patterns: [/personal loan/i, /loan emi/i], type: "expense" },
   { name: "home-loan", patterns: [/home loan/i, /housing loan/i], type: "expense" },
   { name: "car-loan", patterns: [/car loan/i, /auto loan/i, /vehicle loan/i], type: "expense" },
   { name: "education-loan", patterns: [/education loan/i, /student loan/i], type: "expense" },
-  { name: "emi", patterns: [/emi/i], type: "expense" },
+  { name: "personal-loan", patterns: [/personal loan/i, /loan emi/i], type: "expense" },
+  { name: "emi", patterns: [/\bemi\b/i], type: "expense" },
 
   // Credit cards
   { name: "credit-card", patterns: [/credit card/i, /cc payment/i, /card payment/i], type: "expense" },
@@ -63,7 +63,7 @@ const CATEGORIES = [
   { name: "train", patterns: [/irctc/i, /train/i, /railway/i], type: "expense" },
   { name: "flight", patterns: [/indigo/i, /spicejet/i, /air india/i, /vistara/i, /akasa/i, /flight/i], type: "expense" },
   { name: "metro", patterns: [/metro/i, /delhi metro/i, /bangalore metro/i], type: "expense" },
-  { name: "fuel", patterns: [/petrol/i, /diesel/i, /fuel/i, /hpcl/i, /bpcl/i, /ioc/i], type: "expense" },
+  { name: "fuel", patterns: [/petrol/i, /diesel/i, /fuel/i, /hpcl/i, /bpcl/i, /\bioc\b/i], type: "expense" },
   { name: "parking", patterns: [/parking/i], type: "expense" },
 
   // Shopping
@@ -89,7 +89,7 @@ const CATEGORIES = [
   { name: "pet", patterns: [/pet.*food/i, /pet.*store/i, /veterinary/i], type: "expense" },
   { name: "charity", patterns: [/donation/i, /charity/i, /temple/i, /church/i, /mosque/i], type: "expense" },
   { name: "personal-care", patterns: [/salon/i, /beauty/i, /parlour/i, /grooming/i], type: "expense" },
-  { name: "laundry", patterns: [/laundry/i, /dry clean/i, /wash/i], type: "expense" },
+  { name: "laundry", patterns: [/laundry/i, /dry clean/i], type: "expense" },
   { name: "home-maintenance", patterns: [/maintenance/i, /repair/i, /plumber/i, /electrician/i], type: "expense" },
   { name: "bank-fees", patterns: [/bank.*charge/i, /service charge/i, /maintenance fee/i, /atm.*charge/i], type: "expense" },
   { name: "stationery", patterns: [/stationery/i, /pen/i, /notebook/i], type: "expense" },

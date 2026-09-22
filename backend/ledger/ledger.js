@@ -16,10 +16,14 @@ function buildLiveProfile({ accounts, transactions }) {
   const profile = {
     name: mockProfile.name,
     balance: balance || mockProfile.balance,
-    monthlyInflow: monthlyInflow || mockProfile.monthlyInflow,
+    monthlyInflow,
     commitments: commitments.length > 0 ? commitments : mockProfile.commitments,
     goals: mockProfile.goals,
   };
+
+  if (monthlyInflow === 0) {
+    warnings.push("No salary/income detected in transactions. Income set to 0 — simulation results may be inaccurate.");
+  }
 
   const meta = {
     parsingAccuracy: accuracy,

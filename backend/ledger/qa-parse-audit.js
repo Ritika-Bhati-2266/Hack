@@ -77,6 +77,54 @@ const GROUND_TRUTH = [
   { narration: "BANK SERVICE CHARGE", expected: "bank-fees" },
   { narration: "COURIER DELIVERY", expected: "courier" },
 
+  // Real bank format — HDFC detailed
+  { narration: "HDFC BANK NPS DEBIT", expected: "nps" },
+  { narration: "HDFC BANK INSURANCE PREMIUM", expected: "insurance" },
+  { narration: "HDFC BANK INTERNET BANKING TRANSFER", expected: "other" },
+  { narration: "HDFC BANK METRO CARD LOAD", expected: "metro" },
+  { narration: "HDFC BANK PARKING PAYMENT", expected: "parking" },
+  { narration: "HDFC BANK STATIONERY SHOP", expected: "stationery" },
+
+  // Real bank format — SBI detailed
+  { narration: "SBI LIFE INSURANCE PREMIUM", expected: "insurance" },
+  { narration: "SBI CARD PAYMENT", expected: "credit-card" },
+  { narration: "SBI NPS CONTRIBUTION", expected: "nps" },
+  { narration: "SBI SIP DEBIT", expected: "sip" },
+  { narration: "SBI METRO RECHARGE", expected: "metro" },
+  { narration: "SBI PARKING FEE", expected: "parking" },
+
+  // Real bank format — ICICI detailed
+  { narration: "ICICI BANK INSURANCE PREMIUM", expected: "insurance" },
+  { narration: "ICICI BANK NPS CONTRIBUTION", expected: "nps" },
+  { narration: "ICICI BANK SIP DEBIT", expected: "sip" },
+  { narration: "ICICI BANK PARKING PAYMENT", expected: "parking" },
+  { narration: "ICICI BANK METRO RECHARGE", expected: "metro" },
+  { narration: "ICICI BANK STATIONERY PURCHASE", expected: "stationery" },
+
+  // Real bank format — Axis detailed
+  { narration: "AXIS BANK INSURANCE PREMIUM", expected: "insurance" },
+  { narration: "AXIS BANK NPS CONTRIBUTION", expected: "nps" },
+  { narration: "AXIS BANK SIP DEBIT", expected: "sip" },
+  { narration: "AXIS BANK PARKING PAYMENT", expected: "parking" },
+  { narration: "AXIS BANK METRO RECHARGE", expected: "metro" },
+
+  // Real bank format — Kotak detailed
+  { narration: "KOTAK BANK INSURANCE PREMIUM", expected: "insurance" },
+  { narration: "KOTAK BANK NPS CONTRIBUTION", expected: "nps" },
+  { narration: "KOTAK BANK SIP DEBIT", expected: "sip" },
+  { narration: "KOTAK BANK PARKING PAYMENT", expected: "parking" },
+
+  // Real bank format — Yes Bank detailed
+  { narration: "YES BANK INSURANCE PREMIUM", expected: "insurance" },
+  { narration: "YES BANK NPS CONTRIBUTION", expected: "nps" },
+  { narration: "YES BANK SIP DEBIT", expected: "sip" },
+
+  // Word-boundary edge cases (false positive prevention)
+  { narration: "GYMKHANA CLUB membership", expected: "other" },
+  { narration: "SIPPED COFFEE cafe", expected: "other" },
+  { narration: "JIOCINEMA subscription", expected: "other" },
+  { narration: "PREMIUM CAR WASH", expected: "other" },
+
   // Edge cases
   { narration: "UPI-HDFC-RENT", expected: "rent" },
   { narration: "SCHOOL FEES", expected: "other" },
