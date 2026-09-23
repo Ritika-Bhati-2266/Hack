@@ -51,7 +51,7 @@ export default function FinancialFirewall() {
         {/* Bar */}
         <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-widest">
           <span className="text-amber-300/80">■ EARMARKED {earmarkedPct}%</span>
-          <span className="text-[#10B981]">■ FREE BUFFER {100 - earmarkedPct}%</span>
+          <span className="text-orange-400">■ FREE BUFFER {100 - earmarkedPct}%</span>
         </div>
         <div className="h-5 w-full bg-black/60 rounded-full p-1 flex overflow-hidden border border-white/10">
           <div style={{ width: `${(rent / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-l-full" title={`Rent ${inr(rent)}`} />
@@ -60,7 +60,7 @@ export default function FinancialFirewall() {
           {emi > 0 && (
             <div style={{ width: `${(emi / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-orange-500 to-red-400 border-l border-black" title={`EMI ${inr(emi)}`} />
           )}
-          <div className="h-full bg-gradient-to-r from-[#10B981] to-emerald-400 rounded-r-full border-l border-black shadow-[0_0_20px_rgba(16,185,129,0.4)] flex-1" title={`Buffer ${inr(safeBuffer)}`} />
+          <div className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-r-full border-l border-black shadow-[0_0_20px_rgba(251,146,60,0.4)] flex-1" title={`Buffer ${inr(safeBuffer)}`} />
         </div>
 
         <div className={`grid grid-cols-1 gap-3 mt-5 ${emi > 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
@@ -81,7 +81,7 @@ export default function FinancialFirewall() {
         </div>
 
         <p className="mt-4 font-mono text-[11px] text-slate-500 bg-black/40 border border-white/[0.06] rounded-xl px-4 py-2.5">
-          <span className="text-emerald-300">✓ RULE FW-RBI-2026:</span> {inr(user.totalBalance)} − {inr(totalEarmarked)} = <b className="text-white">{inr(safeBuffer)}</b> liquid buffer
+          <span className="text-orange-300">✓ RULE FW-RBI-2026:</span> {inr(user.totalBalance)} − {inr(totalEarmarked)} = <b className="text-white">{inr(safeBuffer)}</b> liquid buffer
         </p>
       </div>
     </div>

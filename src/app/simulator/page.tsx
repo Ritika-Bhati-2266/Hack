@@ -58,7 +58,7 @@ export default function SimulatorPage() {
       ? { bg: 'bg-red-500', text: 'text-red-300', border: 'border-red-500/30', glow: 'shadow-[0_0_60px_rgba(239,68,68,0.3)]' }
       : verdict === 'EMI'
       ? { bg: 'bg-amber-400', text: 'text-amber-300', border: 'border-amber-400/30', glow: 'shadow-[0_0_60px_rgba(251,191,36,0.25)]' }
-      : { bg: 'bg-[#10B981]', text: 'text-[#10B981]', border: 'border-[#10B981]/30', glow: 'shadow-[0_0_60px_rgba(16,185,129,0.3)]' };
+      : { bg: 'bg-orange-400', text: 'text-orange-300', border: 'border-orange-400/30', glow: 'shadow-[0_0_60px_rgba(251,146,60,0.3)]' };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -172,7 +172,7 @@ export default function SimulatorPage() {
           <button
             onClick={handleSimulate}
             disabled={!canSimulate}
-            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/10'}`}
+            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-orange-400 text-black hover:brightness-110 shadow-[0_0_40px_rgba(251,146,60,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/10'}`}
           >
             ⚡ SIMULATE BEFORE YOU SWIPE
           </button>

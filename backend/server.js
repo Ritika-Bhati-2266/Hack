@@ -254,16 +254,16 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
 
     if (!txns.length) return res.status(400).json({ error: "No valid transactions found in CSV" });
 
-    // Balance: use provided value, or derive from transactions (credits - debits)
-    let balance = 0;
-    if (req.body.balance) {
-      balance = parseFloat(req.body.balance);
-      if (isNaN(balance) || balance < 0) balance = 0;
-    } else {
-      // Derive: sum of all credits minus debits (rough estimate)
-      balance = txns.reduce((sum, t) => sum + (t.amount > 0 ? t.amount : 0), 0)
-              - txns.reduce((sum, t) => sum + (t.amount < 0 ? Math.abs(t.amount) : 0), 0);
-      balance = Math.max(0, Math.floor(balance));
+    // Balance is REQUIRED — a CSV has no balance column, and net-flow
+    // (credits − debits) is NOT a balance. Silently deriving it produced
+    // near-zero balances and wrong runways/verdicts. Explicit > guessed.
+    const rawBalance = req.body.balance;
+    if (rawBalance === undefined || rawBalance === null || String(rawBalance).trim() === "") {
+      return res.status(400).json({ error: "Current balance is required — enter your bank balance with the upload (CSV has no balance column)" });
+    }
+    const balance = Number(String(rawBalance).trim());
+    if (!Number.isFinite(balance) || balance < 0 || balance > 100000000) {
+      return res.status(400).json({ error: "Balance must be a number between 0 and 10 crore" });
     }
 
     const accounts = [{ accountId: "csv-upload", bank: "Uploaded Statement", balance, type: "savings" }];
@@ -272,17 +272,12 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
     const sessionId = getOrCreateSessionId(req);
     liveProfiles.set(sessionId, { profile, meta, accounts, transactions: txns, source: "csv", fetchedAt: new Date().toISOString() });
 
-    // Balance sanity check: warn if user-provided balance differs wildly from derived
-    const derivedBalance = txns.reduce((sum, t) => sum + (t.amount > 0 ? t.amount : 0), 0)
-            - txns.reduce((sum, t) => sum + (t.amount < 0 ? Math.abs(t.amount) : 0), 0);
-    const derived = Math.max(0, Math.floor(derivedBalance));
+    // Balance sanity check: warn if balance covers less than 1 month of
+    // detected recurring expenses — runway will be thin whatever the verdict.
+    const monthlyExp = (meta && meta.monthlyExpenses) || 0;
     let balanceWarning = null;
-    if (req.body.balance && derived > 0) {
-      const diff = Math.abs(balance - derived);
-      const pct = (diff / derived) * 100;
-      if (pct > 50) {
-        balanceWarning = `Balance ₹${balance.toLocaleString("en-IN")} differs significantly from derived ₹${derived.toLocaleString("en-IN")} (${Math.round(pct)}% off). Runway calculations may be inaccurate.`;
-      }
+    if (monthlyExp > 0 && balance < monthlyExp) {
+      balanceWarning = `Balance ₹${balance.toLocaleString("en-IN")} covers less than 1 month of detected expenses (₹${monthlyExp.toLocaleString("en-IN")}/mo). Runway will be thin.`;
     }
 
     res.json({ message: `Parsed ${txns.length} transactions`, liveProfile: profile, meta, sessionId, balanceWarning });
@@ -389,8 +384,63 @@ app.post("/api/simulate/custom", (req, res) => {
     return res.status(400).json({ error: "profile and proposal are required" });
   }
 
-  const result = simulate(profile, proposal);
-  res.json(result);
+  // Profile shape validation (user-supplied — engine assumes these exist)
+  const balance = Number(profile.balance);
+  const monthlyInflow = Number(profile.monthlyInflow);
+  if (!Number.isFinite(balance) || balance < 0 || balance > 100000000) {
+    return res.status(400).json({ error: "profile.balance must be between 0 and 10 crore" });
+  }
+  if (!Number.isFinite(monthlyInflow) || monthlyInflow < 0 || monthlyInflow > 100000000) {
+    return res.status(400).json({ error: "profile.monthlyInflow must be between 0 and 10 crore" });
+  }
+  if (!Array.isArray(profile.commitments)) {
+    return res.status(400).json({ error: "profile.commitments must be an array" });
+  }
+  for (const c of profile.commitments) {
+    const amt = Number(c && c.amount);
+    if (!c || !Number.isFinite(amt) || amt < 0 || amt > 100000000) {
+      return res.status(400).json({ error: "each commitment needs amount between 0 and 10 crore" });
+    }
+  }
+  if (profile.goals !== undefined && !Array.isArray(profile.goals)) {
+    return res.status(400).json({ error: "profile.goals must be an array" });
+  }
+
+  // Proposal validation (same bounds as /api/simulate)
+  const { name, amount, mode = "cash", emiMonths = 12, interestRate = 12 } = proposal;
+  if (!name || typeof name !== "string" || !name.trim()) {
+    return res.status(400).json({ error: "proposal.name is required" });
+  }
+  const numAmount = Number(amount);
+  if (!Number.isFinite(numAmount) || numAmount <= 0 || numAmount > 100000000) {
+    return res.status(400).json({ error: "amount must be between 1 and 10 crore" });
+  }
+  if (!["cash", "emi", "loan"].includes(mode)) {
+    return res.status(400).json({ error: "mode must be cash, emi, or loan" });
+  }
+  const numEmiMonths = Number(emiMonths);
+  if (!Number.isFinite(numEmiMonths) || numEmiMonths < 1 || numEmiMonths > 360) {
+    return res.status(400).json({ error: "emiMonths must be between 1 and 360" });
+  }
+  const numInterestRate = Number(interestRate);
+  if (!Number.isFinite(numInterestRate) || numInterestRate < 0 || numInterestRate > 50) {
+    return res.status(400).json({ error: "interestRate must be between 0 and 50" });
+  }
+
+  try {
+    const cleanProfile = {
+      ...profile,
+      balance,
+      monthlyInflow,
+      commitments: profile.commitments.map((c) => ({ ...c, amount: Number(c.amount) })),
+      goals: Array.isArray(profile.goals) ? profile.goals : [],
+    };
+    const cleanProposal = { name: name.trim().slice(0, 200), amount: numAmount, mode, emiMonths: numEmiMonths, interestRate: numInterestRate };
+    const result = simulate(cleanProfile, cleanProposal);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: "invalid profile or proposal" });
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════

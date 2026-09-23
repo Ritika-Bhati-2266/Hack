@@ -27,7 +27,8 @@ export default function DashboardPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 });
   const allProfiles: Record<string, { label: string; sub: string }> = { ...CUSTOMERS, ...customProfiles };
-  const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.totalBalance > 0;
+  const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
+  const earmarkedTotal = form.rent + form.sip + form.bills;
 
   const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
   // Single source of truth: same backend-parity engine as the Simulator.
@@ -71,7 +72,8 @@ export default function DashboardPage() {
               <span>BUFFER <b className="text-white">{inr(buffer)}</b></span>
               <span>FIREWALL <b className="text-amber-300">{inr(totalEarmarked)} LOCKED</b></span>
               <span>ENGINE <b className="text-emerald-300">DETERMINISTIC • NO LLM</b></span>
-              <span>AA <b className="text-emerald-300">SYNCED 2M AGO</b></span>
+              <span>AA <b className="text-amber-300">MOCK • DEMO DATA</b></span>
+              <span>REAL <b className="text-white">CSV ONLY</b></span>
               <span>QA <b className="text-white">24/24 PASS</b></span>
             </span>
           ))}
@@ -191,7 +193,7 @@ export default function DashboardPage() {
                 <span className={`text-[10px] font-black tracking-widest px-2.5 py-1 rounded-lg border animate-stamp-in verdict-stamp ${
                   heroVerdict === 'WAIT' ? 'bg-red-500/15 text-red-300 border-red-500/30' :
                   heroVerdict === 'EMI' ? 'bg-amber-400/15 text-amber-300 border-amber-400/30' :
-                  'bg-emerald-400/15 text-emerald-300 border-emerald-400/30'
+                   'bg-orange-400/15 text-orange-300 border-orange-400/30'
                 }`}>
                   {heroVerdict}
                 </span>
@@ -267,7 +269,7 @@ export default function DashboardPage() {
           <p className="text-[11px] text-slate-500 mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
         </div>
 
-        <div className="rounded-3xl p-5 bg-[#10B981] text-black card-hover relative overflow-hidden">
+        <div className="rounded-3xl p-5 bg-orange-400 text-black card-hover relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-black tracking-[0.16em] text-black/60">SPEND TODAY</span>
             <Wallet className="w-4 h-4" />
@@ -374,10 +376,13 @@ export default function DashboardPage() {
               {([['monthlyIncome', 'MONTHLY INCOME (₹)'], ['totalBalance', 'TOTAL BALANCE (₹)'], ['dailyBurnRate', 'DAILY BURN (₹)'], ['rent', 'RENT (₹)'], ['sip', 'SIP (₹)'], ['bills', 'BILLS (₹)']] as const).map(([k, label]) => (
                 <div key={k}>
                   <label className="text-[11px] font-bold tracking-widest text-slate-500">{label}</label>
-                  <input type="number" value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
+                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
                 </div>
               ))}
             </div>
+            {earmarkedTotal > form.totalBalance && form.totalBalance > 0 && (
+              <p className="text-[11px] text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">Monthly earmarked (₹{earmarkedTotal.toLocaleString('en-IN')}) balance se zyada hai — runway 0 se start hoga.</p>
+            )}
             <button
               disabled={!canCreate}
               onClick={() => { createProfile(form); setShowCreate(false); setForm({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 }); }}

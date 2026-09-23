@@ -96,20 +96,30 @@ export const useFinanceStore = create<FinanceStore>()(
     set({ activeCustomer: id, user: c.user, goals: c.goals, currentSimulation: null });
   },
   createProfile: (data) => {
+    // CSV-style rule: never trust raw input, never invent history.
+    // Clamp to sane range (same 0–10Cr bounds as backend validation).
+    const clamp = (n: number) => Math.min(100000000, Math.max(0, Math.round(Number(n) || 0)));
+    const income = clamp(data.monthlyIncome);
+    const balance = clamp(data.totalBalance);
     const id = `custom_${Date.now()}`;
     const newUser: UserFinancialState = {
-      totalBalance: data.totalBalance,
-      monthlyIncome: data.monthlyIncome,
-      dailyBurnRate: data.dailyBurnRate,
+      totalBalance: balance,
+      monthlyIncome: income,
+      dailyBurnRate: clamp(data.dailyBurnRate),
       earmarkedExpenses: [
-        { id: '1', name: 'Apartment Rent', amount: data.rent, category: 'rent', dueDate: '1st of month', autoDebit: true },
-        { id: '2', name: 'Mutual Fund SIPs', amount: data.sip, category: 'sip', dueDate: '5th of month', autoDebit: true },
-        { id: '3', name: 'Electricity & Wifi', amount: data.bills, category: 'bill', dueDate: '10th of month', autoDebit: true },
+        { id: '1', name: 'Apartment Rent', amount: clamp(data.rent), category: 'rent', dueDate: '1st of month', autoDebit: true },
+        { id: '2', name: 'Mutual Fund SIPs', amount: clamp(data.sip), category: 'sip', dueDate: '5th of month', autoDebit: true },
+        { id: '3', name: 'Electricity & Wifi', amount: clamp(data.bills), category: 'bill', dueDate: '10th of month', autoDebit: true },
       ],
     };
+    // Goals start at 0 saved — we don't know the user's real split, so we
+    // don't invent one (was: 60%/20% of balance). Dates are relative, not hardcoded.
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    const inSix = new Date(); inSix.setMonth(inSix.getMonth() + 6);
+    const inTwelve = new Date(); inTwelve.setMonth(inTwelve.getMonth() + 12);
     const newGoals: Goal[] = [
-      { id: 'g1', name: 'Emergency Shield Fund', targetAmount: 300000, currentAmount: Math.round(data.totalBalance * 0.6), monthlyContribution: Math.round(data.monthlyIncome * 0.15), targetDate: '2026-12-31', category: 'emergency', delayInMonths: 0 },
-      { id: 'g2', name: 'Custom Goal', targetAmount: 100000, currentAmount: Math.round(data.totalBalance * 0.2), monthlyContribution: Math.round(data.monthlyIncome * 0.1), targetDate: '2026-11-20', category: 'tech', delayInMonths: 0 },
+      { id: 'g1', name: 'Emergency Shield Fund', targetAmount: 300000, currentAmount: 0, monthlyContribution: Math.round(income * 0.15), targetDate: fmt(inTwelve), category: 'emergency', delayInMonths: 0 },
+      { id: 'g2', name: 'Custom Goal', targetAmount: 100000, currentAmount: 0, monthlyContribution: Math.round(income * 0.1), targetDate: fmt(inSix), category: 'tech', delayInMonths: 0 },
     ];
     set((s) => ({
       customProfiles: { ...s.customProfiles, [id]: { label: data.name, sub: `Custom • ₹${(data.monthlyIncome/1000).toFixed(0)}k/mo`, user: newUser, goals: newGoals } },
@@ -181,9 +191,11 @@ export const useFinanceStore = create<FinanceStore>()(
 }),
     {
       name: 'previse-customer',
-      partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles }),
+      partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles, user: state.user, goals: state.goals }),
       onRehydrateStorage: () => (state) => {
-        if (state && state.activeCustomer) {
+        // Keep persisted user/goals when present (e.g. EMI added via
+        // confirmPurchaseAnyway) — else they were silently lost on reload.
+        if (state && state.activeCustomer && (!state.user || !state.goals)) {
           const c = (CUSTOMERS as Record<string, CustomerRecord>)[state.activeCustomer] || state.customProfiles[state.activeCustomer];
           if (c) {
             state.user = c.user;

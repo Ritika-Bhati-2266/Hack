@@ -162,10 +162,10 @@ export const fetchAAData = (consentId: string, sessionToken: string) =>
     body: JSON.stringify({ consentId, sessionToken }),
   });
 
-export async function uploadCSV(file: File, balance?: number) {
+export async function uploadCSV(file: File, balance: number) {
   const form = new FormData();
   form.append('statement', file);
-  if (balance) form.append('balance', String(balance));
+  form.append('balance', String(balance));
   const res = await fetch(`${API_BASE}/api/upload/csv`, {
     method: 'POST',
     headers: { 'x-session-id': getSessionId() },

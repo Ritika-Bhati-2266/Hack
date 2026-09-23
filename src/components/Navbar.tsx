@@ -33,9 +33,9 @@ export default function Navbar() {
                 <span className="font-display font-extrabold text-[19px] tracking-tight">
                   PREVISE<span className="text-[#10B981]">.</span>
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-300 border border-emerald-400/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  AA LIVE
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  AA MOCK
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium mt-0.5">Know before you decide</p>

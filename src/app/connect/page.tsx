@@ -6,6 +6,7 @@ import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpr
 import {
   createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, LiveProfileRes,
 } from '@/lib/api';
+import DataSourceBanner from '@/components/DataSourceBanner';
 
 export default function ConnectPage() {
   const [step, setStep] = useState<'idle' | 'consent' | 'active' | 'fetched'>('idle');
@@ -42,12 +43,21 @@ export default function ConnectPage() {
       // Backend falls back to demo data with 200 when the session is gone — never present it as live
       setExpired(true);
       setMsg('Session expired — showing demo data. Reconnect via AA or CSV.');
+    } else if (profile.source === 'aa') {
+      // AA TSP is mock — fake transactions, not real bank sync. Say it loudly.
+      setMsg(`Demo profile loaded — source: aa (MOCK TSP, not real bank data). Real numbers ke liye CSV upload karo. Balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
     } else {
       setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
     }
   });
   const handleCSV = async (file: File) => run(async () => {
-    const res = await uploadCSV(file, Number(balance) || undefined);
+    // Backend requires explicit balance — CSV has no balance column.
+    const trimmed = balance.trim();
+    const b = Number(trimmed);
+    if (trimmed === '' || !Number.isFinite(b) || b < 0) {
+      throw new Error('Current balance dalo (₹ me number) — CSV me balance column nahi hota, iske bina runway galat aayega.');
+    }
+    const res = await uploadCSV(file, b);
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
     if (profile.source === 'mock') {
@@ -108,7 +118,11 @@ export default function ConnectPage() {
         <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <Landmark className="w-5 h-5 text-[#10B981]" /> Option A — AA Flow
+            <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
+              MOCK DEMO
+            </span>
           </h2>
+          <p className="text-[11px] text-slate-500 leading-relaxed">Mock TSP — fake transactions. Real bank sync nahi.</p>
           <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-slate-300 border border-white/10' : 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.3)]'} disabled:opacity-50`}>
             1. Create consent {stepIdx >= 1 && '✓'}
           </button>
@@ -124,6 +138,9 @@ export default function ConnectPage() {
         <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-cyan-300" /> Option B — CSV
+            <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-emerald-400/15 text-emerald-300 border border-emerald-400/30">
+              REAL DATA
+            </span>
           </h2>
           <p className="text-[11px] text-slate-500 font-mono">date, narration, amount, type</p>
           <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">CURRENT BALANCE (₹)</label>
@@ -138,8 +155,9 @@ export default function ConnectPage() {
 
       {live && (
         <div className="rounded-[24px] bg-[#0B111E] border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
+          <DataSourceBanner source={expired ? 'mock' : live.source} />
           <h3 className="font-display font-extrabold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-300" /> {expired ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired ? 'text-amber-300' : 'text-emerald-300'}`}>{live.source}</span>
+            <CheckCircle2 className="w-5 h-5 text-emerald-300" /> {expired || live.source !== 'csv' ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired || live.source !== 'csv' ? 'text-amber-300' : 'text-emerald-300'}`}>{expired ? 'mock' : live.source}{!expired && live.source === 'aa' ? ' (mock TSP)' : ''}</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
