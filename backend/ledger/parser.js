@@ -109,6 +109,15 @@ function categorize(narration) {
   return { category: "other", type: "unknown" };
 }
 
+function normalizeTxnType(raw, amount) {
+  const s = String(raw == null ? "" : raw).trim().toLowerCase().replace(/\./g, "");
+  const credit = new Set(["credit", "credited", "cr", "c", "inflow", "deposit", "deposited", "received", "refund", "reversed"]);
+  const debit = new Set(["debit", "debited", "dr", "d", "outflow", "withdrawal", "withdrawn", "paid", "expense", "purchase", "spent", "wd"]);
+  if (credit.has(s)) return "credit";
+  if (debit.has(s)) return "debit";
+  return amount < 0 ? "debit" : "credit";
+}
+
 function parseTransactions(transactions) {
   let categorized = 0;
   let total = 0;
@@ -119,13 +128,18 @@ function parseTransactions(transactions) {
     const { category, type } = categorize(txn.narration);
     if (category !== "other") categorized++;
 
+    // Defense-in-depth: normalize type (case-insensitive, cr/dr variants) and
+    // sign the amount by type, so all-positive-amount CSVs classify correctly
+    const txnType = normalizeTxnType(txn.type, txn.amount);
     const amount = Math.abs(txn.amount);
-    const txnType = txn.type || (txn.amount > 0 ? "credit" : "debit");
+    const signedAmount = txnType === "credit" ? amount : -amount;
 
     return {
       ...txn,
+      amount: signedAmount,
+      type: txnType,
       parsedCategory: category,
-      parsedType: txnType === "credit" ? "credit" : "debit",
+      parsedType: txnType,
       parsedAmount: amount,
     };
   });

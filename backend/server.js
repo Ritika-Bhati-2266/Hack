@@ -223,17 +223,32 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
     }
 
     const txns = [];
+    // Normalize type-column: case-insensitive, cr/dr variants; sign amount by type
+    // (Indian statements often carry all-positive amounts + a type column)
+    function normalizeCsvType(raw, amount) {
+      const s = String(raw == null ? "" : raw).trim().toLowerCase().replace(/\./g, "");
+      const credit = new Set(["credit", "credited", "cr", "c", "inflow", "deposit", "deposited", "received", "refund", "reversed"]);
+      const debit = new Set(["debit", "debited", "dr", "d", "outflow", "withdrawal", "withdrawn", "paid", "expense", "purchase", "spent", "wd"]);
+      if (credit.has(s)) return "credit";
+      if (debit.has(s)) return "debit";
+      return amount < 0 ? "debit" : "credit";
+    }
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
       const cols = parseCSVLine(lines[i]);
-      const amount = parseFloat(cols[amtIdx]);
-      if (isNaN(amount)) continue;
+      const rawAmount = parseFloat(cols[amtIdx]);
+      if (isNaN(rawAmount)) continue;
+
+      const normType = typeIdx !== -1 ? normalizeCsvType(cols[typeIdx], rawAmount) : (rawAmount < 0 ? "debit" : "credit");
+      // Sign the amount by the (normalized) type so downstream inflow/commitment
+      // detection (which filters on amount sign) works with all-positive CSVs
+      const amount = normType === "credit" ? Math.abs(rawAmount) : -Math.abs(rawAmount);
 
       txns.push({
         date: cols[dateIdx],
         narration: cols[narrIdx],
         amount,
-        type: typeIdx !== -1 ? cols[typeIdx] : (amount > 0 ? "credit" : "debit"),
+        type: normType,
       });
     }
 

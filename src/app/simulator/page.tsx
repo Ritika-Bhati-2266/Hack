@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
@@ -40,29 +40,45 @@ export default function SimulatorPage() {
     runSimulation({ itemName: itemName.trim(), price, mode });
   };
 
+  const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+  const pct = Math.min(100, Math.max(0, (price / Math.max(1, user.totalBalance)) * 100));
+
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
-    { id: 'CASH', label: 'Full Cash', sub: `₹${price.toLocaleString('en-IN')}` },
-    { id: 'EMI_3', label: '3 EMI', sub: `~₹${Math.round((price * 1.07) / 3).toLocaleString('en-IN')}/mo` },
-    { id: 'EMI_6', label: '6 EMI', sub: `~₹${Math.round((price * 1.10) / 6).toLocaleString('en-IN')}/mo` },
-    { id: 'EMI_12', label: '12 EMI', sub: `~₹${Math.round((price * 1.14) / 12).toLocaleString('en-IN')}/mo` },
+    { id: 'CASH', label: 'Full Cash', sub: inr(price) },
+    { id: 'EMI_3', label: '3 EMI', sub: `~${inr(Math.round((price * 1.07) / 3))}/mo` },
+    { id: 'EMI_6', label: '6 EMI', sub: `~${inr(Math.round((price * 1.10) / 6))}/mo` },
+    { id: 'EMI_12', label: '12 EMI', sub: `~${inr(Math.round((price * 1.14) / 12))}/mo` },
   ];
 
+  const verdict = currentSimulation?.verdict;
+  const verdictStyle =
+    verdict === 'WAIT'
+      ? { bg: 'bg-red-500', text: 'text-red-300', border: 'border-red-500/30', glow: 'shadow-[0_0_60px_rgba(239,68,68,0.3)]' }
+      : verdict === 'EMI'
+      ? { bg: 'bg-amber-400', text: 'text-amber-300', border: 'border-amber-400/30', glow: 'shadow-[0_0_60px_rgba(251,191,36,0.25)]' }
+      : { bg: 'bg-[#10B981]', text: 'text-[#10B981]', border: 'border-[#10B981]/30', glow: 'shadow-[0_0_60px_rgba(16,185,129,0.3)]' };
+
   return (
-    <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
-      <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200">
-        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-      </Link>
-      {/* Customer switcher — same as dashboard, proves every-customer personalisation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-3">
-        <span className="text-xs text-slate-400">
-          Simulating for: <b className="text-violet-400">{CUSTOMERS[activeCustomer].label}</b> • {CUSTOMERS[activeCustomer].sub} • Bal ₹{user.totalBalance.toLocaleString('en-IN')}
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-white transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </Link>
+        <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">ENGINE: DETERMINISTIC • FW-RBI-2026</span>
+      </div>
+
+      {/* Persona strip */}
+      <div className="glass rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+        <span className="text-xs text-slate-400 shrink-0">
+          Simulating for <b className="text-[#10B981]">{CUSTOMERS[activeCustomer]?.label || activeCustomer}</b>
+          <span className="text-slate-500"> • Bal {inr(user.totalBalance)}</span>
         </span>
-        <div className="flex gap-2">
+        <div className="flex gap-2 sm:ml-auto">
           {(Object.keys(CUSTOMERS) as CustomerId[]).map((id) => (
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-full text-xs font-bold border ${activeCustomer === id ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${activeCustomer === id ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}
             >
               {CUSTOMERS[id].label.split(' ')[0]}
             </button>
@@ -70,180 +86,188 @@ export default function SimulatorPage() {
         </div>
       </div>
 
-      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 md:p-8 shadow-xl">
-        <h1 className="text-2xl font-extrabold text-slate-100 flex items-center gap-2">
-          <Zap className="w-6 h-6 text-violet-400" /> What-If Simulator
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Test any purchase before you swipe — deterministic rules engine calculates runway + buffer + goal impact. India Stack AA ready (mock).
-        </p>
-
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-400 tracking-widest">WHAT DO YOU WANT TO BUY?</label>
-            <input
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              className={`mt-1.5 w-full bg-slate-950 border rounded-xl px-4 py-3 text-sm font-medium text-slate-100 focus:outline-none ${nameError ? 'border-rose-500 focus:border-rose-500' : 'border-slate-700 focus:border-violet-600'}`}
-              placeholder="e.g., iPhone 16 Pro"
-            />
-            {nameError && <p className="text-[11px] text-rose-400 mt-1">{nameError}</p>}
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-slate-400 tracking-widest">AMOUNT (₹)</label>
-            <input
-              type="number"
-              value={price}
-              min={1}
-              onChange={(e) => setPrice(Number(e.target.value) || 0)}
-              className={`mt-1.5 w-full bg-slate-950 border rounded-xl px-4 py-3 text-sm font-bold text-slate-100 focus:outline-none ${priceError ? 'border-rose-500 focus:border-rose-500' : 'border-slate-700 focus:border-violet-600'}`}
-            />
-            {priceError && <p className="text-[11px] text-rose-400 mt-1">{priceError}</p>}
-            <div className="flex gap-1.5 mt-2">
-              {[50000, 80000, 120000].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setPrice(v)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold border ${price === v ? 'bg-white text-black border-white' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
-                >
-                  ₹{v / 1000}k
-                </button>
-              ))}
+      {/* Input hero */}
+      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-6 sm:p-8">
+        <div className="absolute inset-0 bg-grid opacity-70" />
+        <div className="absolute -top-20 left-1/3 w-[400px] h-[200px] bg-[#10B981]/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-[#10B981] flex items-center justify-center">
+              <Zap className="w-5 h-5 text-black fill-black" />
+            </div>
+            <div>
+              <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight">What-If Simulator</h1>
+              <p className="text-[13px] text-slate-500">Swipe se pehle — runway, buffer, goals. 5 second me verdict.</p>
             </div>
           </div>
-          <div>
-            <label className="text-xs font-semibold text-slate-400 tracking-widest">PAYMENT MODE</label>
-            <div className="mt-1.5 grid grid-cols-2 gap-2">
-              {modeOptions.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setMode(m.id)}
-                  className={`py-2.5 rounded-xl text-xs font-bold border text-left px-3 ${mode === m.id ? 'bg-violet-600 text-white border-violet-600' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
-                >
-                  <span>{m.label}</span>
-                  <span className="block text-[10px] font-normal opacity-70">{m.sub}</span>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_1fr_1.2fr] gap-5">
+            <div>
+              <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">WHAT ARE YOU BUYING?</label>
+              <input
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                className={`mt-2 w-full bg-black/60 border rounded-2xl px-4 py-3.5 text-[15px] font-bold focus:outline-none transition-colors ${nameError ? 'border-red-500' : 'border-white/10 focus:border-[#10B981]'}`}
+                placeholder="e.g., iPhone 16 Pro"
+              />
+              <div className="flex gap-1.5 mt-2.5 flex-wrap">
+                {['iPhone 16 Pro Max', 'MacBook Air', 'Bali Trip'].map((v) => (
+                  <button key={v} onClick={() => setItemName(v)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === v ? 'bg-white text-black border-white' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">AMOUNT</label>
+              <div className="mt-2 flex items-center gap-2">
+                <button onClick={() => setPrice(Math.max(1000, price - 5000))} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 shrink-0">
+                  <Minus className="w-4 h-4" />
                 </button>
-              ))}
+                <div className="flex-1 text-center bg-black/60 border border-white/10 rounded-2xl py-2.5">
+                  <p className="font-mono font-black text-xl leading-none">{inr(price)}</p>
+                  <p className="text-[10px] font-mono text-slate-500 mt-1">{pct.toFixed(0)}% of balance</p>
+                </div>
+                <button onClick={() => setPrice(price + 5000)} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 shrink-0">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <input
+                type="range" min={5000} max={Math.max(300000, user.totalBalance)} step={1000} value={price}
+                onChange={(e) => setPrice(Number(e.target.value))}
+                className="volt-range w-full mt-3"
+                style={{ ['--fill' as string]: `${(price / Math.max(300000, user.totalBalance)) * 100}%` }}
+              />
+              <div className="flex gap-1.5 mt-2.5">
+                {[50000, 80000, 120000].map((v) => (
+                  <button key={v} onClick={() => setPrice(v)} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold border ${price === v ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10'}`}>
+                    ₹{v / 1000}k
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">PAYMENT MODE</label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {modeOptions.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setMode(m.id)}
+                    className={`py-2.5 rounded-2xl text-xs font-bold border text-left px-3.5 transition-all ${mode === m.id ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/[0.04] text-slate-400 border-white/10 hover:text-white'}`}
+                  >
+                    {m.label}
+                    <span className={`block text-[10px] font-mono font-normal mt-0.5 ${mode === m.id ? 'text-black/60' : 'opacity-60'}`}>{m.sub}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <button
-          onClick={handleSimulate}
-          disabled={!canSimulate}
-          className={`mt-6 w-full py-3.5 rounded-2xl font-extrabold text-sm transition-all shadow-lg ${canSimulate ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}
-        >
-          ⚡ Simulate Before You Swipe — Run Engine
-        </button>
-        {!canSimulate && <p className="text-[11px] text-amber-400 mt-2 text-center">Fix errors above to simulate</p>}
-        <button
-          onClick={handleVerifyBackend}
-          disabled={!canSimulate || backendLoading}
-          className="mt-3 w-full py-2.5 rounded-2xl font-bold text-xs border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          <Server className="w-4 h-4" />
-          {backendLoading ? 'Verifying with backend engine…' : 'Verify with backend engine (:3001)'}
-        </button>
-        {backendError && <p className="text-[11px] text-rose-400 mt-2 text-center">{backendError}</p>}
-        {backendVerdict && (
-          <div className="mt-3 p-4 rounded-2xl bg-slate-950 border border-emerald-500/20 text-xs space-y-1">
-            <p className="font-bold text-emerald-300 tracking-widest">BACKEND VERDICT — {backendVerdict.verdict.action.toUpperCase()} ({backendVerdict.verdict.severity})</p>
-            <p className="text-slate-300">{backendVerdict.verdict.message}</p>
-            <p className="text-slate-400">{backendVerdict.verdict.detail}</p>
-            <p className="text-slate-500 font-mono">
-              Runway {backendVerdict.before.runwayDisplay} → {backendVerdict.after.runwayDisplay} • Buffer ₹{backendVerdict.before.buffer.toLocaleString('en-IN')} → ₹{backendVerdict.after.buffer.toLocaleString('en-IN')} • source: {backendVerdict.profileSource}
-            </p>
-            {currentSimulation && (
-              <p className={`font-bold ${backendVerdict.verdict.action.toLowerCase() === currentSimulation.verdict.toLowerCase() || (backendVerdict.verdict.action === 'buy' && currentSimulation.verdict === 'BUY') || (backendVerdict.verdict.action === 'wait' && currentSimulation.verdict === 'WAIT') || (backendVerdict.verdict.action === 'emi' && currentSimulation.verdict === 'EMI') ? 'text-emerald-400' : 'text-amber-400'}`}>
-                Local UI verdict: {currentSimulation.verdict} — {backendVerdict.verdict.action.toUpperCase() === currentSimulation.verdict || (backendVerdict.verdict.action === 'buy' && currentSimulation.verdict === 'BUY') ? 'MATCH ✓' : 'MISMATCH — backend is source of truth'}
-              </p>
-            )}
-          </div>
-        )}
-        {currentSimulation && (
-          <button onClick={() => { clearSimulation(); setBackendVerdict(null); }} className="mt-2 w-full py-2 text-xs text-slate-400 hover:text-slate-200">
-            Clear simulation
+          {priceError && <p className="text-[11px] text-red-300 mt-2">{priceError}</p>}
+
+          <button
+            onClick={handleSimulate}
+            disabled={!canSimulate}
+            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/10'}`}
+          >
+            ⚡ SIMULATE BEFORE YOU SWIPE
           </button>
-        )}
+          <button
+            onClick={handleVerifyBackend}
+            disabled={!canSimulate || backendLoading}
+            className="mt-2.5 w-full py-3 rounded-2xl font-bold text-xs border border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-300 hover:bg-emerald-400/15 transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            <Server className="w-4 h-4" />
+            {backendLoading ? 'Verifying with backend engine…' : 'Verify with backend engine (:3001) — single source of truth'}
+          </button>
+          {backendError && <p className="text-[11px] text-red-300 mt-2 text-center">{backendError}</p>}
+          {backendVerdict && (
+            <div className="mt-3 p-4 rounded-2xl bg-black/60 border border-emerald-400/20 text-xs space-y-1 animate-fade-up">
+              <p className="font-black tracking-widest text-emerald-300">BACKEND: {backendVerdict.verdict.action.toUpperCase()} ({backendVerdict.verdict.severity})</p>
+              <p className="text-slate-300">{backendVerdict.verdict.message}</p>
+              <p className="text-slate-500 font-mono">
+                Runway {backendVerdict.before.runwayDisplay} → {backendVerdict.after.runwayDisplay} • Buffer {inr(backendVerdict.before.buffer)} → {inr(backendVerdict.after.buffer)}
+              </p>
+              {currentSimulation && (() => {
+                const local = currentSimulation.verdict.toUpperCase();
+                const remote = backendVerdict.verdict.action.toUpperCase();
+                const match = local === remote || (local === 'EMI' && remote === 'EMI');
+                return (
+                  <p className={`font-bold ${match ? 'text-emerald-300' : 'text-red-300'}`}>
+                    Local: {currentSimulation.verdict} — {match ? 'MATCH ✓ backend is source of truth' : `MISMATCH ✗ (backend: ${backendVerdict.verdict.action})`}
+                  </p>
+                );
+              })()}
+            </div>
+          )}
+          {currentSimulation && (
+            <button onClick={() => { clearSimulation(); setBackendVerdict(null); }} className="mt-2 w-full py-2 text-xs text-slate-500 hover:text-slate-300">
+              Clear simulation
+            </button>
+          )}
+        </div>
       </div>
 
-      {currentSimulation && (
+      {currentSimulation && verdictStyle && (
         <>
-          <SplitViewComparison simulation={currentSimulation} />
-          <TrajectoryChart simulation={currentSimulation} />
-
-          <div
-            className={`rounded-3xl p-6 border ${
-              currentSimulation.verdict === 'WAIT'
-                ? 'bg-rose-500/10 border-rose-500/30'
-                : currentSimulation.verdict === 'EMI'
-                ? 'bg-amber-500/10 border-amber-500/30'
-                : 'bg-emerald-500/10 border-emerald-500/30'
-            }`}
-          >
-            <div className="flex gap-4">
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 ${
-                  currentSimulation.verdict === 'WAIT' ? 'bg-rose-500' : currentSimulation.verdict === 'EMI' ? 'bg-amber-500' : 'bg-emerald-500'
-                }`}
-              >
-                {currentSimulation.verdict === 'WAIT' ? <AlertTriangle className="w-5 h-5" /> : currentSimulation.verdict === 'EMI' ? <Clock className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+          {/* ── DRAMATIC VERDICT ── */}
+          <div className={`relative overflow-hidden rounded-[28px] border ${verdictStyle.border} bg-[#0B111E] p-6 sm:p-8 ${verdictStyle.glow} animate-fade-up`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className={`verdict-stamp animate-stamp-in px-6 py-3 rounded-2xl text-4xl font-black tracking-tight ${verdictStyle.text} bg-black/40 shrink-0`}>
+                {currentSimulation.verdict}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold tracking-widest text-slate-100">{currentSimulation.verdictTitle}</p>
-                <p className="text-xs text-slate-300 mt-1 leading-4">{currentSimulation.verdictReasoning}</p>
-                <p className="text-xs text-slate-400 mt-2 italic">{currentSimulation.recommendation}</p>
+                <p className="font-display font-extrabold text-xl">{currentSimulation.verdictTitle}</p>
+                <p className="text-[13px] text-slate-400 mt-1.5 leading-relaxed">{currentSimulation.verdictReasoning}</p>
+                <p className="text-[13px] mt-2 italic text-slate-300">→ {currentSimulation.recommendation}</p>
+                <div className="flex flex-wrap gap-2 mt-3 font-mono text-[11px]">
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">runway {currentSimulation.todayRunwayMonths} → {currentSimulation.simulatedRunwayMonths} mo</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">buffer {inr(currentSimulation.todayBuffer)} → {inr(currentSimulation.simulatedBuffer)}</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">goals +{currentSimulation.goalDelayMonths} mo</span>
+                </div>
               </div>
             </div>
-            {/* Phase 1: Wired verdict actions */}
-            <div className="mt-4 flex flex-col sm:flex-row gap-3">
+            <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
               {currentSimulation.verdict === 'WAIT' ? (
                 <>
-                  <button
-                    onClick={acceptWaitRecommendation}
-                    className="flex-1 py-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs hover:bg-slate-800 transition"
-                  >
-                    ✓ Accept — Wait 6 Weeks
+                  <button onClick={acceptWaitRecommendation} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 font-bold text-[13px] hover:bg-white/10 transition">
+                    ✓ Accept — wait 6 weeks
                   </button>
-                  <button
-                    onClick={confirmPurchaseAnyway}
-                    className="flex-1 py-3 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-500 transition"
-                  >
-                    Buy Anyway — Deduct ₹{currentSimulation.purchasePrice.toLocaleString('en-IN')}
+                  <button onClick={confirmPurchaseAnyway} className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-bold text-[13px] hover:bg-red-400 transition">
+                    Buy anyway — deduct {inr(currentSimulation.purchasePrice)}
                   </button>
                 </>
               ) : currentSimulation.verdict === 'EMI' ? (
                 <>
-                  <button
-                    onClick={() => runSimulation({ itemName, price, mode: 'EMI_6' })}
-                    className="flex-1 py-3 rounded-xl bg-amber-500 text-slate-900 font-bold text-xs hover:bg-amber-400 transition"
-                  >
+                  <button onClick={() => runSimulation({ itemName, price, mode: 'EMI_6' })} className="flex-1 py-3.5 rounded-2xl bg-amber-400 text-black font-bold text-[13px] hover:brightness-110 transition">
                     Switch to 6 EMI
                   </button>
-                  <button
-                    onClick={confirmPurchaseAnyway}
-                    className="flex-1 py-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs hover:bg-slate-800 transition"
-                  >
-                    Buy with Cash Anyway
+                  <button onClick={confirmPurchaseAnyway} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 font-bold text-[13px] hover:bg-white/10 transition">
+                    Buy with cash anyway
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={confirmPurchaseAnyway}
-                  className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition"
-                >
-                  ✓ Confirm Purchase — ₹{currentSimulation.purchasePrice.toLocaleString('en-IN')} (Safe)
+                <button onClick={confirmPurchaseAnyway} className="w-full py-3.5 rounded-2xl bg-[#10B981] text-black font-extrabold text-[13px] hover:brightness-110 transition">
+                  ✓ Confirm purchase — {inr(currentSimulation.purchasePrice)} (safe)
                 </button>
               )}
             </div>
           </div>
+
+          <SplitViewComparison simulation={currentSimulation} />
+          <TrajectoryChart simulation={currentSimulation} />
         </>
       )}
 
       {!currentSimulation && (
-        <div className="rounded-2xl bg-slate-900/50 border border-slate-800 border-dashed p-8 text-center">
-          <p className="text-sm text-slate-400">No simulation yet. Enter an item and hit “Simulate” — trajectory chart will appear here.</p>
-          <p className="text-xs text-slate-500 mt-1">Try: iPhone ₹80k • Cash vs 6 EMI — see runway drop instantly.</p>
+        <div className="rounded-[28px] border border-dashed border-white/15 bg-white/[0.02] p-10 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center mx-auto">
+            {verdict ? <CheckCircle2 className="w-6 h-6 text-[#10B981]" /> : <Clock className="w-6 h-6 text-slate-500" />}
+          </div>
+          <p className="text-sm text-slate-300 font-bold mt-4">No simulation yet — hit SIMULATE above.</p>
+          <p className="text-xs text-slate-500 mt-1">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
         </div>
       )}
     </div>
