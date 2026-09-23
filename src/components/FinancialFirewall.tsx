@@ -18,33 +18,33 @@ export default function FinancialFirewall() {
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-surface p-4 sm:p-8 min-w-0">
-      <div className="absolute -top-24 right-0 w-[400px] h-[250px] bg-amber-400/[0.07] blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute -bottom-24 left-0 w-[400px] h-[250px] bg-safe/[0.06] blur-[100px] rounded-full pointer-events-none" />
+    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#0b0f19]/90 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+      <div className="absolute -top-24 right-0 w-[450px] h-[280px] bg-amber-400/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute -bottom-24 left-0 w-[450px] h-[280px] bg-cyan-400/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/25 flex items-center justify-center">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.25)]">
               <ShieldCheck className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-display font-extrabold text-xl">Financial Firewall</h2>
-                <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full bg-safe/10 text-safe border border-safe/20 animate-pulse">
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-display font-black text-xl text-white">Financial Firewall</h2>
+                <span className="text-[10px] font-mono font-black tracking-widest px-2.5 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.3)]">
                   ● ACTIVE
                 </span>
               </div>
-              <p className="text-xs text-dusk mt-0.5">
+              <p className="text-xs text-gray-400 mt-0.5">
                 Rent + SIP + bills pehle lock — uske baad hi safe-to-spend.
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-well/60 px-4 py-2.5 rounded-2xl border border-white/[0.08] self-start md:self-auto">
+          <div className="flex items-center gap-2 bg-white/[0.04] px-4 py-2.5 rounded-2xl border border-white/10 self-start md:self-auto backdrop-blur-md">
             <Lock className="w-4 h-4 text-amber-300" />
-            <span className="text-xs text-mist font-semibold">Locked:</span>
+            <span className="text-xs text-gray-300 font-semibold">Locked:</span>
             <span className="font-mono text-sm font-black text-amber-300">{inr(totalEarmarked)}</span>
-            <span className="text-[11px] font-mono text-dusk">({earmarkedPct}%)</span>
+            <span className="text-[11px] font-mono text-gray-400">({earmarkedPct}%)</span>
           </div>
         </div>
 

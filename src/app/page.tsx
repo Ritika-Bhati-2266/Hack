@@ -62,43 +62,46 @@ export default function DashboardPage() {
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      {/* Background Cyber Lights */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
+
       {/* ── Ticker ─────────────────────────────── */}
-      <div className="overflow-hidden max-w-full rounded-full border border-white/[0.08] bg-white/[0.03] py-2 select-none" aria-hidden="true">
-        <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-mist w-max">
+      <div className="overflow-hidden max-w-full rounded-full border border-cyan-500/20 bg-cyan-950/20 backdrop-blur-md py-2.5 select-none shadow-[0_0_20px_rgba(0,240,255,0.1)]" aria-hidden="true">
+        <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-cyan-300/80 w-max">
           {[0, 1].map((k) => (
             <span key={k} className="flex gap-8">
-              <span>RUNWAY <b className="text-safe">{safeRunway} MO</b></span>
-              <span>BUFFER <b className="text-white">{inr(buffer)}</b></span>
-              <span>FIREWALL <b className="text-amber-300">{inr(totalEarmarked)} LOCKED</b></span>
-              <span>ENGINE <b className="text-safe">DETERMINISTIC • NO LLM</b></span>
-              <span>AA <b className="text-amber-300">MOCK • DEMO DATA</b></span>
-              <span>REAL <b className="text-white">CSV ONLY</b></span>
-              <span>QA <b className="text-white">24/24 PASS</b></span>
+              <span>RUNWAY <b className="text-cyan-400 font-bold">{safeRunway} MO</b></span>
+              <span>BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
+              <span>FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
+              <span>ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
+              <span>AA <b className="text-amber-300 font-bold">MOCK • DEMO DATA</b></span>
+              <span>REAL <b className="text-white font-bold">CSV ONLY</b></span>
+              <span>QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
             </span>
           ))}
         </div>
       </div>
 
       {/* ── Persona switcher (judge demo) ──────── */}
-      <div className="rounded-2xl border border-white/[0.08] bg-surface p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
+      <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
-          <Flame className="w-4 h-4 text-primary" />
-          <span className="text-[11px] font-black tracking-[0.18em] text-mist">JUDGE DEMO — SWITCH PERSONA</span>
+          <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
+          <span className="text-[11px] font-mono font-extrabold tracking-[0.18em] text-cyan-300">JUDGE DEMO — SWITCH PERSONA</span>
         </div>
         <div className="flex flex-wrap gap-2 flex-1">
           {Object.keys(CUSTOMERS).map((id) => (
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-full text-xs font-bold border transition-all active:scale-95 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
                 activeCustomer === id
-                  ? 'bg-primary text-white border-primary shadow-[0_0_20px_rgba(83,134,94,0.3)]'
-                  : 'bg-white/5 text-mist border-white/[0.08] hover:bg-white/10 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white border-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.4)]'
+                  : 'bg-white/5 text-gray-300 border-white/10 hover:bg-white/10 hover:text-white'
               }`}
             >
               {CUSTOMERS[id as CustomerId].label.split(' ')[0]}
-              <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-70">
+              <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-80">
                 {id === 'spender' ? '• Spender' : id === 'saver' ? '• Saver' : '• Tight'}
               </span>
             </button>
@@ -107,8 +110,8 @@ export default function DashboardPage() {
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-full text-xs font-bold border flex items-center gap-2 transition-all active:scale-95 ${
-                activeCustomer === id ? 'bg-safe text-black border-safe' : 'bg-white/5 text-safe border-safe/20'
+              className={`px-4 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all active:scale-95 ${
+                activeCustomer === id ? 'bg-cyan-400 text-black border-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.5)]' : 'bg-white/5 text-cyan-300 border-cyan-500/20'
               }`}
             >
               {customProfiles[id].label.split(' ')[0]}
@@ -119,7 +122,7 @@ export default function DashboardPage() {
           ))}
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-white/[0.14] text-mist text-xs font-bold transition-all active:scale-95 hover:border-primary/50 hover:text-primary"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dashed border-cyan-500/40 text-cyan-300 text-xs font-bold transition-all active:scale-95 hover:border-cyan-400 hover:bg-cyan-500/10"
           >
             <Plus className="w-3.5 h-3.5" /> Create Profile
           </button>
@@ -127,106 +130,109 @@ export default function DashboardPage() {
       </div>
 
       {/* ── HERO (landing-first) ───────────────── */}
-      <section className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-surface animate-fade-up stagger-1">
-        <div className="absolute inset-0 bg-grid" />
-        <div className="absolute -top-32 left-1/4 w-[500px] h-[300px] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-24 right-0 w-[400px] h-[300px] bg-safe/15 blur-[120px] rounded-full pointer-events-none" />
+      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#070b14]/90 backdrop-blur-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)] animate-fade-up stagger-1">
+        <div className="absolute inset-0 bg-framer-grid opacity-30" />
+        <div className="absolute -top-32 left-1/4 w-[600px] h-[350px] bg-blue-600/20 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 right-0 w-[500px] h-[350px] bg-cyan-400/15 blur-[140px] rounded-full pointer-events-none" />
 
-        <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-6 sm:gap-8 p-4 sm:p-10">
+        <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-6 sm:gap-8 p-6 sm:p-12 items-center">
           {/* Left copy */}
-          <div className="space-y-4 sm:space-y-5 min-w-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-bold tracking-wide">
-              <BadgeCheck className="w-3.5 h-3.5" />
+          <div className="space-y-5 sm:space-y-6 min-w-0">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-[11px] font-mono font-bold tracking-wide shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+              <BadgeCheck className="w-4 h-4 text-cyan-400" />
               EXPENSE TRACKERS SHOW PAST • PREVISE SIMULATES FUTURE
             </div>
-            <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2.5rem,9vw,4rem)]">
+            <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2.6rem,8vw,4.5rem)] text-white">
               Buy it or
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-safe to-cyan-300">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300 drop-shadow-[0_0_35px_rgba(0,240,255,0.4)]">
                 park it?
               </span>
               <br />
               Know in 5 sec.
             </h1>
-            <p className="text-mist text-[15px] leading-relaxed max-w-xl">
-              <b className="text-frost">“Mere paise ka kya hoga agar main ye kharidu?”</b> — Previse
-              runway, buffer aur goal-delay simulate karta hai <b className="text-frost">swipe se pehle</b>.
-              Deterministic rules. No hallucination.
+            <p className="text-gray-300 text-[16px] leading-relaxed max-w-xl font-normal">
+              <b className="text-white font-semibold">“Mere paise ka kya hoga agar main ye kharidu?”</b> — Previse
+              runway, buffer aur goal-delay simulate karta hai <b className="text-cyan-300 font-semibold">swipe se pehle</b>.
+              Deterministic rules. Zero hallucination.
             </p>
-            <div className="flex flex-wrap gap-3 pt-1">
+            <div className="flex flex-wrap gap-3.5 pt-2">
               <Link
                 href="/simulator"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-[0_0_40px_rgba(83,134,94,0.35)] hover:shadow-[0_0_60px_rgba(83,134,94,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
               >
-                <Zap className="w-4 h-4 fill-white" />
+                <Zap className="w-4 h-4 fill-white text-white" />
                 Launch What-If Simulator
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/connect"
-                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold text-frost transition-all active:scale-[0.98] hover:bg-white/10"
+                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10 hover:border-cyan-500/40"
               >
                 <Lock className="w-4 h-4 text-amber-300" />
                 Connect Bank (AA)
               </Link>
             </div>
-            <div className="flex items-center gap-5 pt-2 text-[11px] font-mono text-dusk">
-              <span>⚡ INSTANT LOCAL ENGINE</span>
+            <div className="flex items-center gap-6 pt-3 text-[11px] font-mono text-gray-400">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" /> INSTANT ENGINE</span>
               <span>✓ VERIFIED BY :3001</span>
               <span className="hidden sm:inline">RBI AA MOCK</span>
             </div>
           </div>
 
-          {/* Right — live verdict card */}
+          {/* Right — live verdict card (Framer dark frame look) */}
           <div className="relative min-w-0">
-            <div className="rounded-3xl overflow-hidden border border-white/[0.08] bg-well/60 backdrop-blur-xl shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-elevated to-surface border border-white/[0.08] flex items-center justify-center">
-                    <Smartphone className="w-4.5 h-4.5 w-5 h-5 text-frost" />
+            {/* Decorative back glow frame */}
+            <div className="absolute -inset-1 rounded-[32px] bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-600 blur-xl opacity-30 animate-pulse" />
+
+            <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-[#0e1424]/90 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/30 to-cyan-500/20 border border-cyan-400/30 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                    <Smartphone className="w-5 h-5 text-cyan-300" />
                   </div>
                   <div className="leading-tight">
-                    <p className="text-[13px] font-bold">iPhone 16 • ₹80,000</p>
-                    <p className="text-[11px] text-dusk font-mono">CASH • {allProfiles[activeCustomer]?.label}</p>
+                    <p className="text-[14px] font-bold text-white">iPhone 16 • ₹80,000</p>
+                    <p className="text-[11px] text-gray-400 font-mono">CASH • {allProfiles[activeCustomer]?.label}</p>
                   </div>
                 </div>
-                <span className={`text-[10px] font-black tracking-widest px-2.5 py-1 rounded-lg border animate-stamp-in verdict-stamp ${
-                  heroVerdict === 'WAIT' ? 'bg-red-500/15 text-red-300 border-red-500/30' :
-                  heroVerdict === 'EMI' ? 'bg-amber-400/15 text-amber-300 border-amber-400/30' :
-                   'bg-safe/15 text-safe border-safe/30'
+                <span className={`text-[11px] font-black tracking-widest px-3 py-1 rounded-xl border animate-stamp-in shadow-lg ${
+                  heroVerdict === 'WAIT' ? 'bg-red-500/20 text-red-300 border-red-500/40 shadow-red-500/20' :
+                  heroVerdict === 'EMI' ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow-amber-400/20' :
+                   'bg-cyan-400/20 text-cyan-300 border-cyan-400/40 shadow-cyan-400/20'
                 }`}>
                   {heroVerdict}
                 </span>
               </div>
-              <div className="p-5 space-y-4">
+              <div className="p-6 space-y-5">
                 <div>
-                  <div className="flex justify-between text-[11px] font-bold tracking-widest text-dusk mb-2">
+                  <div className="flex justify-between text-[11px] font-mono font-bold tracking-widest text-gray-400 mb-2">
                     <span>RUNWAY IMPACT</span>
-                    <span className="font-mono text-mist">{safeRunway} MO → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroAfterRunway} MO</b></span>
+                    <span className="text-gray-300">{safeRunway} MO → <b className={heroVerdict === 'WAIT' ? 'text-red-400' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-cyan-300'}>{heroAfterRunway} MO</b></span>
                   </div>
-                  <div className="h-3 rounded-full bg-white/5 border border-white/[0.08] overflow-hidden flex">
-                    <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-full" style={{ width: `${Math.min(70, Number(safeRunway) * 18)}%` }} />
-                    <div className="h-full bg-red-500/80" style={{ width: '18%' }} />
+                  <div className="h-3 rounded-full bg-white/5 border border-white/10 overflow-hidden flex p-0.5">
+                    <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full" style={{ width: `${Math.min(70, Number(safeRunway) * 18)}%` }} />
+                    <div className="h-full bg-red-500/80 rounded-full ml-1" style={{ width: '18%' }} />
                   </div>
-                    <div className="flex justify-between mt-1.5 text-[11px] font-mono">
-                      <span className="text-safe">● before {safeRunway}mo</span>
-                      <span className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>● after {heroAfterRunway}mo</span>
-                    </div>
+                  <div className="flex justify-between mt-2 text-[11px] font-mono">
+                    <span className="text-cyan-400">● before {safeRunway}mo</span>
+                    <span className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-cyan-300'}>● after {heroAfterRunway}mo</span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] p-3.5">
-                    <p className="text-[10px] font-bold tracking-widest text-dusk">BUFFER LEFT</p>
-                    <p className="font-mono font-black text-lg mt-0.5">{inr(buffer)}</p>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-4">
+                    <p className="text-[10px] font-mono font-bold tracking-widest text-gray-400">BUFFER LEFT</p>
+                    <p className="font-mono font-black text-xl mt-1 text-white">{inr(buffer)}</p>
                   </div>
-                  <div className="rounded-2xl bg-safe/[0.07] border border-safe/20 p-3.5">
-                    <p className="text-[10px] font-bold tracking-widest text-safe/80">SAFE TODAY</p>
-                    <p className="font-mono font-black text-lg mt-0.5 text-safe">{inr(safeToSpendToday)}</p>
+                  <div className="rounded-2xl bg-cyan-500/10 border border-cyan-400/30 p-4 shadow-[0_0_20px_rgba(0,240,255,0.15)]">
+                    <p className="text-[10px] font-mono font-bold tracking-widest text-cyan-300">SAFE TODAY</p>
+                    <p className="font-mono font-black text-xl mt-1 text-cyan-300">{inr(safeToSpendToday)}</p>
                   </div>
                 </div>
                 <Link href="/simulator" className="flex items-center justify-between group px-1 pt-1">
-                  <span className="text-xs text-mist">Same phone, persona badlo — verdict badlega.</span>
-                  <span className="inline-flex items-center gap-1 text-xs font-extrabold text-primary group-hover:gap-2 transition-all">
-                    Try it <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span className="text-xs text-gray-400">Same phone, persona badlo — verdict badlega.</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-400 group-hover:gap-2.5 transition-all">
+                    Try it <ArrowUpRight className="w-4 h-4" />
                   </span>
                 </Link>
               </div>
@@ -236,46 +242,46 @@ export default function DashboardPage() {
       </section>
 
       {/* ── STATS BENTO ────────────────────────── */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-fade-up stagger-2">
-        <div className="glass card-hover rounded-3xl p-5 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">SAFE BUFFER</span>
-            <ShieldCheck className="w-4 h-4 text-safe" />
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up stagger-2">
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">SAFE BUFFER</span>
+            <ShieldCheck className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[28px] leading-none">₹{(buffer / 100000).toFixed(1)}L</p>
-          <p className="text-[11px] text-dusk mt-2 font-mono">of {inr(user.totalBalance)} • {inr(totalEarmarked)} locked</p>
-          <div className="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
-            <div className="h-full bg-safe rounded-full" style={{ width: `${Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100))}%` }} />
+          <p className="font-display font-black text-[32px] leading-none text-white">₹{(buffer / 100000).toFixed(1)}L</p>
+          <p className="text-[11px] text-gray-400 mt-2 font-mono">of {inr(user.totalBalance)} • {inr(totalEarmarked)} locked</p>
+          <div className="mt-4 h-1.5 rounded-full bg-white/5 overflow-hidden p-0.5">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100))}%` }} />
           </div>
         </div>
 
-        <div className="glass card-hover rounded-3xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">RUNWAY</span>
-            <Clock className="w-4 h-4 text-violet-300" />
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">RUNWAY</span>
+            <Clock className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[28px] leading-none">{safeRunway}<span className="text-sm font-bold text-dusk ml-1">mo</span></p>
-          <p className="text-[11px] mt-2 font-bold text-safe flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> Target &gt;3.0 mo
+          <p className="font-display font-black text-[32px] leading-none text-white">{safeRunway}<span className="text-base font-bold text-gray-400 ml-1">mo</span></p>
+          <p className="text-[11px] mt-2 font-bold text-cyan-300 flex items-center gap-1">
+            <TrendingUp className="w-3.5 h-3.5 text-cyan-400" /> Target &gt;3.0 mo
           </p>
         </div>
 
-        <div className="glass card-hover rounded-3xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">GOALS</span>
-            <span className="w-2 h-2 rounded-full bg-safe animate-pulse" />
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">GOALS</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
           </div>
-          <p className="font-display font-black text-[28px] leading-none">{goalsOnTrack} <span className="text-sm font-bold text-safe">on track</span></p>
-          <p className="text-[11px] text-dusk mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
+          <p className="font-display font-black text-[32px] leading-none text-white">{goalsOnTrack} <span className="text-base font-bold text-cyan-400">on track</span></p>
+          <p className="text-[11px] text-gray-400 mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
         </div>
 
-        <div className="glass card-hover rounded-3xl p-5 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">SPEND TODAY</span>
-            <Wallet className="w-4 h-4 text-orange-300" />
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">SPEND TODAY</span>
+            <Wallet className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[28px] leading-none font-mono">{inr(safeToSpendToday)}</p>
-          <p className="text-[11px] mt-2 font-mono text-dusk">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
+          <p className="font-display font-black text-[32px] leading-none text-cyan-300 font-mono">{inr(safeToSpendToday)}</p>
+          <p className="text-[11px] mt-2 font-mono text-gray-400">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
         </div>
       </section>
 
