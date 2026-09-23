@@ -81,7 +81,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Persona switcher (judge demo) ──────── */}
-      <div className="glass rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
+      <div className="rounded-2xl border border-white/10 bg-[#0B111E] p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-[#10B981]" />
           <span className="text-[11px] font-black tracking-[0.18em] text-slate-400">JUDGE DEMO — SWITCH PERSONA</span>
@@ -337,7 +337,7 @@ export default function DashboardPage() {
               <div className="flex justify-between"><span className="text-slate-500">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold' : 'text-emerald-300 font-bold'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
             </div>
           </div>
-          <Link href="/simulator" className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white text-black font-extrabold text-sm hover:bg-[#10B981] transition-colors">
+          <Link href="/simulator" className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#10B981] text-black font-extrabold text-sm hover:brightness-110 transition-colors">
             Simulate a purchase <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

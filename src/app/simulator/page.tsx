@@ -114,7 +114,7 @@ export default function SimulatorPage() {
               />
               <div className="flex gap-1.5 mt-2.5 flex-wrap">
                 {['iPhone 16 Pro Max', 'MacBook Air', 'Bali Trip'].map((v) => (
-                  <button key={v} onClick={() => setItemName(v)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === v ? 'bg-white text-black border-white' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
+                  <button key={v} onClick={() => setItemName(v)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === v ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
                     {v}
                   </button>
                 ))}

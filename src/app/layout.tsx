@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} dark`}>
+    <html lang="en" className={`${inter.variable} ${outfit.variable} dark bg-[#06090F]`} style={{ backgroundColor: '#06090F' }}>
       <body className="bg-[#06090F] text-slate-100 font-sans antialiased min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
