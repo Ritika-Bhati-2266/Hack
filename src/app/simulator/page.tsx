@@ -8,6 +8,7 @@ import SplitViewComparison from '@/components/SplitViewComparison';
 import TrajectoryChart from '@/components/TrajectoryChart';
 import { PaymentMode } from '@/types';
 import { simulateOnBackend, BackendVerdict } from '@/lib/api';
+import { backendEMI } from '@/lib/engine';
 
 export default function SimulatorPage() {
   const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, goals, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
@@ -43,11 +44,12 @@ export default function SimulatorPage() {
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
   const pct = Math.min(100, Math.max(0, (price / Math.max(1, user.totalBalance)) * 100));
 
+  // Displayed estimates use the same reducing-balance formula as the verdict engine
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
     { id: 'CASH', label: 'Full Cash', sub: inr(price) },
-    { id: 'EMI_3', label: '3 EMI', sub: `~${inr(Math.round((price * 1.07) / 3))}/mo` },
-    { id: 'EMI_6', label: '6 EMI', sub: `~${inr(Math.round((price * 1.10) / 6))}/mo` },
-    { id: 'EMI_12', label: '12 EMI', sub: `~${inr(Math.round((price * 1.14) / 12))}/mo` },
+    { id: 'EMI_3', label: '3 EMI', sub: `~${inr(backendEMI(price, 3, 12))}/mo` },
+    { id: 'EMI_6', label: '6 EMI', sub: `~${inr(backendEMI(price, 6, 12))}/mo` },
+    { id: 'EMI_12', label: '12 EMI', sub: `~${inr(backendEMI(price, 12, 12))}/mo` },
   ];
 
   const verdict = currentSimulation?.verdict;
