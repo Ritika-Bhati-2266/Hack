@@ -301,6 +301,7 @@ export default function DashboardPage() {
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-[10px] border ${
                     e.category === 'rent' ? 'bg-amber-400/10 text-amber-300 border-amber-400/20' :
                     e.category === 'sip' ? 'bg-violet-400/10 text-violet-300 border-violet-400/20' :
+                    e.category === 'emi' ? 'bg-orange-400/10 text-orange-300 border-orange-400/20' :
                     'bg-cyan-400/10 text-cyan-300 border-cyan-400/20'
                   }`}>
                     {e.category.slice(0, 3).toUpperCase()}

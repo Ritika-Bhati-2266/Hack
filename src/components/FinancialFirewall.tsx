@@ -9,8 +9,9 @@ export default function FinancialFirewall() {
   const rent = user.earmarkedExpenses.find((e) => e.category === 'rent')?.amount || 35000;
   const sips = user.earmarkedExpenses.find((e) => e.category === 'sip')?.amount || 15000;
   const bills = user.earmarkedExpenses.find((e) => e.category === 'bill')?.amount || 10000;
+  const emi = user.earmarkedExpenses.filter((e) => e.category === 'emi').reduce((s, e) => s + e.amount, 0);
 
-  const totalEarmarked = rent + sips + bills;
+  const totalEarmarked = user.earmarkedExpenses.reduce((s, e) => s + e.amount, 0);
   const safeBuffer = user.totalBalance - totalEarmarked;
 
   const earmarkedPct = Math.round((totalEarmarked / Math.max(1, user.totalBalance)) * 100);
@@ -56,14 +57,18 @@ export default function FinancialFirewall() {
           <div style={{ width: `${(rent / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-l-full" title={`Rent ${inr(rent)}`} />
           <div style={{ width: `${(sips / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 border-l border-black" title={`SIP ${inr(sips)}`} />
           <div style={{ width: `${(bills / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 border-l border-black" title={`Bills ${inr(bills)}`} />
+          {emi > 0 && (
+            <div style={{ width: `${(emi / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-orange-500 to-red-400 border-l border-black" title={`EMI ${inr(emi)}`} />
+          )}
           <div className="h-full bg-gradient-to-r from-[#10B981] to-emerald-400 rounded-r-full border-l border-black shadow-[0_0_20px_rgba(16,185,129,0.4)] flex-1" title={`Buffer ${inr(safeBuffer)}`} />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
+        <div className={`grid grid-cols-1 gap-3 mt-5 ${emi > 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
           {[
             { label: 'RENT • 1st', amt: rent, dot: 'bg-amber-400', text: 'text-amber-300' },
             { label: 'SIP • 5th', amt: sips, dot: 'bg-violet-400', text: 'text-violet-300' },
-            { label: 'BILLS • 10th', amt: bills, dot: 'bg-cyan-400', text: 'text-cyan-300' },
+            { label: emi > 0 ? 'BILLS • 10th' : 'BILLS • 10th', amt: bills, dot: 'bg-cyan-400', text: 'text-cyan-300' },
+            ...(emi > 0 ? [{ label: 'EMI • 1st', amt: emi, dot: 'bg-orange-400', text: 'text-orange-300' }] : []),
           ].map((c) => (
             <div key={c.label} className="rounded-2xl bg-black/40 border border-white/[0.07] p-4 flex items-center justify-between">
               <div>

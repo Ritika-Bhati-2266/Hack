@@ -62,7 +62,7 @@ export function toBackendProfile(
   goals: Goal[],
   name = 'Demo User'
 ): BackendProfile {
-  const dayOfMonth = { rent: 1, sip: 5, bill: 10 } as const;
+  const dayOfMonth = { rent: 1, sip: 5, bill: 10, emi: 1 } as const;
   return {
     name,
     balance: user.totalBalance,

@@ -147,10 +147,33 @@ export const useFinanceStore = create<FinanceStore>()(
   confirmPurchaseAnyway: () => {
     const { currentSimulation, user } = get();
     if (!currentSimulation) return;
+    // CASH: deduct upfront. EMI: balance unchanged, but track monthly commitment
+    // so runway/buffer/firewall reflect the new EMI (was silently dropped before).
+    if (currentSimulation.mode === 'CASH') {
+      set({
+        user: {
+          ...user,
+          totalBalance: currentSimulation.simulatedBalance,
+        },
+        currentSimulation: null,
+      });
+      return;
+    }
     set({
       user: {
         ...user,
         totalBalance: currentSimulation.simulatedBalance,
+        earmarkedExpenses: [
+          ...user.earmarkedExpenses,
+          {
+            id: `emi-${Date.now()}`,
+            name: `EMI: ${currentSimulation.itemName} (${currentSimulation.emiMonths}mo)`,
+            amount: currentSimulation.monthlyEMI,
+            category: 'emi',
+            dueDate: '1st of month',
+            autoDebit: true,
+          },
+        ],
       },
       currentSimulation: null,
     });

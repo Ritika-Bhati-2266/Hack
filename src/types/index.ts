@@ -2,7 +2,7 @@ export interface EarmarkedExpense {
   id: string;
   name: string;
   amount: number;
-  category: 'rent' | 'sip' | 'bill';
+  category: 'rent' | 'sip' | 'bill' | 'emi';
   dueDate: string;
   autoDebit: boolean;
 }

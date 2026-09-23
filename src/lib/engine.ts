@@ -6,7 +6,7 @@
 import type { UserFinancialState, Goal, SimulationInput, SimulationResult } from '../types';
 
 // Backend shapes: commitments {name, amount, type, dayOfMonth, active}, goals {name, targetAmount, currentAmount, deadline}
-const COMMIT_DAY: Record<string, number> = { rent: 1, sip: 5, bill: 10 };
+const COMMIT_DAY: Record<string, number> = { rent: 1, sip: 5, bill: 10, emi: 1 };
 
 export function backendEMI(principal: number, months: number, annualRate: number): number {
   if (annualRate === 0) return Math.ceil(principal / months);
