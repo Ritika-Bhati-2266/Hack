@@ -14,11 +14,12 @@ export default function ConnectPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState<LiveProfileRes | null>(null);
+  const [expired, setExpired] = useState(false);
   const [balance, setBalance] = useState('150000');
   const [msg, setMsg] = useState<string | null>(null);
 
   const run = async (fn: () => Promise<void>) => {
-    setLoading(true); setError(null); setMsg(null);
+    setLoading(true); setError(null); setMsg(null); setExpired(false);
     try { await fn(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Something failed — is backend on :3001?'); }
     finally { setLoading(false); }
@@ -37,13 +38,24 @@ export default function ConnectPage() {
     await fetchAAData(consentId, sessionToken);
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
-    setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
+    if (profile.source === 'mock') {
+      // Backend falls back to demo data with 200 when the session is gone — never present it as live
+      setExpired(true);
+      setMsg('Session expired — showing demo data. Reconnect via AA or CSV.');
+    } else {
+      setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
+    }
   });
   const handleCSV = async (file: File) => run(async () => {
     const res = await uploadCSV(file, Number(balance) || undefined);
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
-    setMsg(`${res.message || 'CSV parsed'} — source: csv. ${res.balanceWarning || ''}`);
+    if (profile.source === 'mock') {
+      setExpired(true);
+      setMsg('Session expired right after upload — showing demo data. Please upload again.');
+    } else {
+      setMsg(`${res.message || 'CSV parsed'} — source: csv. ${res.balanceWarning || ''}`);
+    }
   });
   const handleDelete = () => run(async () => {
     await deleteMyData(); setLive(null); setStep('idle'); setMsg('All session data deleted (DPDP).');
@@ -85,7 +97,12 @@ export default function ConnectPage() {
       </div>
 
       {error && <p className="text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-2xl p-4">{error}</p>}
-      {msg && <p className="text-sm text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-2xl p-4">{msg}</p>}
+      {msg && !expired && <p className="text-sm text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-2xl p-4">{msg}</p>}
+      {expired && (
+        <div className="text-sm text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 animate-fade-up">
+          <b>Session expired (1h TTL)</b> — {msg || 'ye demo data hai, live nahi.'} AA ya CSV se dobara connect karo, 10 second me restore ho jayega.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
@@ -122,7 +139,7 @@ export default function ConnectPage() {
       {live && (
         <div className="rounded-[24px] bg-[#0B111E] border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
           <h3 className="font-display font-extrabold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-300" /> Live Profile — <span className="font-mono text-sm text-emerald-300">{live.source}</span>
+            <CheckCircle2 className="w-5 h-5 text-emerald-300" /> {expired ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired ? 'text-amber-300' : 'text-emerald-300'}`}>{live.source}</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
