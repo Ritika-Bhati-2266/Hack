@@ -64,7 +64,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* ── Ticker ─────────────────────────────── */}
-      <div className="overflow-hidden max-w-full rounded-full border border-white/10 bg-white/[0.03] py-2 select-none" aria-hidden="true">
+      <div className="overflow-hidden max-w-full rounded-full border border-white/15 bg-white/[0.03] py-2 select-none" aria-hidden="true">
         <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-slate-400 w-max">
           {[0, 1].map((k) => (
             <span key={k} className="flex gap-8">
@@ -81,7 +81,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Persona switcher (judge demo) ──────── */}
-      <div className="rounded-2xl border border-white/10 bg-[#0B111E] p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
+      <div className="rounded-2xl border border-white/15 bg-surface p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-[#10B981]" />
           <span className="text-[11px] font-black tracking-[0.18em] text-slate-400">JUDGE DEMO — SWITCH PERSONA</span>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
               className={`px-4 py-2 rounded-full text-xs font-bold border transition-all active:scale-95 ${
                 activeCustomer === id
                   ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
+                  : 'bg-white/5 text-slate-400 border-white/15 hover:bg-white/10 hover:text-white'
               }`}
             >
               {CUSTOMERS[id as CustomerId].label.split(' ')[0]}
@@ -127,7 +127,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── HERO (landing-first) ───────────────── */}
-      <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] animate-fade-up stagger-1">
+      <section className="relative overflow-hidden rounded-[28px] border border-white/15 bg-surface animate-fade-up stagger-1">
         <div className="absolute inset-0 bg-grid" />
         <div className="absolute -top-32 left-1/4 w-[500px] h-[300px] bg-[#10B981]/10 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute -bottom-24 right-0 w-[400px] h-[300px] bg-emerald-500/15 blur-[120px] rounded-full pointer-events-none" />
@@ -164,7 +164,7 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/connect"
-                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-slate-200 transition-all active:scale-[0.98] hover:bg-white/10"
+                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/15 text-sm font-bold text-slate-200 transition-all active:scale-[0.98] hover:bg-white/10"
               >
                 <Lock className="w-4 h-4 text-amber-300" />
                 Connect Bank (AA)
@@ -179,10 +179,10 @@ export default function DashboardPage() {
 
           {/* Right — live verdict card */}
           <div className="relative min-w-0">
-            <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/50 backdrop-blur-xl shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.07]">
+            <div className="rounded-3xl overflow-hidden border border-white/15 bg-well/60 backdrop-blur-xl shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/15">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 border border-white/10 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 border border-white/15 flex items-center justify-center">
                     <Smartphone className="w-4.5 h-4.5 w-5 h-5 text-slate-200" />
                   </div>
                   <div className="leading-tight">
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                     <span>RUNWAY IMPACT</span>
                     <span className="font-mono text-slate-300">{safeRunway} MO → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-emerald-300'}>{heroAfterRunway} MO</b></span>
                   </div>
-                  <div className="h-3 rounded-full bg-white/5 border border-white/10 overflow-hidden flex">
+                  <div className="h-3 rounded-full bg-white/5 border border-white/15 overflow-hidden flex">
                     <div className="h-full bg-gradient-to-r from-[#10B981] to-emerald-400 rounded-full" style={{ width: `${Math.min(70, Number(safeRunway) * 18)}%` }} />
                     <div className="h-full bg-red-500/80" style={{ width: '18%' }} />
                   </div>
@@ -214,7 +214,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/[0.04] border border-white/[0.07] p-3.5">
+                  <div className="rounded-2xl bg-white/[0.04] border border-white/15 p-3.5">
                     <p className="text-[10px] font-bold tracking-widest text-slate-500">BUFFER LEFT</p>
                     <p className="font-mono font-black text-lg mt-0.5">{inr(buffer)}</p>
                   </div>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
       {/* ── LEDGER + CTA ───────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-up stagger-4">
         <div className="lg:col-span-2 glass rounded-3xl p-6">
-          <div className="flex items-center justify-between pb-4 border-b border-white/[0.07]">
+          <div className="flex items-center justify-between pb-4 border-b border-white/15">
             <div>
               <h3 className="font-display font-extrabold text-lg">Earmarked Ledger</h3>
               <p className="text-xs text-slate-500">Rent + SIP + bills — firewall locked, spend me count nahi</p>
@@ -296,7 +296,7 @@ export default function DashboardPage() {
               {inr(totalEarmarked)} locked
             </span>
           </div>
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-white/10">
             {user.earmarkedExpenses.map((e) => (
               <div key={e.id} className="flex items-center justify-between gap-3 py-4 group rounded-xl px-2 -mx-2 transition-colors hover:bg-white/[0.03]">
                 <div className="flex items-center gap-3">
@@ -324,7 +324,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-[#101828] to-black p-6 flex flex-col justify-between relative">
+        <div className="rounded-3xl overflow-hidden border border-white/15 bg-gradient-to-b from-surface to-well p-6 flex flex-col justify-between relative">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#10B981]/60 to-transparent" />
           <div className="space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center">
@@ -332,7 +332,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="font-display font-extrabold text-xl leading-tight">Try the 10-second demo judges love</h3>
             <p className="text-xs text-slate-400 leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-emerald-300'}>{heroVerdict}</b>. Persona switch karo → verdict flip.</p>
-            <div className="rounded-2xl bg-black/60 border border-white/10 p-3.5 font-mono text-[11px] space-y-1.5">
+            <div className="rounded-2xl bg-well/60 border border-white/15 p-3.5 font-mono text-[11px] space-y-1.5">
               <div className="flex justify-between"><span className="text-slate-500">INPUT</span><span className="text-white">iPhone ₹80k cash</span></div>
               <div className="flex justify-between"><span className="text-slate-500">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold' : 'text-emerald-300 font-bold'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
             </div>
@@ -363,7 +363,7 @@ export default function DashboardPage() {
       {/* Create profile modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-[#0B111E] border border-white/10 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface border border-white/15 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-extrabold">Create Profile</h3>
               <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-slate-400" /></button>
@@ -371,12 +371,12 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
                 <label className="text-[11px] font-bold tracking-widest text-slate-500">NAME</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., Ritika" className="mt-1 w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., Ritika" className="mt-1 w-full bg-well/60 border border-white/15 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
               </div>
               {([['monthlyIncome', 'MONTHLY INCOME (₹)'], ['totalBalance', 'TOTAL BALANCE (₹)'], ['dailyBurnRate', 'DAILY BURN (₹)'], ['rent', 'RENT (₹)'], ['sip', 'SIP (₹)'], ['bills', 'BILLS (₹)']] as const).map(([k, label]) => (
                 <div key={k}>
                   <label className="text-[11px] font-bold tracking-widest text-slate-500">{label}</label>
-                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
+                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-well/60 border border-white/15 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
                 </div>
               ))}
             </div>

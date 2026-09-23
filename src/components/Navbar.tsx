@@ -21,7 +21,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="backdrop-blur-2xl bg-[#06090F]/80 border-b border-white/[0.06]">
+      <div className="backdrop-blur-2xl bg-base/80 border-b border-white/15">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
@@ -43,7 +43,7 @@ export default function Navbar() {
           </Link>
 
           {/* Pill nav */}
-          <nav className="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
+          <nav className="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/15">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -93,7 +93,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile nav */}
-        <div className="md:hidden border-t border-white/5 px-4 py-2 flex gap-1 overflow-x-auto">
+        <div className="md:hidden border-t border-white/15 px-4 py-2 flex gap-1 overflow-x-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;

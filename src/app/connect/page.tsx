@@ -79,7 +79,7 @@ export default function ConnectPage() {
         <ArrowLeft className="w-4 h-4" /> Back to Home
       </Link>
 
-      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-surface p-6 sm:p-8">
         <div className="absolute inset-0 bg-grid opacity-60" />
         <div className="relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-400/10 border border-emerald-400/25 text-emerald-300 text-[11px] font-bold">
@@ -96,7 +96,7 @@ export default function ConnectPage() {
             {['Consent', 'Approve', 'Fetch'].map((s, i) => (
               <div key={s} className="flex items-center gap-2 flex-1 min-w-0">
                 <div className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs font-bold whitespace-nowrap transition-all ${
-                  stepIdx > i ? 'bg-[#10B981] text-black border-[#10B981]' : stepIdx === i + 1 || (stepIdx === 0 && i === 0) ? 'bg-white/10 text-white border-white/20' : 'bg-white/[0.03] text-slate-500 border-white/10'
+                  stepIdx > i ? 'bg-[#10B981] text-black border-[#10B981]' : stepIdx === i + 1 || (stepIdx === 0 && i === 0) ? 'bg-white/10 text-white border-white/20' : 'bg-white/[0.03] text-slate-500 border-white/15'
                 }`}>
                   <span className="font-mono">{i + 1}</span> {s} {stepIdx > i && '✓'}
                 </div>
@@ -127,17 +127,17 @@ export default function ConnectPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
+        <div className="rounded-[24px] bg-surface border border-white/15 p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <Landmark className="w-5 h-5 text-[#10B981]" /> Option A — AA Flow
             <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
               MOCK DEMO
             </span>
           </h2>
-          <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-slate-300 border border-white/10' : 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.3)]'} disabled:opacity-50`}>
+          <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-slate-300 border border-white/15' : 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.3)]'} disabled:opacity-50`}>
             1. Create consent {stepIdx >= 1 && '✓'}
           </button>
-          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/15 text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && step === 'consent' && <Loader2 className="w-4 h-4 animate-spin" />}
             2. Approve consent {stepIdx >= 2 && '✓'}
           </button>
@@ -148,7 +148,7 @@ export default function ConnectPage() {
           {consentId && <p className="text-[10px] font-mono text-slate-600 break-all">consent: {consentId.slice(0, 32)}…</p>}
         </div>
 
-        <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
+        <div className="rounded-[24px] bg-surface border border-white/15 p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-cyan-300" /> Option B — CSV
             <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-emerald-400/15 text-emerald-300 border border-emerald-400/30">
@@ -158,7 +158,7 @@ export default function ConnectPage() {
           <p className="text-[11px] text-slate-500 font-mono">date, narration, amount, type</p>
           <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">CURRENT BALANCE (₹)</label>
           <input value={balance} onChange={(e) => setBalance(e.target.value)} inputMode="numeric"
-            className="w-full bg-black/60 border border-white/10 rounded-2xl px-4 py-3 text-sm font-mono font-bold focus:border-cyan-300 outline-none" />
+            className="w-full bg-well/70 border border-white/15 rounded-2xl px-4 py-3 text-sm font-mono font-bold focus:border-cyan-300 outline-none" />
           <label className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 text-sm font-bold text-slate-300 cursor-pointer hover:bg-white/[0.07] hover:border-cyan-300/40 transition-all">
             <Upload className="w-4 h-4" /> Choose CSV statement
             <input type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCSV(f); }} />
@@ -176,7 +176,7 @@ export default function ConnectPage() {
 
       {!live && !loading && (
         <div className="rounded-[24px] border border-dashed border-white/15 bg-white/[0.02] p-8 text-center animate-fade-up">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto">
             <PlugZap className="w-5 h-5 text-slate-500" />
           </div>
           <p className="font-display font-extrabold text-lg mt-3">No live data yet</p>
@@ -185,7 +185,7 @@ export default function ConnectPage() {
       )}
 
       {live && (
-        <div className="rounded-[24px] bg-[#0B111E] border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
+        <div className="rounded-[24px] bg-surface border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
           <h3 className="font-display font-extrabold flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-300" /> {expired || live.source !== 'csv' ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired || live.source !== 'csv' ? 'text-amber-300' : 'text-emerald-300'}`}>{expired ? 'mock' : live.source}{!expired && live.source === 'aa' ? ' (mock TSP)' : ''}</span>
           </h3>
@@ -196,7 +196,7 @@ export default function ConnectPage() {
               { l: 'Runway', v: live.state.runway.display, c: 'text-[#10B981]' },
               { l: 'Safe/day', v: `₹${live.state.safeToSpend.daily.toLocaleString('en-IN')}`, c: 'text-white' },
             ].map((s) => (
-              <div key={s.l} className="p-3.5 rounded-2xl bg-black/50 border border-white/[0.07]">
+              <div key={s.l} className="p-3.5 rounded-2xl bg-well/60 border border-white/15">
                 <p className="text-[11px] text-slate-500 font-semibold">{s.l}</p>
                 <p className={`font-mono font-black mt-0.5 ${s.c}`}>{s.v}</p>
               </div>

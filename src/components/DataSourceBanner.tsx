@@ -49,8 +49,8 @@ export default function DataSourceBanner({ source }: { source: Source }) {
 
   // mock / fallback / default Priya Sharma profile
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10">
+    <div className="flex items-start gap-3 rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-3.5">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/15">
         <UserRound className="h-4 w-4 text-slate-400" />
       </span>
       <div className="min-w-0">

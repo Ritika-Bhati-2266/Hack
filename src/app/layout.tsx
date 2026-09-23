@@ -28,14 +28,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} dark bg-[#06090F]`} style={{ backgroundColor: '#06090F' }}>
-      <body className="bg-[#06090F] text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+    <html lang="en" className={`${inter.variable} ${outfit.variable} dark bg-base`} style={{ backgroundColor: 'var(--color-base)' }}>
+      <body className="bg-base text-slate-100 font-sans antialiased min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
           {children}
         </main>
 
-        <footer className="border-t border-white/5 bg-black/40 backdrop-blur-xl">
+        <footer className="border-t border-white/15 bg-well/50 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-[#10B981] flex items-center justify-center font-display font-black text-black text-lg">
@@ -51,10 +51,10 @@ export default function RootLayout({
               </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-slate-500">
-              <span className="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 font-mono">
+              <span className="px-2.5 py-1 rounded-full border border-white/15 bg-white/5 font-mono">
                 QA 24/24
               </span>
-              <span className="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 font-mono">
+              <span className="px-2.5 py-1 rounded-full border border-white/15 bg-white/5 font-mono">
                 FW-RBI-2026
               </span>
               <span className="hidden sm:inline">Built for hackathon demo</span>

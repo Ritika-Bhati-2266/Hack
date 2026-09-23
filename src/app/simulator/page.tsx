@@ -80,7 +80,7 @@ export default function SimulatorPage() {
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 whitespace-nowrap ${activeCustomer === id ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 whitespace-nowrap ${activeCustomer === id ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/15 hover:text-white'}`}
             >
               {CUSTOMERS[id].label.split(' ')[0]}
             </button>
@@ -89,7 +89,7 @@ export default function SimulatorPage() {
       </div>
 
       {/* Input hero */}
-      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-surface p-6 sm:p-8">
         <div className="absolute inset-0 bg-grid opacity-70" />
         <div className="absolute -top-20 left-1/3 w-[400px] h-[200px] bg-[#10B981]/10 blur-[100px] rounded-full pointer-events-none" />
         <div className="relative">
@@ -109,12 +109,12 @@ export default function SimulatorPage() {
               <input
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
-                className={`mt-2 w-full bg-black/60 border rounded-2xl px-4 py-3.5 text-[15px] font-bold focus:outline-none transition-colors ${nameError ? 'border-red-500' : 'border-white/10 focus:border-[#10B981]'}`}
+                className={`mt-2 w-full bg-well/70 border rounded-2xl px-4 py-3.5 text-[15px] font-bold focus:outline-none transition-colors ${nameError ? 'border-red-500' : 'border-white/15 focus:border-[#10B981]'}`}
                 placeholder="e.g., iPhone 16 Pro"
               />
               <div className="flex gap-1.5 mt-2.5 flex-wrap">
                 {['iPhone 16 Pro Max', 'MacBook Air', 'Bali Trip'].map((v) => (
-                  <button key={v} onClick={() => setItemName(v)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === v ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
+                  <button key={v} onClick={() => setItemName(v)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === v ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/15 hover:text-white'}`}>
                     {v}
                   </button>
                 ))}
@@ -124,14 +124,14 @@ export default function SimulatorPage() {
             <div>
               <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">AMOUNT</label>
               <div className="mt-2 flex items-center gap-2">
-                <button onClick={() => setPrice(Math.max(1000, price - 5000))} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 shrink-0">
+                <button onClick={() => setPrice(Math.max(1000, price - 5000))} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center hover:bg-white/10 shrink-0">
                   <Minus className="w-4 h-4" />
                 </button>
-                <div className="flex-1 text-center bg-black/60 border border-white/10 rounded-2xl py-2.5">
+                <div className="flex-1 text-center bg-well/70 border border-white/15 rounded-2xl py-2.5">
                   <p className="font-mono font-black text-xl leading-none">{inr(price)}</p>
                   <p className="text-[10px] font-mono text-slate-500 mt-1">{pct.toFixed(0)}% of balance</p>
                 </div>
-                <button onClick={() => setPrice(price + 5000)} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 shrink-0">
+                <button onClick={() => setPrice(price + 5000)} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center hover:bg-white/10 shrink-0">
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
@@ -143,7 +143,7 @@ export default function SimulatorPage() {
               />
               <div className="flex gap-1.5 mt-2.5">
                 {[50000, 80000, 120000].map((v) => (
-                  <button key={v} onClick={() => setPrice(v)} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold border ${price === v ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10'}`}>
+                  <button key={v} onClick={() => setPrice(v)} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold border ${price === v ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/15'}`}>
                     ₹{v / 1000}k
                   </button>
                 ))}
@@ -157,7 +157,7 @@ export default function SimulatorPage() {
                   <button
                     key={m.id}
                     onClick={() => setMode(m.id)}
-                    className={`py-2.5 rounded-2xl text-xs font-bold border text-left px-3.5 transition-all active:scale-95 ${mode === m.id ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/[0.04] text-slate-400 border-white/10 hover:text-white'}`}
+                    className={`py-2.5 rounded-2xl text-xs font-bold border text-left px-3.5 transition-all active:scale-95 ${mode === m.id ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/[0.04] text-slate-400 border-white/15 hover:text-white'}`}
                   >
                     {m.label}
                     <span className={`block text-[10px] font-mono font-normal mt-0.5 ${mode === m.id ? 'text-black/60' : 'opacity-60'}`}>{m.sub}</span>
@@ -172,7 +172,7 @@ export default function SimulatorPage() {
           <button
             onClick={handleSimulate}
             disabled={!canSimulate}
-            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/10'}`}
+            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/15'}`}
           >
             ⚡ SIMULATE BEFORE YOU SWIPE
           </button>
@@ -202,7 +202,7 @@ export default function SimulatorPage() {
             </div>
           )}
           {backendVerdict && (
-            <div className="mt-3 p-4 rounded-2xl bg-black/60 border border-emerald-400/20 text-xs space-y-1 animate-fade-up min-w-0">
+            <div className="mt-3 p-4 rounded-2xl bg-well/70 border border-emerald-400/20 text-xs space-y-1 animate-fade-up min-w-0">
               <p className="font-black tracking-widest text-emerald-300">BACKEND: {backendVerdict.verdict.action.toUpperCase()} ({backendVerdict.verdict.severity})</p>
               <p className="text-slate-300">{backendVerdict.verdict.message}</p>
               <p className="text-slate-500 font-mono">
@@ -231,9 +231,9 @@ export default function SimulatorPage() {
       {currentSimulation && verdictStyle && (
         <>
           {/* ── DRAMATIC VERDICT ── */}
-          <div className={`relative overflow-hidden rounded-[28px] border ${verdictStyle.border} bg-[#0B111E] p-6 sm:p-8 ${verdictStyle.glow} animate-fade-up`}>
+          <div className={`relative overflow-hidden rounded-[28px] border ${verdictStyle.border} bg-surface p-6 sm:p-8 ${verdictStyle.glow} animate-fade-up`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className={`verdict-stamp animate-stamp-in px-6 py-3 rounded-2xl text-4xl font-black tracking-tight ${verdictStyle.text} bg-black/40 shrink-0`}>
+              <div className={`verdict-stamp animate-stamp-in px-6 py-3 rounded-2xl text-4xl font-black tracking-tight ${verdictStyle.text} bg-well/50 shrink-0`}>
                 {currentSimulation.verdict}
               </div>
               <div className="flex-1">
@@ -241,16 +241,16 @@ export default function SimulatorPage() {
                 <p className="text-[13px] text-slate-400 mt-1.5 leading-relaxed">{currentSimulation.verdictReasoning}</p>
                 <p className="text-[13px] mt-2 italic text-slate-300">→ {currentSimulation.recommendation}</p>
                 <div className="flex flex-wrap gap-2 mt-3 font-mono text-[11px]">
-                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">runway {currentSimulation.todayRunwayMonths} → {currentSimulation.simulatedRunwayMonths} mo</span>
-                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">buffer {inr(currentSimulation.todayBuffer)} → {inr(currentSimulation.simulatedBuffer)}</span>
-                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">goals +{currentSimulation.goalDelayMonths} mo</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/15">runway {currentSimulation.todayRunwayMonths} → {currentSimulation.simulatedRunwayMonths} mo</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/15">buffer {inr(currentSimulation.todayBuffer)} → {inr(currentSimulation.simulatedBuffer)}</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/15">goals +{currentSimulation.goalDelayMonths} mo</span>
                 </div>
               </div>
             </div>
             <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
               {currentSimulation.verdict === 'WAIT' ? (
                 <>
-                  <button onClick={acceptWaitRecommendation} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 font-bold text-[13px] hover:bg-white/10 transition">
+                  <button onClick={acceptWaitRecommendation} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/15 font-bold text-[13px] hover:bg-white/10 transition">
                     ✓ Accept — wait 6 weeks
                   </button>
                   <button onClick={confirmPurchaseAnyway} className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-bold text-[13px] hover:bg-red-400 transition">
@@ -262,7 +262,7 @@ export default function SimulatorPage() {
                   <button onClick={() => runSimulation({ itemName, price, mode: 'EMI_6' })} className="flex-1 py-3.5 rounded-2xl bg-amber-400 text-black font-bold text-[13px] hover:brightness-110 transition">
                     Switch to 6 EMI
                   </button>
-                  <button onClick={confirmPurchaseAnyway} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 font-bold text-[13px] hover:bg-white/10 transition">
+                  <button onClick={confirmPurchaseAnyway} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/15 font-bold text-[13px] hover:bg-white/10 transition">
                     Buy with cash anyway
                   </button>
                 </>

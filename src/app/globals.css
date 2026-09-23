@@ -5,10 +5,18 @@
   --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
 
-  --color-ink-950: #06090f;
-  --color-ink-900: #0b111e;
-  --color-ink-800: #131c31;
-  --color-ink-700: #1e2a45;
+  /* ── Navy surface scale (single source of truth for base/card colors) ──
+     base    = page background      (#101B36 deep navy)
+     surface = cards                (#1A2942 lighter navy)
+     well    = tracks / wells / inputs (deepest navy, replaces bg-black/*) */
+  --color-base: #101b36;
+  --color-surface: #1a2942;
+  --color-well: #0b1428;
+
+  --color-ink-950: #101b36;
+  --color-ink-900: #1a2942;
+  --color-ink-800: #24365c;
+  --color-ink-700: #2e4568;
 
   --color-volt-300: #6ee7b7;
   --color-volt-400: #34d399;
@@ -21,8 +29,10 @@
 }
 
 :root {
-  --background: #06090f;
+  --background: #101b36;
   --foreground: #f1f5f9;
+  --surface: #1a2942;
+  --well: #0b1428;
 }
 
 html {
@@ -61,7 +71,7 @@ body {
 /* glass + cards */
 .glass {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(18px);
 }
 .card-hover {
@@ -166,7 +176,7 @@ input[type="range"].volt-range::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #06090f;
+  background: #101b36;
   border: 3px solid #10b981;
   box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15);
   cursor: pointer;
@@ -174,14 +184,14 @@ input[type="range"].volt-range::-webkit-slider-thumb {
 
 /* scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #06090f; }
-::-webkit-scrollbar-thumb { background: #1e2a45; border-radius: 8px; border: 2px solid #06090f; }
+::-webkit-scrollbar-track { background: #101b36; }
+::-webkit-scrollbar-thumb { background: #2e4568; border-radius: 8px; border: 2px solid #101b36; }
 ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
 /* old class compat */
 .animate-fade-in { animation: var(--animate-fade-up); }
 
-::selection { background: #10b981; color: #06090f; }
+::selection { background: #10b981; color: #101b36; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-ticker,

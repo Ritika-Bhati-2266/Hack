@@ -18,7 +18,7 @@ export default function FinancialFirewall() {
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-4 sm:p-8 min-w-0">
+    <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-surface p-4 sm:p-8 min-w-0">
       <div className="absolute -top-24 right-0 w-[400px] h-[250px] bg-amber-400/[0.07] blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute -bottom-24 left-0 w-[400px] h-[250px] bg-[#10B981]/[0.06] blur-[100px] rounded-full pointer-events-none" />
 
@@ -40,7 +40,7 @@ export default function FinancialFirewall() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-black/50 px-4 py-2.5 rounded-2xl border border-white/10 self-start md:self-auto">
+          <div className="flex items-center gap-2 bg-well/60 px-4 py-2.5 rounded-2xl border border-white/15 self-start md:self-auto">
             <Lock className="w-4 h-4 text-amber-300" />
             <span className="text-xs text-slate-400 font-semibold">Locked:</span>
             <span className="font-mono text-sm font-black text-amber-300">{inr(totalEarmarked)}</span>
@@ -53,7 +53,7 @@ export default function FinancialFirewall() {
           <span className="text-amber-300/80">■ EARMARKED {earmarkedPct}%</span>
           <span className="text-emerald-300">■ FREE BUFFER {100 - earmarkedPct}%</span>
         </div>
-        <div className="h-5 w-full bg-black/60 rounded-full p-1 flex overflow-hidden border border-white/10">
+        <div className="h-5 w-full bg-well/70 rounded-full p-1 flex overflow-hidden border border-white/15">
           <div style={{ width: `${(rent / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-l-full" title={`Rent ${inr(rent)}`} />
           <div style={{ width: `${(sips / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 border-l border-black" title={`SIP ${inr(sips)}`} />
           <div style={{ width: `${(bills / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 border-l border-black" title={`Bills ${inr(bills)}`} />
@@ -70,7 +70,7 @@ export default function FinancialFirewall() {
             { label: emi > 0 ? 'BILLS • 10th' : 'BILLS • 10th', amt: bills, dot: 'bg-cyan-400', text: 'text-cyan-300' },
             ...(emi > 0 ? [{ label: 'EMI • 1st', amt: emi, dot: 'bg-orange-400', text: 'text-orange-300' }] : []),
           ].map((c) => (
-            <div key={c.label} className="rounded-2xl bg-black/40 border border-white/[0.07] p-4 flex items-center justify-between gap-2 min-w-0 transition-colors hover:border-white/20">
+            <div key={c.label} className="rounded-2xl bg-well/50 border border-white/15 p-4 flex items-center justify-between gap-2 min-w-0 transition-colors hover:border-white/20">
               <div className="min-w-0">
                 <p className="text-[10px] font-black tracking-[0.15em] text-slate-500">{c.label}</p>
                 <p className="font-mono font-black text-lg mt-1">{inr(c.amt)}</p>
@@ -80,7 +80,7 @@ export default function FinancialFirewall() {
           ))}
         </div>
 
-        <p className="mt-4 font-mono text-[11px] text-slate-500 bg-black/40 border border-white/[0.06] rounded-xl px-4 py-2.5">
+        <p className="mt-4 font-mono text-[11px] text-slate-500 bg-well/50 border border-white/15 rounded-xl px-4 py-2.5">
           <span className="text-orange-300">✓ RULE FW-RBI-2026:</span> {inr(user.totalBalance)} − {inr(totalEarmarked)} = <b className="text-white">{inr(safeBuffer)}</b> liquid buffer
         </p>
       </div>
