@@ -1,173 +1,101 @@
 'use client';
 
-import { Shield, AlertTriangle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 import { SimulationResult } from '@/types';
 
-interface SplitViewProps {
-  simulation: SimulationResult;
-}
-
-export default function SplitViewComparison({ simulation }: SplitViewProps) {
+export default function SplitViewComparison({ simulation }: { simulation: SimulationResult }) {
   const isWait = simulation.verdict === 'WAIT';
   const isEMI = simulation.verdict === 'EMI';
+  const accent = isWait ? 'text-red-300' : isEMI ? 'text-amber-300' : 'text-[#10B981]';
+  const border = isWait ? 'border-red-500/30' : isEMI ? 'border-amber-400/30' : 'border-[#10B981]/25';
+  const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+
+  const card = (title: string, highlight: boolean) => (
+    <div className={`rounded-[24px] border bg-[#0B111E] p-6 relative overflow-hidden ${highlight ? border : 'border-white/10'}`}>
+      {highlight && (
+        <div className={`absolute top-0 left-0 right-0 h-1 ${isWait ? 'bg-red-500' : isEMI ? 'bg-amber-400' : 'bg-[#10B981]'}`} />
+      )}
+      {!highlight && <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500/60" />}
+    </div>
+  );
+  void card;
 
   return (
-    <div className="space-y-6">
-      
-      {/* Header Banner */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      <div className="flex items-end justify-between">
         <div>
-          <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-            <span>Before vs After</span>
-          </h3>
-          <p className="text-xs text-slate-400">Comparing financial state BEFORE vs AFTER purchase of {simulation.itemName}</p>
+          <h3 className="font-display font-extrabold text-lg">Before vs After</h3>
+          <p className="text-xs text-slate-500">Financial state before vs after buying <b className="text-slate-300">{simulation.itemName}</b></p>
         </div>
-        <div className="text-right">
-          <span className="text-xs text-slate-400">Payment Mode:</span>
-          <span className="text-xs font-bold text-emerald-400 font-mono ml-2 uppercase">
-            {simulation.mode === 'CASH' ? 'Full Cash' : `${simulation.mode.replace('_', ' ')} Mo EMI`}
-          </span>
-        </div>
+        <span className="text-[11px] font-mono text-slate-500 uppercase">{simulation.mode === 'CASH' ? 'full cash' : simulation.mode.replace('_', ' ') + ' EMI'}</span>
       </div>
 
-      {/* Split Cards Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* LEFT CARD: STATE TODAY */}
-        <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 relative overflow-hidden shadow-xl">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400" />
-          
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
-                STATE TODAY
-              </span>
-              <h4 className="text-xl font-extrabold text-slate-100 mt-2">Baseline Position</h4>
-            </div>
-            <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              On Track
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* TODAY */}
+        <div className="rounded-[24px] border border-white/10 bg-[#0B111E] p-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500/70" />
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-[10px] font-black tracking-[0.18em] text-slate-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">STATE TODAY</span>
+            <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-400/10 px-2.5 py-1 rounded-full border border-emerald-400/20">
+              <CheckCircle2 className="w-3.5 h-3.5" /> On track
             </span>
           </div>
-
-          <div className="space-y-4">
-            {/* Liquid Emergency Buffer */}
-            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <span className="text-xs text-slate-400 font-medium">Safe Emergency Buffer</span>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className="text-2xl font-black font-mono text-emerald-400">
-                  ₹{(simulation.todayBuffer / 1000).toFixed(0)}k
-                </span>
-                <span className="text-xs text-slate-400 font-mono">₹{simulation.todayBuffer.toLocaleString('en-IN')}</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">Total ₹{simulation.todayBalance.toLocaleString('en-IN')} - ₹{simulation.todayEarmarked.toLocaleString('en-IN')} Earmarked</p>
+          <div className="space-y-3">
+            <div className="rounded-2xl bg-black/50 border border-white/[0.07] p-4">
+              <p className="text-[11px] text-slate-500 font-semibold">Safe buffer</p>
+              <p className="font-mono font-black text-2xl text-emerald-300 mt-0.5">{inr(simulation.todayBuffer)}</p>
+              <p className="text-[11px] text-slate-500 mt-1 font-mono">{inr(simulation.todayBalance)} − {inr(simulation.todayEarmarked)} locked</p>
             </div>
-
-            {/* Safe Runway */}
-            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <span className="text-xs text-slate-400 font-medium">Safe Runway</span>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className="text-2xl font-black font-mono text-slate-100">
-                  {simulation.todayRunwayMonths} <span className="text-sm font-sans font-normal text-slate-400">Months</span>
-                </span>
-                <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  Healthy (&gt;3.0 Mo)
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">Based on ₹{Math.round(simulation.todayBuffer / Math.max(1, simulation.todayRunwayMonths) / 30).toLocaleString('en-IN')}/day burn rate</p>
+            <div className="rounded-2xl bg-black/50 border border-white/[0.07] p-4">
+              <p className="text-[11px] text-slate-500 font-semibold">Runway</p>
+              <p className="font-mono font-black text-2xl mt-0.5">{simulation.todayRunwayMonths} <span className="text-xs font-sans font-normal text-slate-500">months</span></p>
             </div>
-
-            {/* Goal Impact */}
-            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
-              <div>
-                <span className="text-xs text-slate-400 font-medium">Goal Target Status</span>
-                <p className="text-sm font-semibold text-slate-200 mt-0.5">Emergency Shield & Tech Fund</p>
-              </div>
-              <span className="text-xs font-bold text-emerald-400 font-mono">0 Mo Delay</span>
+            <div className="rounded-2xl bg-black/50 border border-white/[0.07] p-4 flex items-center justify-between">
+              <p className="text-[11px] text-slate-500 font-semibold">Goals</p>
+              <p className="text-[11px] font-mono font-bold text-emerald-300">0 mo delay</p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT CARD: STATE SIMULATED */}
-        <div className={`rounded-3xl bg-slate-900/90 border p-6 relative overflow-hidden shadow-xl ${
-          isWait ? 'border-rose-500/30' : isEMI ? 'border-amber-500/30' : 'border-emerald-500/30'
-        }`}>
-          <div className={`absolute top-0 left-0 right-0 h-1 ${
-            isWait ? 'bg-gradient-to-r from-rose-500 to-red-600' : isEMI ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-          }`} />
-
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
-                STATE SIMULATED
-              </span>
-              <h4 className="text-xl font-extrabold text-slate-100 mt-2">Post-Purchase Position</h4>
-            </div>
-            <span className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border ${
-              isWait
-                ? 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-                : isEMI
-                ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-                : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-            }`}>
+        {/* SIMULATED */}
+        <div className={`rounded-[24px] border bg-[#0B111E] p-6 relative overflow-hidden ${border}`}>
+          <div className={`absolute top-0 left-0 right-0 h-1 ${isWait ? 'bg-red-500' : isEMI ? 'bg-amber-400' : 'bg-[#10B981]'}`} />
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-[10px] font-black tracking-[0.18em] text-slate-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">STATE SIMULATED</span>
+            <span className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${isWait ? 'text-red-300 bg-red-500/10 border-red-500/25' : isEMI ? 'text-amber-300 bg-amber-400/10 border-amber-400/25' : 'text-[#10B981] bg-[#10B981]/10 border-[#10B981]/25'}`}>
               {isWait ? <AlertTriangle className="w-3.5 h-3.5" /> : isEMI ? <Clock className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
               {simulation.verdictBadge}
             </span>
           </div>
-
-          <div className="space-y-4">
-            {/* Liquid Emergency Buffer Simulated */}
-            <div className={`p-4 rounded-2xl bg-slate-950/70 border ${isWait ? 'border-rose-500/20' : 'border-slate-800'}`}>
-              <span className="text-xs text-slate-400 font-medium">Simulated Safe Buffer</span>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className={`text-2xl font-black font-mono ${isWait ? 'text-rose-400' : isEMI ? 'text-amber-400' : 'text-emerald-400'}`}>
-                  ₹{(simulation.simulatedBuffer / 1000).toFixed(0)}k
-                </span>
-                <span className="text-xs text-rose-400 font-mono font-bold">
-                  -₹{((simulation.todayBuffer - simulation.simulatedBuffer) / 1000).toFixed(0)}k Drop
-                </span>
+          <div className="space-y-3">
+            <div className="rounded-2xl bg-black/50 border border-white/[0.07] p-4">
+              <p className="text-[11px] text-slate-500 font-semibold">Simulated buffer</p>
+              <div className="flex items-baseline justify-between mt-0.5">
+                <p className={`font-mono font-black text-2xl ${accent}`}>{inr(simulation.simulatedBuffer)}</p>
+                <p className="text-[11px] font-mono font-bold text-red-300">−{inr(simulation.todayBuffer - simulation.simulatedBuffer)}</p>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
-                {simulation.mode === 'CASH'
-                  ? `₹${simulation.purchasePrice.toLocaleString('en-IN')} cash deducted upfront`
-                  : `₹${simulation.downPayment.toLocaleString('en-IN')} downpayment + ₹${simulation.monthlyEMI.toLocaleString('en-IN')}/mo EMI`}
+              <p className="text-[11px] text-slate-500 mt-1">
+                {simulation.mode === 'CASH' ? `${inr(simulation.purchasePrice)} cash upfront` : `${inr(simulation.downPayment)} down + ${inr(simulation.monthlyEMI)}/mo × ${simulation.emiMonths}`}
               </p>
             </div>
-
-            {/* Safe Runway Simulated */}
-            <div className={`p-4 rounded-2xl bg-slate-950/70 border ${isWait ? 'border-rose-500/20' : 'border-slate-800'}`}>
-              <span className="text-xs text-slate-400 font-medium">Simulated Safe Runway</span>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className={`text-2xl font-black font-mono ${isWait ? 'text-rose-400' : 'text-slate-100'}`}>
-                  {simulation.simulatedRunwayMonths} <span className="text-sm font-sans font-normal text-slate-400">Months</span>
-                </span>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${
-                  isWait
-                    ? 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-                    : isEMI
-                    ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-                    : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                }`}>
-                  {isWait ? 'Vulnerable (<2.0 Mo)' : isEMI ? 'Moderate (2.0-3.0 Mo)' : 'Safe (>3.0 Mo)'}
-                </span>
+            <div className="rounded-2xl bg-black/50 border border-white/[0.07] p-4">
+              <p className="text-[11px] text-slate-500 font-semibold">Simulated runway</p>
+              <div className="flex items-baseline justify-between mt-0.5">
+                <p className="font-mono font-black text-2xl">{simulation.simulatedRunwayMonths} <span className="text-xs font-sans font-normal text-slate-500">months</span></p>
+                <p className="text-[11px] font-mono text-slate-500">−{(simulation.todayRunwayMonths - simulation.simulatedRunwayMonths).toFixed(1)} mo</p>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Runway drop of {(simulation.todayRunwayMonths - simulation.simulatedRunwayMonths).toFixed(1)} months</p>
             </div>
-
-            {/* Goal Delay Impact — per-goal breakdown */}
-            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <div className="rounded-2xl bg-black/50 border border-white/[0.07] p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Goal Delay Impact</span>
-                <span className="text-xs font-bold text-amber-400 font-mono bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
-                  +{simulation.goalDelayMonths} Mo avg
-                </span>
+                <p className="text-[11px] text-slate-500 font-semibold">Goal delay</p>
+                <p className="text-[11px] font-mono font-bold text-amber-300">+{simulation.goalDelayMonths} mo avg</p>
               </div>
               {simulation.perGoalDelays && (
-                <div className="space-y-1 pt-1 border-t border-slate-800">
+                <div className="mt-2 pt-2 border-t border-white/[0.07] space-y-1">
                   {simulation.perGoalDelays.map((g) => (
                     <div key={g.goalId} className="flex justify-between text-[11px]">
-                      <span className="text-slate-400">{g.goalName.split(' ').slice(0,2).join(' ')}</span>
-                      <span className="font-mono text-amber-400">+{g.delayMonths} Mo</span>
+                      <span className="text-slate-500">{g.goalName.split(' ').slice(0, 2).join(' ')}</span>
+                      <span className="font-mono text-amber-300">+{g.delayMonths} mo</span>
                     </div>
                   ))}
                 </div>
@@ -175,7 +103,6 @@ export default function SplitViewComparison({ simulation }: SplitViewProps) {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -2,15 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 import {
-  createConsent,
-  approveConsent,
-  fetchAAData,
-  uploadCSV,
-  deleteMyData,
-  getLiveProfile,
-  LiveProfileRes,
+  createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, LiveProfileRes,
 } from '@/lib/api';
 
 export default function ConnectPage() {
@@ -24,152 +18,130 @@ export default function ConnectPage() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const run = async (fn: () => Promise<void>) => {
-    setLoading(true);
-    setError(null);
-    setMsg(null);
-    try {
-      await fn();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something failed — is backend on :3001?');
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true); setError(null); setMsg(null);
+    try { await fn(); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Something failed — is backend on :3001?'); }
+    finally { setLoading(false); }
   };
 
-  const handleCreate = () =>
-    run(async () => {
-      const s = await createConsent();
-      setConsentId(s.consentId);
-      setSessionToken(s.sessionToken);
-      setStep('consent');
-      setMsg(`Consent created: ${s.consentId.slice(0, 12)}… — now approve it.`);
-    });
+  const handleCreate = () => run(async () => {
+    const s = await createConsent();
+    setConsentId(s.consentId); setSessionToken(s.sessionToken); setStep('consent');
+    setMsg(`Consent created — now approve it.`);
+  });
+  const handleApprove = () => run(async () => {
+    await approveConsent(consentId, sessionToken); setStep('active');
+    setMsg('Consent approved — now fetch live data.');
+  });
+  const handleFetch = () => run(async () => {
+    await fetchAAData(consentId, sessionToken);
+    const profile = await getLiveProfile();
+    setLive(profile); setStep('fetched');
+    setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
+  });
+  const handleCSV = async (file: File) => run(async () => {
+    const res = await uploadCSV(file, Number(balance) || undefined);
+    const profile = await getLiveProfile();
+    setLive(profile); setStep('fetched');
+    setMsg(`${res.message || 'CSV parsed'} — source: csv. ${res.balanceWarning || ''}`);
+  });
+  const handleDelete = () => run(async () => {
+    await deleteMyData(); setLive(null); setStep('idle'); setMsg('All session data deleted (DPDP).');
+  });
 
-  const handleApprove = () =>
-    run(async () => {
-      await approveConsent(consentId, sessionToken);
-      setStep('active');
-      setMsg('Consent approved — now fetch live data.');
-    });
-
-  const handleFetch = () =>
-    run(async () => {
-      await fetchAAData(consentId, sessionToken);
-      const profile = await getLiveProfile();
-      setLive(profile);
-      setStep('fetched');
-      setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
-    });
-
-  const handleCSV = async (file: File) =>
-    run(async () => {
-      const res = await uploadCSV(file, Number(balance) || undefined);
-      const profile = await getLiveProfile();
-      setLive(profile);
-      setStep('fetched');
-      setMsg(`${res.message || 'CSV parsed'} — source: csv. ${res.balanceWarning || ''}`);
-    });
-
-  const handleDelete = () =>
-    run(async () => {
-      await deleteMyData();
-      setLive(null);
-      setStep('idle');
-      setMsg('All session data deleted (DPDP).');
-    });
+  const stepIdx = step === 'idle' ? 0 : step === 'consent' ? 1 : step === 'active' ? 2 : 3;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto animate-fade-in">
-      <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200">
-        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-white">
+        <ArrowLeft className="w-4 h-4" /> Back to Home
       </Link>
 
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-100">Connect Your Bank Data</h1>
-        <p className="text-sm text-slate-400 mt-1">
-          RBI Account Aggregator (mock) or CSV upload. Backend: <span className="font-mono text-emerald-400">:3001</span> — session isolated via x-session-id.
-        </p>
+      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-6 sm:p-8">
+        <div className="absolute inset-0 bg-grid opacity-60" />
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-400/10 border border-emerald-400/25 text-emerald-300 text-[11px] font-bold">
+            <ShieldCheck className="w-3.5 h-3.5" /> RBI ACCOUNT AGGREGATOR • DPDP SAFE
+          </div>
+          <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight mt-3">Connect your money.</h1>
+          <p className="text-sm text-slate-400 mt-2 max-w-lg">
+            Mock AA flow ya CSV upload — backend <span className="font-mono text-emerald-300">:3001</span> pe session-isolated. Judges ke liye 3-click demo.
+          </p>
+
+          {/* Stepper */}
+          <div className="flex items-center gap-2 mt-6">
+            {['Consent', 'Approve', 'Fetch'].map((s, i) => (
+              <div key={s} className="flex items-center gap-2 flex-1">
+                <div className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs font-bold whitespace-nowrap transition-all ${
+                  stepIdx > i ? 'bg-[#10B981] text-black border-[#10B981]' : stepIdx === i + 1 || (stepIdx === 0 && i === 0) ? 'bg-white/10 text-white border-white/20' : 'bg-white/[0.03] text-slate-500 border-white/10'
+                }`}>
+                  <span className="font-mono">{i + 1}</span> {s} {stepIdx > i && '✓'}
+                </div>
+                {i < 2 && <div className={`h-px flex-1 ${stepIdx > i ? 'bg-[#10B981]/50' : 'bg-white/10'}`} />}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {error && <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl p-3">{error}</p>}
-      {msg && <p className="text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">{msg}</p>}
+      {error && <p className="text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-2xl p-4">{error}</p>}
+      {msg && <p className="text-sm text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-2xl p-4">{msg}</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* AA flow */}
-        <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 space-y-4">
-          <h2 className="font-bold text-slate-100 flex items-center gap-2">
-            <Landmark className="w-5 h-5 text-emerald-400" /> Option A — Account Aggregator
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
+          <h2 className="font-display font-extrabold flex items-center gap-2">
+            <Landmark className="w-5 h-5 text-[#10B981]" /> Option A — AA Flow
           </h2>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <span className={`px-2 py-1 rounded-full border ${step !== 'idle' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-800 border-slate-700'}`}>1 Consent</span>
-            <span>→</span>
-            <span className={`px-2 py-1 rounded-full border ${step === 'active' || step === 'fetched' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-800 border-slate-700'}`}>2 Approve</span>
-            <span>→</span>
-            <span className={`px-2 py-1 rounded-full border ${step === 'fetched' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-800 border-slate-700'}`}>3 Fetch</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <button onClick={handleCreate} disabled={loading} className="py-2.5 rounded-xl bg-violet-600 text-white text-sm font-bold hover:bg-violet-500 disabled:opacity-50">
-              1. Create consent
-            </button>
-            <button onClick={handleApprove} disabled={loading || step === 'idle'} className="py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm font-bold text-slate-200 hover:bg-slate-700 disabled:opacity-50">
-              2. Approve consent
-            </button>
-            <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-500 disabled:opacity-50">
-              3. Fetch my data
-            </button>
-          </div>
-          {consentId && <p className="text-[11px] font-mono text-slate-500 break-all">consent: {consentId}</p>}
+          <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-slate-300 border border-white/10' : 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.3)]'} disabled:opacity-50`}>
+            1. Create consent {stepIdx >= 1 && '✓'}
+          </button>
+          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 disabled:opacity-40">
+            2. Approve consent {stepIdx >= 2 && '✓'}
+          </button>
+          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="w-full py-3 rounded-2xl bg-emerald-400 text-black text-sm font-extrabold hover:brightness-110 disabled:opacity-40">
+            3. Fetch my data {stepIdx >= 3 && '✓'}
+          </button>
+          {consentId && <p className="text-[10px] font-mono text-slate-600 break-all">consent: {consentId.slice(0, 32)}…</p>}
         </div>
 
-        {/* CSV flow */}
-        <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 space-y-4">
-          <h2 className="font-bold text-slate-100 flex items-center gap-2">
-            <Upload className="w-5 h-5 text-cyan-400" /> Option B — CSV Upload
+        <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-3">
+          <h2 className="font-display font-extrabold flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-cyan-300" /> Option B — CSV
           </h2>
-          <p className="text-xs text-slate-400">Columns: <span className="font-mono">date, narration, amount, type</span></p>
-          <label className="text-xs font-semibold text-slate-400 tracking-widest">CURRENT BANK BALANCE (₹)</label>
-          <input
-            value={balance}
-            onChange={(e) => setBalance(e.target.value)}
-            inputMode="numeric"
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-cyan-500 outline-none"
-          />
-          <label className="block py-3 rounded-xl bg-slate-800 border border-dashed border-slate-600 text-center text-sm text-slate-300 cursor-pointer hover:bg-slate-700">
-            Choose CSV statement
-            <input
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleCSV(f);
-              }}
-            />
+          <p className="text-[11px] text-slate-500 font-mono">date, narration, amount, type</p>
+          <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">CURRENT BALANCE (₹)</label>
+          <input value={balance} onChange={(e) => setBalance(e.target.value)} inputMode="numeric"
+            className="w-full bg-black/60 border border-white/10 rounded-2xl px-4 py-3 text-sm font-mono font-bold focus:border-cyan-300 outline-none" />
+          <label className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 text-sm font-bold text-slate-300 cursor-pointer hover:bg-white/[0.07] hover:border-cyan-300/40 transition-all">
+            <Upload className="w-4 h-4" /> Choose CSV statement
+            <input type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCSV(f); }} />
           </label>
         </div>
       </div>
 
       {live && (
-        <div className="rounded-3xl bg-slate-900/90 border border-emerald-500/20 p-6 space-y-3">
-          <h3 className="font-bold text-slate-100 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Live Profile — {live.source}
+        <div className="rounded-[24px] bg-[#0B111E] border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
+          <h3 className="font-display font-extrabold flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-300" /> Live Profile — <span className="font-mono text-sm text-emerald-300">{live.source}</span>
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800"><p className="text-slate-400">Balance</p><p className="font-mono font-bold text-slate-100">₹{live.profile.balance.toLocaleString('en-IN')}</p></div>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800"><p className="text-slate-400">Income/mo</p><p className="font-mono font-bold text-slate-100">₹{live.profile.monthlyInflow.toLocaleString('en-IN')}</p></div>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800"><p className="text-slate-400">Runway</p><p className="font-mono font-bold text-emerald-400">{live.state.runway.display}</p></div>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800"><p className="text-slate-400">Safe/day</p><p className="font-mono font-bold text-slate-100">₹{live.state.safeToSpend.daily.toLocaleString('en-IN')}</p></div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { l: 'Balance', v: `₹${live.profile.balance.toLocaleString('en-IN')}`, c: 'text-white' },
+              { l: 'Income/mo', v: `₹${live.profile.monthlyInflow.toLocaleString('en-IN')}`, c: 'text-white' },
+              { l: 'Runway', v: live.state.runway.display, c: 'text-[#10B981]' },
+              { l: 'Safe/day', v: `₹${live.state.safeToSpend.daily.toLocaleString('en-IN')}`, c: 'text-white' },
+            ].map((s) => (
+              <div key={s.l} className="p-3.5 rounded-2xl bg-black/50 border border-white/[0.07]">
+                <p className="text-[11px] text-slate-500 font-semibold">{s.l}</p>
+                <p className={`font-mono font-black mt-0.5 ${s.c}`}>{s.v}</p>
+              </div>
+            ))}
           </div>
-          {live.meta && (
-            <p className="text-[11px] text-slate-500 font-mono">
-              Parsed {live.meta.parsedCount}/{live.meta.totalTransactions} • accuracy {(live.meta.parsingAccuracy * 100).toFixed(0)}%{live.meta.warnings.map((w) => ` • ${w}`).join('')}
-            </p>
-          )}
           <div className="flex flex-col sm:flex-row gap-2">
-            <Link href="/simulator" className="flex-1 text-center py-2.5 rounded-xl bg-violet-600 text-white text-sm font-bold hover:bg-violet-500">
+            <Link href="/simulator" className="flex-1 text-center py-3 rounded-2xl bg-[#10B981] text-black text-sm font-extrabold hover:brightness-110">
               Simulate with this data →
             </Link>
-            <button onClick={handleDelete} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-rose-600/10 border border-rose-500/30 text-rose-300 text-sm font-bold hover:bg-rose-600/20 flex items-center justify-center gap-2">
+            <button onClick={handleDelete} disabled={loading} className="flex-1 py-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm font-bold hover:bg-red-500/20 flex items-center justify-center gap-2">
               <Trash2 className="w-4 h-4" /> Delete My Data (DPDP)
             </button>
           </div>

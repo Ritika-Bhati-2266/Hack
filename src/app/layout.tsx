@@ -13,11 +13,13 @@ const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
   display: 'swap',
+  weight: ['400', '500', '600', '700', '800', '900'],
 });
 
 export const metadata: Metadata = {
-  title: 'PREVISE - Know Before You Decide | Personal Financial Decision Engine',
-  description: 'Simulate what will happen BEFORE you spend in real-time. Built on RBI Account Aggregator framework with Financial Firewall protection.',
+  title: 'PREVISE — Know Before You Decide',
+  description:
+    'Expense trackers show the past. Previse simulates the future — runway, buffer & goal impact before you swipe. Deterministic engine on RBI Account Aggregator.',
 };
 
 export default function RootLayout({
@@ -27,19 +29,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} dark`}>
-      <body className="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-emerald-500 selection:text-slate-950 flex flex-col">
+      <body className="bg-[#06090F] text-slate-100 font-sans antialiased min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
           {children}
         </main>
-        
-        <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-400">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>PREVISE Decision Engine &bull; RBI Account Aggregator Mock Engine</span>
-            </p>
-            <p className="text-slate-400">Built for Hackathon Demo &bull; Deterministic Financial Firewall Rules</p>
+
+        <footer className="border-t border-white/5 bg-black/40 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#10B981] flex items-center justify-center font-display font-black text-black text-lg">
+                P
+              </div>
+              <div>
+                <p className="font-display font-800 font-extrabold tracking-tight leading-none">
+                  PREVISE <span className="text-[#10B981]">.</span>
+                </p>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Deterministic decision engine • RBI AA mock • No LLM hallucination
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+              <span className="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 font-mono">
+                QA 24/24
+              </span>
+              <span className="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 font-mono">
+                FW-RBI-2026
+              </span>
+              <span className="hidden sm:inline">Built for hackathon demo</span>
+            </div>
           </div>
         </footer>
       </body>
