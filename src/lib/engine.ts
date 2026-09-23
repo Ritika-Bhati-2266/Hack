@@ -57,6 +57,11 @@ function bVerdict(afterRunway: number, emiDetails: { monthlyEMI: number; tenure:
       detail: `Your runway drops to ${afterDisplay}. You need at least 1 month of expenses as buffer.`,
       weeksToWait: Math.ceil((1 - afterRunway) * 4) };
   }
+  if (afterRunway < 2) {
+    return { action: 'wait', severity: 'warning', message: 'This is risky — less than 2 months of runway.',
+      detail: `Your runway drops to ${afterDisplay}. Wait until you have at least 2 months buffer.`,
+      weeksToWait: Math.ceil((2 - afterRunway) * 4) };
+  }
   if (emiDetails) {
     // Exact backend replica (simulator.js): income derived as usable/runway
     const monthlyIncome = beforeRunway > 0 ? beforeUsable / beforeRunway : 0;
@@ -66,11 +71,6 @@ function bVerdict(afterRunway: number, emiDetails: { monthlyEMI: number; tenure:
     }
     return { action: 'emi', severity: 'safe', message: 'EMI is affordable within your budget.',
       detail: `EMI for ${emiDetails.tenure} months. Total interest: ${emiDetails.totalInterest}.`, weeksToWait: 0 };
-  }
-  if (afterRunway < 2) {
-    return { action: 'wait', severity: 'warning', message: 'This is risky — less than 2 months of runway.',
-      detail: `Your runway drops to ${afterDisplay}. Wait until you have at least 2 months buffer.`,
-      weeksToWait: Math.ceil((2 - afterRunway) * 4) };
   }
   const goalDelayed = beforeGoals.some((g, i) => {
     const b = bMonthsToGoal(g, beforeSavings), a = bMonthsToGoal(afterGoals[i], afterSavings);

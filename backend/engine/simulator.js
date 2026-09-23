@@ -105,7 +105,21 @@ function generateVerdict(before, after, impact, emiDetails) {
     };
   }
 
-  // Rule 2: EMI/Loan — check affordability before runway rules
+  // Rule 2: Warning — after runway < 2 months (all modes, incl. EMI)
+  // Must run BEFORE the EMI affordability check, else an affordable EMI
+  // with collapsed runway wrongly returns EMI/safe.
+  if (after.runway.months < 2) {
+    const weeksToWait = Math.ceil((2 - after.runway.months) * 4);
+    return {
+      action: "wait",
+      severity: "warning",
+      message: "This is risky — less than 2 months of runway.",
+      detail: `Your runway drops to ${after.runway.display}. Wait until you have at least 2 months buffer.`,
+      weeksToWait,
+    };
+  }
+
+  // Rule 3: EMI/Loan — check affordability
   if (emiDetails) {
     const monthlyIncome = before.runway.months > 0 ? before.buffer.total / before.runway.months : 0;
     if (monthlyIncome > 0 && (emiDetails.monthlyEMI / monthlyIncome) > 0.3) {
@@ -123,18 +137,6 @@ function generateVerdict(before, after, impact, emiDetails) {
       message: "EMI is affordable within your budget.",
       detail: `₹${emiDetails.monthlyEMI.toLocaleString("en-IN")}/mo for ${emiDetails.tenure} months. Total interest: ₹${emiDetails.totalInterest.toLocaleString("en-IN")}.`,
       weeksToWait: 0,
-    };
-  }
-
-  // Rule 3: Warning — after runway < 2 months (cash mode)
-  if (after.runway.months < 2) {
-    const weeksToWait = Math.ceil((2 - after.runway.months) * 4);
-    return {
-      action: "wait",
-      severity: "warning",
-      message: "This is risky — less than 2 months of runway.",
-      detail: `Your runway drops to ${after.runway.display}. Wait until you have at least 2 months buffer.`,
-      weeksToWait,
     };
   }
 
