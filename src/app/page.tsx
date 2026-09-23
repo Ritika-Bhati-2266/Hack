@@ -121,7 +121,7 @@ export default function DashboardPage() {
             onClick={() => setShowCreate(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-white/20 text-slate-300 text-xs font-bold transition-all active:scale-95 hover:border-[#10B981]/50 hover:text-[#10B981]"
           >
-            <Plus className="w-3.5 h-3.5" /> Apni profile
+            <Plus className="w-3.5 h-3.5" /> Create Profile
           </button>
         </div>
       </div>
@@ -269,13 +269,13 @@ export default function DashboardPage() {
           <p className="text-[11px] text-slate-500 mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
         </div>
 
-        <div className="rounded-3xl p-5 bg-orange-400 text-black card-hover relative overflow-hidden">
+        <div className="glass card-hover rounded-3xl p-5 relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-black/60">SPEND TODAY</span>
-            <Wallet className="w-4 h-4" />
+            <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">SPEND TODAY</span>
+            <Wallet className="w-4 h-4 text-orange-300" />
           </div>
           <p className="font-display font-black text-[28px] leading-none font-mono">{inr(safeToSpendToday)}</p>
-          <p className="text-[11px] mt-2 font-semibold text-black/60">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
+          <p className="text-[11px] mt-2 font-mono text-slate-500">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
         </div>
       </section>
 
@@ -365,7 +365,7 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
           <div className="bg-[#0B111E] border border-white/10 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-extrabold">Apni profile banao</h3>
+              <h3 className="font-display text-lg font-extrabold">Create Profile</h3>
               <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-slate-400" /></button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -381,7 +381,7 @@ export default function DashboardPage() {
               ))}
             </div>
             {earmarkedTotal > form.totalBalance && form.totalBalance > 0 && (
-              <p className="text-[11px] text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">Monthly earmarked (₹{earmarkedTotal.toLocaleString('en-IN')}) balance se zyada hai — runway 0 se start hoga.</p>
+              <p className="text-[11px] text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">Monthly earmarked (₹{earmarkedTotal.toLocaleString('en-IN')}) exceeds your balance — runway will start from 0.</p>
             )}
             <button
               disabled={!canCreate}
