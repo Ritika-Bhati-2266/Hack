@@ -75,19 +75,19 @@ export default function ConnectPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <Link href="/" className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-white">
+      <Link href="/" className="inline-flex items-center gap-2 text-xs text-dusk hover:text-white">
         <ArrowLeft className="w-4 h-4" /> Back to Home
       </Link>
 
-      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-surface p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-surface p-6 sm:p-8">
         <div className="absolute inset-0 bg-grid opacity-60" />
         <div className="relative">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-400/10 border border-emerald-400/25 text-emerald-300 text-[11px] font-bold">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-safe/10 border border-safe/25 text-safe text-[11px] font-bold">
             <ShieldCheck className="w-3.5 h-3.5" /> RBI ACCOUNT AGGREGATOR • DPDP SAFE
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight mt-3">Connect your money.</h1>
-          <p className="text-sm text-slate-400 mt-2 max-w-lg">
-            Mock AA flow ya CSV upload — backend <span className="font-mono text-emerald-300">:3001</span> pe session-isolated. Judges ke liye 3-click demo.
+          <p className="text-sm text-mist mt-2 max-w-lg">
+            Mock AA flow ya CSV upload — backend <span className="font-mono text-safe">:3001</span> pe session-isolated. Judges ke liye 3-click demo.
           </p>
 
           {/* Stepper */}
@@ -96,11 +96,11 @@ export default function ConnectPage() {
             {['Consent', 'Approve', 'Fetch'].map((s, i) => (
               <div key={s} className="flex items-center gap-2 flex-1 min-w-0">
                 <div className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs font-bold whitespace-nowrap transition-all ${
-                  stepIdx > i ? 'bg-[#10B981] text-black border-[#10B981]' : stepIdx === i + 1 || (stepIdx === 0 && i === 0) ? 'bg-white/10 text-white border-white/20' : 'bg-white/[0.03] text-slate-500 border-white/15'
+                  stepIdx > i ? 'bg-primary text-white border-primary' : stepIdx === i + 1 || (stepIdx === 0 && i === 0) ? 'bg-white/10 text-white border-white/[0.14]' : 'bg-white/[0.03] text-dusk border-white/[0.08]'
                 }`}>
                   <span className="font-mono">{i + 1}</span> {s} {stepIdx > i && '✓'}
                 </div>
-                {i < 2 && <div className={`h-px flex-1 ${stepIdx > i ? 'bg-[#10B981]/50' : 'bg-white/10'}`} />}
+                {i < 2 && <div className={`h-px flex-1 ${stepIdx > i ? 'bg-primary/50' : 'bg-white/10'}`} />}
               </div>
             ))}
           </div>
@@ -115,7 +115,7 @@ export default function ConnectPage() {
         </div>
       )}
       {msg && !expired && (
-        <div className="flex items-start gap-2.5 text-sm text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-2xl p-4 animate-fade-up">
+        <div className="flex items-start gap-2.5 text-sm text-safe bg-safe/10 border border-safe/25 rounded-2xl p-4 animate-fade-up">
           <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
           <p className="min-w-0 break-words">{msg}</p>
         </div>
@@ -127,39 +127,39 @@ export default function ConnectPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-[24px] bg-surface border border-white/15 p-6 space-y-3">
+        <div className="rounded-[24px] bg-surface border border-white/[0.08] p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
-            <Landmark className="w-5 h-5 text-[#10B981]" /> Option A — AA Flow
+            <Landmark className="w-5 h-5 text-primary" /> Option A — AA Flow
             <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
               MOCK DEMO
             </span>
           </h2>
-          <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-slate-300 border border-white/15' : 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.3)]'} disabled:opacity-50`}>
+          <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-mist border border-white/[0.08]' : 'bg-primary text-white hover:brightness-110 shadow-[0_0_25px_rgba(83,134,94,0.3)]'} disabled:opacity-50`}>
             1. Create consent {stepIdx >= 1 && '✓'}
           </button>
-          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/15 text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && step === 'consent' && <Loader2 className="w-4 h-4 animate-spin" />}
             2. Approve consent {stepIdx >= 2 && '✓'}
           </button>
-          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="w-full py-3 rounded-2xl bg-emerald-400 text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="w-full py-3 rounded-2xl bg-safe text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && (step === 'active' || step === 'fetched') && <Loader2 className="w-4 h-4 animate-spin" />}
             3. Fetch my data {stepIdx >= 3 && '✓'}
           </button>
-          {consentId && <p className="text-[10px] font-mono text-slate-600 break-all">consent: {consentId.slice(0, 32)}…</p>}
+          {consentId && <p className="text-[10px] font-mono text-dusk break-all">consent: {consentId.slice(0, 32)}…</p>}
         </div>
 
-        <div className="rounded-[24px] bg-surface border border-white/15 p-6 space-y-3">
+        <div className="rounded-[24px] bg-surface border border-white/[0.08] p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-cyan-300" /> Option B — CSV
-            <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-emerald-400/15 text-emerald-300 border border-emerald-400/30">
+            <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-safe/15 text-safe border border-safe/30">
               REAL DATA
             </span>
           </h2>
-          <p className="text-[11px] text-slate-500 font-mono">date, narration, amount, type</p>
-          <label className="text-[10px] font-black tracking-[0.18em] text-slate-500">CURRENT BALANCE (₹)</label>
+          <p className="text-[11px] text-dusk font-mono">date, narration, amount, type</p>
+          <label className="text-[10px] font-black tracking-[0.18em] text-dusk">CURRENT BALANCE (₹)</label>
           <input value={balance} onChange={(e) => setBalance(e.target.value)} inputMode="numeric"
-            className="w-full bg-well/70 border border-white/15 rounded-2xl px-4 py-3 text-sm font-mono font-bold focus:border-cyan-300 outline-none" />
-          <label className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/[0.04] border border-dashed border-white/20 text-sm font-bold text-slate-300 cursor-pointer hover:bg-white/[0.07] hover:border-cyan-300/40 transition-all">
+            className="w-full bg-well/70 border border-white/[0.08] rounded-2xl px-4 py-3 text-sm font-mono font-bold focus:border-cyan-300 outline-none" />
+          <label className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/[0.04] border border-dashed border-white/[0.14] text-sm font-bold text-mist cursor-pointer hover:bg-white/[0.07] hover:border-cyan-300/40 transition-all">
             <Upload className="w-4 h-4" /> Choose CSV statement
             <input type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCSV(f); }} />
           </label>
@@ -175,35 +175,35 @@ export default function ConnectPage() {
       )}
 
       {!live && !loading && (
-        <div className="rounded-[24px] border border-dashed border-white/15 bg-white/[0.02] p-8 text-center animate-fade-up">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mx-auto">
-            <PlugZap className="w-5 h-5 text-slate-500" />
+        <div className="rounded-[24px] border border-dashed border-white/[0.08] bg-white/[0.02] p-8 text-center animate-fade-up">
+          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center mx-auto">
+            <PlugZap className="w-5 h-5 text-dusk" />
           </div>
           <p className="font-display font-extrabold text-lg mt-3">No live data yet</p>
-          <p className="text-sm text-slate-400 mt-1 max-w-md mx-auto">Upar Option A (AA mock demo) ya Option B (CSV — asli numbers) se connect karo. Phir yahan balance, runway aur safe-spend dikhega.</p>
+          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Upar Option A (AA mock demo) ya Option B (CSV — asli numbers) se connect karo. Phir yahan balance, runway aur safe-spend dikhega.</p>
         </div>
       )}
 
       {live && (
-        <div className="rounded-[24px] bg-surface border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
+        <div className="rounded-[24px] bg-surface border border-safe/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(6,182,212,0.15)]">
           <h3 className="font-display font-extrabold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-300" /> {expired || live.source !== 'csv' ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired || live.source !== 'csv' ? 'text-amber-300' : 'text-emerald-300'}`}>{expired ? 'mock' : live.source}{!expired && live.source === 'aa' ? ' (mock TSP)' : ''}</span>
+            <CheckCircle2 className="w-5 h-5 text-safe" /> {expired || live.source !== 'csv' ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired || live.source !== 'csv' ? 'text-amber-300' : 'text-safe'}`}>{expired ? 'mock' : live.source}{!expired && live.source === 'aa' ? ' (mock TSP)' : ''}</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { l: 'Balance', v: `₹${live.profile.balance.toLocaleString('en-IN')}`, c: 'text-white' },
               { l: 'Income/mo', v: `₹${live.profile.monthlyInflow.toLocaleString('en-IN')}`, c: 'text-white' },
-              { l: 'Runway', v: live.state.runway.display, c: 'text-[#10B981]' },
+              { l: 'Runway', v: live.state.runway.display, c: 'text-safe' },
               { l: 'Safe/day', v: `₹${live.state.safeToSpend.daily.toLocaleString('en-IN')}`, c: 'text-white' },
             ].map((s) => (
-              <div key={s.l} className="p-3.5 rounded-2xl bg-well/60 border border-white/15">
-                <p className="text-[11px] text-slate-500 font-semibold">{s.l}</p>
+              <div key={s.l} className="p-3.5 rounded-2xl bg-well/60 border border-white/[0.08]">
+                <p className="text-[11px] text-dusk font-semibold">{s.l}</p>
                 <p className={`font-mono font-black mt-0.5 ${s.c}`}>{s.v}</p>
               </div>
             ))}
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
-            <Link href="/simulator" className="flex-1 text-center py-3 rounded-2xl bg-[#10B981] text-black text-sm font-extrabold hover:brightness-110">
+            <Link href="/simulator" className="flex-1 text-center py-3 rounded-2xl bg-primary text-white text-sm font-extrabold hover:brightness-110">
               Simulate with this data →
             </Link>
             <button onClick={handleDelete} disabled={loading} className="flex-1 py-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm font-bold hover:bg-red-500/20 flex items-center justify-center gap-2">

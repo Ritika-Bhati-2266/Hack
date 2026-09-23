@@ -5,22 +5,36 @@
   --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
 
-  /* ── Navy surface scale (single source of truth for base/card colors) ──
-     base    = page background      (#101B36 deep navy)
-     surface = cards                (#1A2942 lighter navy)
-     well    = tracks / wells / inputs (deepest navy, replaces bg-black/*) */
-  --color-base: #101b36;
-  --color-surface: #1a2942;
-  --color-well: #0b1428;
+  /* ── Indigo Sage surface scale (single source of truth for base/card colors) ──
+     base     = page background       (#0F0E47 deep indigo)
+     surface  = cards                 (#191854 indigo card)
+     well/elevated = tracks / wells / inputs / modals (#242166 indigo elevated) */
+  --color-base: #0f0e47;
+  --color-surface: #191854;
+  --color-well: #242166;
+  --color-elevated: #242166;
 
-  --color-ink-950: #101b36;
-  --color-ink-900: #1a2942;
-  --color-ink-800: #24365c;
-  --color-ink-700: #2e4568;
+  --color-ink-950: #0f0e47;
+  --color-ink-900: #191854;
+  --color-ink-800: #242166;
+  --color-ink-700: #2e2c6e;
 
-  --color-volt-300: #6ee7b7;
-  --color-volt-400: #34d399;
-  --color-volt-500: #10b981;
+  /* ── Brand + status ──
+     primary = sage signature (CTAs, logo, active nav, focus rings)
+     safe    = clarity cyan (safe/success, real-data) */
+  --color-primary: #53865e;
+  --color-primary-hover: #436d4b;
+  --color-primary-pressed: #35573c;
+  --color-safe: #06b6d4;
+
+  /* ── Text (indigo-tinted, no neutral grey) ── */
+  --color-frost: #f5f5f7;
+  --color-mist: #a8a6d6;
+  --color-dusk: #6b699e;
+
+  --color-volt-300: #93bd9a;
+  --color-volt-400: #6fa277;
+  --color-volt-500: #53865e;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-ticker: ticker 22s linear infinite;
@@ -29,10 +43,26 @@
 }
 
 :root {
-  --background: #101b36;
-  --foreground: #f1f5f9;
-  --surface: #1a2942;
-  --well: #0b1428;
+  --background: #0f0e47;
+  --foreground: #f5f5f7;
+  --surface: #191854;
+  --well: #242166;
+
+  /* Indigo Sage palette (spec) */
+  --bg-base: #0f0e47;
+  --bg-surface: #191854;
+  --bg-elevated: #242166;
+  --primary: #53865e;
+  --primary-hover: #436d4b;
+  --primary-pressed: #35573c;
+  --status-safe: #06b6d4;
+  --status-warning: #f59e0b;
+  --status-critical: #ef4444;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a8a6d6;
+  --text-muted: #6b699e;
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.14);
 }
 
 html {
@@ -50,8 +80,8 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   background-image:
-    radial-gradient(900px 420px at 15% -5%, rgba(16, 185, 129, 0.08), transparent 60%),
-    radial-gradient(800px 500px at 90% 0%, rgba(16, 185, 129, 0.1), transparent 60%),
+    radial-gradient(900px 420px at 15% -5%, rgba(83, 134, 94, 0.1), transparent 60%),
+    radial-gradient(800px 500px at 90% 0%, rgba(83, 134, 94, 0.12), transparent 60%),
     radial-gradient(700px 600px at 50% 110%, rgba(139, 92, 246, 0.08), transparent 60%);
   background-attachment: fixed;
 }
@@ -60,10 +90,10 @@ body {
   font-family: var(--font-display);
 }
 
-/* ── Design scale (dark volt) ─────────────────────────────
+/* ── Design scale (indigo sage) ─────────────────────────────
    Radius:  hero 28px → card 24px → inner 16px → pill 999px
-   Border:  white/10 default • colored/25-30 semantic
-             (emerald = safe/real • amber/orange = warn/mock • red = critical)
+   Border:  white/[0.08] default • white/[0.14] hover • colored/25-30 semantic
+              (cyan = safe/real • amber/orange = warn/mock • red = critical)
    Spacing: 4 / 8 / 12 / 16 / 24 / 32px (p-1/2/3/4/6/8)
    Numbers: financial figures → font-mono (tabular) + bold, ≥28px on hero stats
    ─────────────────────────────────────────────────────────── */
@@ -71,7 +101,7 @@ body {
 /* glass + cards */
 .glass {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(18px);
 }
 .card-hover {
@@ -79,7 +109,7 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(16, 185, 129, 0.35);
+  border-color: rgba(83, 134, 94, 0.4);
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
 }
 
@@ -104,15 +134,15 @@ body {
 
 /* focus visibility (keyboard users) */
 :focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid #53865e;
   outline-offset: 2px;
 }
 
 .text-volt {
-  color: #10b981;
+  color: #53865e;
 }
 .bg-volt {
-  background-color: #10b981;
+  background-color: #53865e;
 }
 
 /* grid texture for hero */
@@ -168,7 +198,7 @@ input[type="range"].volt-range {
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #10b981 var(--fill, 50%), #1e2a45 var(--fill, 50%));
+  background: linear-gradient(90deg, #53865e var(--fill, 50%), #242166 var(--fill, 50%));
   outline: none;
 }
 input[type="range"].volt-range::-webkit-slider-thumb {
@@ -176,22 +206,22 @@ input[type="range"].volt-range::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #101b36;
-  border: 3px solid #10b981;
-  box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15);
+  background: #0f0e47;
+  border: 3px solid #53865e;
+  box-shadow: 0 0 0 5px rgba(83, 134, 94, 0.15);
   cursor: pointer;
 }
 
 /* scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #101b36; }
-::-webkit-scrollbar-thumb { background: #2e4568; border-radius: 8px; border: 2px solid #101b36; }
-::-webkit-scrollbar-thumb:hover { background: #334155; }
+::-webkit-scrollbar-track { background: #0f0e47; }
+::-webkit-scrollbar-thumb { background: #242166; border-radius: 8px; border: 2px solid #0f0e47; }
+::-webkit-scrollbar-thumb:hover { background: #6b699e; }
 
 /* old class compat */
 .animate-fade-in { animation: var(--animate-fade-up); }
 
-::selection { background: #10b981; color: #101b36; }
+::selection { background: #53865e; color: #f5f5f7; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-ticker,

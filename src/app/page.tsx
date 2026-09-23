@@ -64,14 +64,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* ── Ticker ─────────────────────────────── */}
-      <div className="overflow-hidden max-w-full rounded-full border border-white/15 bg-white/[0.03] py-2 select-none" aria-hidden="true">
-        <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-slate-400 w-max">
+      <div className="overflow-hidden max-w-full rounded-full border border-white/[0.08] bg-white/[0.03] py-2 select-none" aria-hidden="true">
+        <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-mist w-max">
           {[0, 1].map((k) => (
             <span key={k} className="flex gap-8">
-              <span>RUNWAY <b className="text-[#10B981]">{safeRunway} MO</b></span>
+              <span>RUNWAY <b className="text-safe">{safeRunway} MO</b></span>
               <span>BUFFER <b className="text-white">{inr(buffer)}</b></span>
               <span>FIREWALL <b className="text-amber-300">{inr(totalEarmarked)} LOCKED</b></span>
-              <span>ENGINE <b className="text-emerald-300">DETERMINISTIC • NO LLM</b></span>
+              <span>ENGINE <b className="text-safe">DETERMINISTIC • NO LLM</b></span>
               <span>AA <b className="text-amber-300">MOCK • DEMO DATA</b></span>
               <span>REAL <b className="text-white">CSV ONLY</b></span>
               <span>QA <b className="text-white">24/24 PASS</b></span>
@@ -81,10 +81,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Persona switcher (judge demo) ──────── */}
-      <div className="rounded-2xl border border-white/15 bg-surface p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
+      <div className="rounded-2xl border border-white/[0.08] bg-surface p-3 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
         <div className="flex items-center gap-2 px-1 shrink-0">
-          <Flame className="w-4 h-4 text-[#10B981]" />
-          <span className="text-[11px] font-black tracking-[0.18em] text-slate-400">JUDGE DEMO — SWITCH PERSONA</span>
+          <Flame className="w-4 h-4 text-primary" />
+          <span className="text-[11px] font-black tracking-[0.18em] text-mist">JUDGE DEMO — SWITCH PERSONA</span>
         </div>
         <div className="flex flex-wrap gap-2 flex-1">
           {Object.keys(CUSTOMERS).map((id) => (
@@ -93,8 +93,8 @@ export default function DashboardPage() {
               onClick={() => switchCustomer(id)}
               className={`px-4 py-2 rounded-full text-xs font-bold border transition-all active:scale-95 ${
                 activeCustomer === id
-                  ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-                  : 'bg-white/5 text-slate-400 border-white/15 hover:bg-white/10 hover:text-white'
+                  ? 'bg-primary text-white border-primary shadow-[0_0_20px_rgba(83,134,94,0.3)]'
+                  : 'bg-white/5 text-mist border-white/[0.08] hover:bg-white/10 hover:text-white'
               }`}
             >
               {CUSTOMERS[id as CustomerId].label.split(' ')[0]}
@@ -108,7 +108,7 @@ export default function DashboardPage() {
               key={id}
               onClick={() => switchCustomer(id)}
               className={`px-4 py-2 rounded-full text-xs font-bold border flex items-center gap-2 transition-all active:scale-95 ${
-                activeCustomer === id ? 'bg-emerald-400 text-black border-emerald-400' : 'bg-white/5 text-emerald-300 border-emerald-400/20'
+                activeCustomer === id ? 'bg-safe text-black border-safe' : 'bg-white/5 text-safe border-safe/20'
               }`}
             >
               {customProfiles[id].label.split(' ')[0]}
@@ -119,7 +119,7 @@ export default function DashboardPage() {
           ))}
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-white/20 text-slate-300 text-xs font-bold transition-all active:scale-95 hover:border-[#10B981]/50 hover:text-[#10B981]"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-white/[0.14] text-mist text-xs font-bold transition-all active:scale-95 hover:border-primary/50 hover:text-primary"
           >
             <Plus className="w-3.5 h-3.5" /> Create Profile
           </button>
@@ -127,50 +127,50 @@ export default function DashboardPage() {
       </div>
 
       {/* ── HERO (landing-first) ───────────────── */}
-      <section className="relative overflow-hidden rounded-[28px] border border-white/15 bg-surface animate-fade-up stagger-1">
+      <section className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-surface animate-fade-up stagger-1">
         <div className="absolute inset-0 bg-grid" />
-        <div className="absolute -top-32 left-1/4 w-[500px] h-[300px] bg-[#10B981]/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-24 right-0 w-[400px] h-[300px] bg-emerald-500/15 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute -top-32 left-1/4 w-[500px] h-[300px] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 right-0 w-[400px] h-[300px] bg-safe/15 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-6 sm:gap-8 p-4 sm:p-10">
           {/* Left copy */}
           <div className="space-y-4 sm:space-y-5 min-w-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/25 text-[#10B981] text-[11px] font-bold tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-bold tracking-wide">
               <BadgeCheck className="w-3.5 h-3.5" />
               EXPENSE TRACKERS SHOW PAST • PREVISE SIMULATES FUTURE
             </div>
             <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2.5rem,9vw,4rem)]">
               Buy it or
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-300 to-cyan-300">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-safe to-cyan-300">
                 park it?
               </span>
               <br />
               Know in 5 sec.
             </h1>
-            <p className="text-slate-400 text-[15px] leading-relaxed max-w-xl">
-              <b className="text-slate-200">“Mere paise ka kya hoga agar main ye kharidu?”</b> — Previse
-              runway, buffer aur goal-delay simulate karta hai <b className="text-slate-200">swipe se pehle</b>.
+            <p className="text-mist text-[15px] leading-relaxed max-w-xl">
+              <b className="text-frost">“Mere paise ka kya hoga agar main ye kharidu?”</b> — Previse
+              runway, buffer aur goal-delay simulate karta hai <b className="text-frost">swipe se pehle</b>.
               Deterministic rules. No hallucination.
             </p>
             <div className="flex flex-wrap gap-3 pt-1">
               <Link
                 href="/simulator"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-[#10B981] text-black font-extrabold text-sm shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-[0_0_40px_rgba(83,134,94,0.35)] hover:shadow-[0_0_60px_rgba(83,134,94,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
               >
-                <Zap className="w-4 h-4 fill-black" />
+                <Zap className="w-4 h-4 fill-white" />
                 Launch What-If Simulator
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/connect"
-                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/15 text-sm font-bold text-slate-200 transition-all active:scale-[0.98] hover:bg-white/10"
+                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold text-frost transition-all active:scale-[0.98] hover:bg-white/10"
               >
                 <Lock className="w-4 h-4 text-amber-300" />
                 Connect Bank (AA)
               </Link>
             </div>
-            <div className="flex items-center gap-5 pt-2 text-[11px] font-mono text-slate-500">
+            <div className="flex items-center gap-5 pt-2 text-[11px] font-mono text-dusk">
               <span>⚡ INSTANT LOCAL ENGINE</span>
               <span>✓ VERIFIED BY :3001</span>
               <span className="hidden sm:inline">RBI AA MOCK</span>
@@ -179,53 +179,53 @@ export default function DashboardPage() {
 
           {/* Right — live verdict card */}
           <div className="relative min-w-0">
-            <div className="rounded-3xl overflow-hidden border border-white/15 bg-well/60 backdrop-blur-xl shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/15">
+            <div className="rounded-3xl overflow-hidden border border-white/[0.08] bg-well/60 backdrop-blur-xl shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 border border-white/15 flex items-center justify-center">
-                    <Smartphone className="w-4.5 h-4.5 w-5 h-5 text-slate-200" />
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-elevated to-surface border border-white/[0.08] flex items-center justify-center">
+                    <Smartphone className="w-4.5 h-4.5 w-5 h-5 text-frost" />
                   </div>
                   <div className="leading-tight">
                     <p className="text-[13px] font-bold">iPhone 16 • ₹80,000</p>
-                    <p className="text-[11px] text-slate-500 font-mono">CASH • {allProfiles[activeCustomer]?.label}</p>
+                    <p className="text-[11px] text-dusk font-mono">CASH • {allProfiles[activeCustomer]?.label}</p>
                   </div>
                 </div>
                 <span className={`text-[10px] font-black tracking-widest px-2.5 py-1 rounded-lg border animate-stamp-in verdict-stamp ${
                   heroVerdict === 'WAIT' ? 'bg-red-500/15 text-red-300 border-red-500/30' :
                   heroVerdict === 'EMI' ? 'bg-amber-400/15 text-amber-300 border-amber-400/30' :
-                   'bg-orange-400/15 text-orange-300 border-orange-400/30'
+                   'bg-safe/15 text-safe border-safe/30'
                 }`}>
                   {heroVerdict}
                 </span>
               </div>
               <div className="p-5 space-y-4">
                 <div>
-                  <div className="flex justify-between text-[11px] font-bold tracking-widest text-slate-500 mb-2">
+                  <div className="flex justify-between text-[11px] font-bold tracking-widest text-dusk mb-2">
                     <span>RUNWAY IMPACT</span>
-                    <span className="font-mono text-slate-300">{safeRunway} MO → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-emerald-300'}>{heroAfterRunway} MO</b></span>
+                    <span className="font-mono text-mist">{safeRunway} MO → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroAfterRunway} MO</b></span>
                   </div>
-                  <div className="h-3 rounded-full bg-white/5 border border-white/15 overflow-hidden flex">
-                    <div className="h-full bg-gradient-to-r from-[#10B981] to-emerald-400 rounded-full" style={{ width: `${Math.min(70, Number(safeRunway) * 18)}%` }} />
+                  <div className="h-3 rounded-full bg-white/5 border border-white/[0.08] overflow-hidden flex">
+                    <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-full" style={{ width: `${Math.min(70, Number(safeRunway) * 18)}%` }} />
                     <div className="h-full bg-red-500/80" style={{ width: '18%' }} />
                   </div>
                     <div className="flex justify-between mt-1.5 text-[11px] font-mono">
-                      <span className="text-emerald-300">● before {safeRunway}mo</span>
-                      <span className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-emerald-300'}>● after {heroAfterRunway}mo</span>
+                      <span className="text-safe">● before {safeRunway}mo</span>
+                      <span className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>● after {heroAfterRunway}mo</span>
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white/[0.04] border border-white/15 p-3.5">
-                    <p className="text-[10px] font-bold tracking-widest text-slate-500">BUFFER LEFT</p>
+                  <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] p-3.5">
+                    <p className="text-[10px] font-bold tracking-widest text-dusk">BUFFER LEFT</p>
                     <p className="font-mono font-black text-lg mt-0.5">{inr(buffer)}</p>
                   </div>
-                  <div className="rounded-2xl bg-[#10B981]/[0.07] border border-[#10B981]/20 p-3.5">
-                    <p className="text-[10px] font-bold tracking-widest text-[#10B981]/80">SAFE TODAY</p>
-                    <p className="font-mono font-black text-lg mt-0.5 text-[#10B981]">{inr(safeToSpendToday)}</p>
+                  <div className="rounded-2xl bg-safe/[0.07] border border-safe/20 p-3.5">
+                    <p className="text-[10px] font-bold tracking-widest text-safe/80">SAFE TODAY</p>
+                    <p className="font-mono font-black text-lg mt-0.5 text-safe">{inr(safeToSpendToday)}</p>
                   </div>
                 </div>
                 <Link href="/simulator" className="flex items-center justify-between group px-1 pt-1">
-                  <span className="text-xs text-slate-400">Same phone, persona badlo — verdict badlega.</span>
-                  <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#10B981] group-hover:gap-2 transition-all">
+                  <span className="text-xs text-mist">Same phone, persona badlo — verdict badlega.</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-extrabold text-primary group-hover:gap-2 transition-all">
                     Try it <ArrowUpRight className="w-3.5 h-3.5" />
                   </span>
                 </Link>
@@ -239,43 +239,43 @@ export default function DashboardPage() {
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-fade-up stagger-2">
         <div className="glass card-hover rounded-3xl p-5 relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">SAFE BUFFER</span>
-            <ShieldCheck className="w-4 h-4 text-[#10B981]" />
+            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">SAFE BUFFER</span>
+            <ShieldCheck className="w-4 h-4 text-safe" />
           </div>
           <p className="font-display font-black text-[28px] leading-none">₹{(buffer / 100000).toFixed(1)}L</p>
-          <p className="text-[11px] text-slate-500 mt-2 font-mono">of {inr(user.totalBalance)} • {inr(totalEarmarked)} locked</p>
+          <p className="text-[11px] text-dusk mt-2 font-mono">of {inr(user.totalBalance)} • {inr(totalEarmarked)} locked</p>
           <div className="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
-            <div className="h-full bg-[#10B981] rounded-full" style={{ width: `${Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100))}%` }} />
+            <div className="h-full bg-safe rounded-full" style={{ width: `${Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100))}%` }} />
           </div>
         </div>
 
         <div className="glass card-hover rounded-3xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">RUNWAY</span>
+            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">RUNWAY</span>
             <Clock className="w-4 h-4 text-violet-300" />
           </div>
-          <p className="font-display font-black text-[28px] leading-none">{safeRunway}<span className="text-sm font-bold text-slate-500 ml-1">mo</span></p>
-          <p className="text-[11px] mt-2 font-bold text-emerald-300 flex items-center gap-1">
+          <p className="font-display font-black text-[28px] leading-none">{safeRunway}<span className="text-sm font-bold text-dusk ml-1">mo</span></p>
+          <p className="text-[11px] mt-2 font-bold text-safe flex items-center gap-1">
             <TrendingUp className="w-3 h-3" /> Target &gt;3.0 mo
           </p>
         </div>
 
         <div className="glass card-hover rounded-3xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">GOALS</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">GOALS</span>
+            <span className="w-2 h-2 rounded-full bg-safe animate-pulse" />
           </div>
-          <p className="font-display font-black text-[28px] leading-none">{goalsOnTrack} <span className="text-sm font-bold text-emerald-300">on track</span></p>
-          <p className="text-[11px] text-slate-500 mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
+          <p className="font-display font-black text-[28px] leading-none">{goalsOnTrack} <span className="text-sm font-bold text-safe">on track</span></p>
+          <p className="text-[11px] text-dusk mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
         </div>
 
         <div className="glass card-hover rounded-3xl p-5 relative overflow-hidden">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">SPEND TODAY</span>
+            <span className="text-[10px] font-black tracking-[0.16em] text-dusk">SPEND TODAY</span>
             <Wallet className="w-4 h-4 text-orange-300" />
           </div>
           <p className="font-display font-black text-[28px] leading-none font-mono">{inr(safeToSpendToday)}</p>
-          <p className="text-[11px] mt-2 font-mono text-slate-500">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
+          <p className="text-[11px] mt-2 font-mono text-dusk">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
         </div>
       </section>
 
@@ -287,16 +287,16 @@ export default function DashboardPage() {
       {/* ── LEDGER + CTA ───────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-up stagger-4">
         <div className="lg:col-span-2 glass rounded-3xl p-6">
-          <div className="flex items-center justify-between pb-4 border-b border-white/15">
+          <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
             <div>
               <h3 className="font-display font-extrabold text-lg">Earmarked Ledger</h3>
-              <p className="text-xs text-slate-500">Rent + SIP + bills — firewall locked, spend me count nahi</p>
+              <p className="text-xs text-dusk">Rent + SIP + bills — firewall locked, spend me count nahi</p>
             </div>
             <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
               {inr(totalEarmarked)} locked
             </span>
           </div>
-          <div className="divide-y divide-white/10">
+          <div className="divide-y divide-white/[0.08]">
             {user.earmarkedExpenses.map((e) => (
               <div key={e.id} className="flex items-center justify-between gap-3 py-4 group rounded-xl px-2 -mx-2 transition-colors hover:bg-white/[0.03]">
                 <div className="flex items-center gap-3">
@@ -310,7 +310,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <p className="font-bold text-sm">{e.name}</p>
-                    <p className="text-[11px] text-slate-500">Due {e.dueDate} • auto-debit</p>
+                    <p className="text-[11px] text-dusk">Due {e.dueDate} • auto-debit</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -324,20 +324,20 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl overflow-hidden border border-white/15 bg-gradient-to-b from-surface to-well p-6 flex flex-col justify-between relative">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#10B981]/60 to-transparent" />
+        <div className="rounded-3xl overflow-hidden border border-white/[0.08] bg-gradient-to-b from-surface to-well p-6 flex flex-col justify-between relative">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
           <div className="space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-[#10B981]" />
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Zap className="w-6 h-6 text-primary" />
             </div>
             <h3 className="font-display font-extrabold text-xl leading-tight">Try the 10-second demo judges love</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-emerald-300'}>{heroVerdict}</b>. Persona switch karo → verdict flip.</p>
-            <div className="rounded-2xl bg-well/60 border border-white/15 p-3.5 font-mono text-[11px] space-y-1.5">
-              <div className="flex justify-between"><span className="text-slate-500">INPUT</span><span className="text-white">iPhone ₹80k cash</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold' : 'text-emerald-300 font-bold'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
+            <p className="text-xs text-mist leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroVerdict}</b>. Persona switch karo → verdict flip.</p>
+            <div className="rounded-2xl bg-well/60 border border-white/[0.08] p-3.5 font-mono text-[11px] space-y-1.5">
+              <div className="flex justify-between"><span className="text-dusk">INPUT</span><span className="text-white">iPhone ₹80k cash</span></div>
+              <div className="flex justify-between"><span className="text-dusk">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold' : 'text-safe font-bold'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
             </div>
           </div>
-          <Link href="/simulator" className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#10B981] text-black font-extrabold text-sm hover:brightness-110 transition-colors">
+          <Link href="/simulator" className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm hover:brightness-110 transition-colors">
             Simulate a purchase <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -347,14 +347,14 @@ export default function DashboardPage() {
       <section className="grid sm:grid-cols-3 gap-3 animate-fade-up stagger-5">
         {[
           { n: '01', t: 'Connect', d: 'AA mock / CSV → live profile in 3 clicks', c: 'text-cyan-300' },
-          { n: '02', t: 'Simulate', d: 'Cash vs EMI → runway + buffer + goals', c: 'text-[#10B981]' },
+          { n: '02', t: 'Simulate', d: 'Cash vs EMI → runway + buffer + goals', c: 'text-primary' },
           { n: '03', t: 'Decide', d: 'BUY / WAIT / EMI stamp — deterministic', c: 'text-violet-300' },
         ].map((s) => (
           <div key={s.n} className="glass rounded-2xl p-5 flex gap-4 items-start">
             <span className={`font-display font-black text-2xl ${s.c}`}>{s.n}</span>
             <div>
               <p className="font-bold text-sm">{s.t}</p>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{s.d}</p>
+              <p className="text-xs text-dusk mt-1 leading-relaxed">{s.d}</p>
             </div>
           </div>
         ))}
@@ -362,21 +362,21 @@ export default function DashboardPage() {
 
       {/* Create profile modal */}
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-surface border border-white/15 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
+          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-extrabold">Create Profile</h3>
-              <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-slate-400" /></button>
+              <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-mist" /></button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className="text-[11px] font-bold tracking-widest text-slate-500">NAME</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., Ritika" className="mt-1 w-full bg-well/60 border border-white/15 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
+                <label className="text-[11px] font-bold tracking-widest text-dusk">NAME</label>
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., Ritika" className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
               </div>
               {([['monthlyIncome', 'MONTHLY INCOME (₹)'], ['totalBalance', 'TOTAL BALANCE (₹)'], ['dailyBurnRate', 'DAILY BURN (₹)'], ['rent', 'RENT (₹)'], ['sip', 'SIP (₹)'], ['bills', 'BILLS (₹)']] as const).map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-[11px] font-bold tracking-widest text-slate-500">{label}</label>
-                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-well/60 border border-white/15 rounded-xl px-3 py-2.5 text-sm focus:border-[#10B981] outline-none" />
+                  <label className="text-[11px] font-bold tracking-widest text-dusk">{label}</label>
+                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
                 </div>
               ))}
             </div>
@@ -386,7 +386,7 @@ export default function DashboardPage() {
             <button
               disabled={!canCreate}
               onClick={() => { createProfile(form); setShowCreate(false); setForm({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 }); }}
-              className={`w-full py-3 rounded-xl font-bold text-sm ${canCreate ? 'bg-[#10B981] text-black hover:brightness-110' : 'bg-white/5 text-slate-500 cursor-not-allowed'}`}
+              className={`w-full py-3 rounded-xl font-bold text-sm ${canCreate ? 'bg-primary text-white hover:brightness-110' : 'bg-white/5 text-dusk cursor-not-allowed'}`}
             >
               Create & Switch
             </button>
