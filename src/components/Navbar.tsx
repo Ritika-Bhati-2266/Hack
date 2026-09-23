@@ -2,21 +2,25 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FlaskConical, PlugZap, Target, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, PlugZap, Target, Sparkles, List, History, Star } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
+import { usableBalance } from '@/lib/engine';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user } = useFinanceStore();
 
-  const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
-  const buffer = user.totalBalance - totalEarmarked;
+  // Firewall-aware: commitments due till today are locked (matches engine).
+  const buffer = usableBalance(user);
 
   const navLinks = [
     { href: '/', label: 'Home', icon: LayoutDashboard },
     { href: '/simulator', label: 'Simulator', icon: FlaskConical, hot: true },
+    { href: '/transactions', label: 'Txns', icon: List },
     { href: '/connect', label: 'Connect', icon: PlugZap },
     { href: '/goals', label: 'Goals', icon: Target },
+    { href: '/history', label: 'History', icon: History },
+    { href: '/pro', label: 'Pro', icon: Star },
   ];
 
   return (

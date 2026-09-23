@@ -21,12 +21,14 @@ import {
 import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
 import { previewSimulation } from '@/lib/engine';
 import FinancialFirewall from '@/components/FinancialFirewall';
+import DataSourceBanner from '@/components/DataSourceBanner';
 
 export default function DashboardPage() {
-  const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile } = useFinanceStore();
+  const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 });
   const allProfiles: Record<string, { label: string; sub: string }> = { ...CUSTOMERS, ...customProfiles };
+  const activeLabel = activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV real' : 'AA mock'})` : allProfiles[activeCustomer]?.label || 'Demo';
   const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
   const earmarkedTotal = form.rent + form.sip + form.bills;
 
@@ -84,12 +86,28 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Persona switcher (judge demo) ──────── */}
+      {liveData && <DataSourceBanner source={liveData.source} />}
       <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
           <span className="text-[11px] font-mono font-extrabold tracking-[0.18em] text-cyan-300">JUDGE DEMO — SWITCH PERSONA</span>
         </div>
         <div className="flex flex-wrap gap-2 flex-1">
+          {liveData && (
+            <button
+              onClick={() => switchCustomer('live')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
+                activeCustomer === 'live'
+                  ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+                  : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
+              }`}
+            >
+              ● Live
+              <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-80">
+                • {liveData.source === 'csv' ? 'CSV real' : 'AA mock'}
+              </span>
+            </button>
+          )}
           {Object.keys(CUSTOMERS).map((id) => (
             <button
               key={id}
@@ -193,7 +211,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="leading-tight">
                     <p className="text-[14px] font-bold text-white">iPhone 16 • ₹80,000</p>
-                    <p className="text-[11px] text-gray-400 font-mono">CASH • {allProfiles[activeCustomer]?.label}</p>
+                    <p className="text-[11px] text-gray-400 font-mono">CASH • {activeLabel}</p>
                   </div>
                 </div>
                 <span className={`text-[11px] font-black tracking-widest px-3 py-1 rounded-xl border animate-stamp-in shadow-lg ${

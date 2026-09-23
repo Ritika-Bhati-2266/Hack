@@ -18,11 +18,42 @@ function buildLiveProfile({ accounts, transactions }) {
   const detected = detectCommitments(parsed);
 
   // Engine safety: 0 commitments => infinite runway => every verdict BUY.
-  // Keep the demo fallback, but label it honestly instead of silently mixing
-  // mock commitments with a meta that claims monthlyExpenses 0.
-  const usingDemoCommitments = detected.length === 0;
-  const commitments = usingDemoCommitments ? mockProfile.commitments : detected;
-  if (usingDemoCommitments) {
+  // So a fallback is required — but it must NEVER silently substitute demo
+  // data when the user gave us real expenses. Three tiers:
+  //   1. "detected" — repeating narrations found (normal case).
+  //   2. "single-sample" — thin file, no repeats, but REAL debits exist:
+  //      aggregate actual debits by category as the monthly estimate.
+  //   3. "demo-fallback" — zero debits at all (credits-only file): only
+  //      here is demo data used, with an explicit warning.
+  const debits = parsed.filter((t) => t.amount < 0);
+  let commitments;
+  let commitmentsSource;
+  if (detected.length > 0) {
+    commitments = detected;
+    commitmentsSource = "detected";
+  } else if (debits.length > 0) {
+    const byCategory = {};
+    for (const d of debits) {
+      const key =
+        d.parsedCategory && d.parsedCategory !== "other"
+          ? d.parsedCategory
+          : d.narration.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim().split(" ").slice(0, 3).join(" ") || "expense";
+      byCategory[key] = (byCategory[key] || 0) + Math.abs(d.amount);
+    }
+    commitments = Object.entries(byCategory).map(([name, amount]) => ({
+      name,
+      amount: Math.round(amount),
+      type: "recurring",
+      dayOfMonth: 1,
+      active: true,
+    }));
+    commitmentsSource = "single-sample";
+    warnings.push(
+      `Only ${parsed.length} transactions — no repeating expenses found, using your actual ${debits.length} expense(s) as monthly estimate. Upload 1-3 months of statements for accurate recurring detection.`
+    );
+  } else {
+    commitments = mockProfile.commitments;
+    commitmentsSource = "demo-fallback";
     warnings.push(
       `Only ${parsed.length} transactions — not enough history to detect recurring expenses, showing demo commitments. Upload 1-3 months of statements for accurate results.`
     );
@@ -45,7 +76,7 @@ function buildLiveProfile({ accounts, transactions }) {
     // What the engine actually simulates with (detected OR demo fallback) —
     // never 0-while-profile-uses-mock again.
     monthlyExpenses: commitments.reduce((sum, c) => sum + c.amount, 0),
-    commitmentsSource: usingDemoCommitments ? "demo-fallback" : "detected",
+    commitmentsSource,
     parsedCount: parsed.filter((t) => t.parsedCategory !== "other").length,
     totalTransactions: parsed.length,
     accountsCount: accounts.length,

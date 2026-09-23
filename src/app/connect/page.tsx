@@ -4,9 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpreadsheet, Loader2, AlertTriangle, PlugZap } from 'lucide-react';
 import {
-  createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, LiveProfileRes,
+  createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, LiveProfileRes, backendProfileToStore,
 } from '@/lib/api';
 import DataSourceBanner from '@/components/DataSourceBanner';
+import { useFinanceStore } from '@/store/useFinanceStore';
 
 export default function ConnectPage() {
   const [step, setStep] = useState<'idle' | 'consent' | 'active' | 'fetched'>('idle');
@@ -18,6 +19,23 @@ export default function ConnectPage() {
   const [expired, setExpired] = useState(false);
   const [balance, setBalance] = useState('150000');
   const [msg, setMsg] = useState<string | null>(null);
+  const setLiveData = useFinanceStore((s) => s.setLiveData);
+  const clearLiveData = useFinanceStore((s) => s.clearLiveData);
+
+  const adoptLive = (profile: LiveProfileRes) => {
+    if (profile.source === 'mock') return false;
+    const { user, goals } = backendProfileToStore(profile.profile);
+    setLiveData({
+      user,
+      goals,
+      source: profile.source,
+      meta: profile.meta,
+      accounts: profile.accounts || [],
+      transactions: profile.transactions || [],
+      fetchedAt: profile.fetchedAt,
+    });
+    return true;
+  };
 
   const run = async (fn: () => Promise<void>) => {
     setLoading(true); setError(null); setMsg(null); setExpired(false);
@@ -45,9 +63,11 @@ export default function ConnectPage() {
       setMsg('Session expired — showing demo data. Reconnect via AA or CSV.');
     } else if (profile.source === 'aa') {
       // AA TSP is mock — fake transactions, not real bank sync. Say it loudly.
-      setMsg(`Demo profile loaded — source: aa (MOCK TSP, not real bank data). Real numbers ke liye CSV upload karo. Balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
+      adoptLive(profile);
+      setMsg(`Demo profile loaded — source: aa (MOCK TSP, not real bank data). Real numbers ke liye CSV upload karo. Balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator ab isi data pe chal rahe hain.`);
     } else {
-      setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}.`);
+      adoptLive(profile);
+      setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator ab isi data pe chal rahe hain.`);
     }
   });
   const handleCSV = async (file: File) => run(async () => {
@@ -64,11 +84,12 @@ export default function ConnectPage() {
       setExpired(true);
       setMsg('Session expired right after upload — showing demo data. Please upload again.');
     } else {
-      setMsg(`${res.message || 'CSV parsed'} — source: csv. ${res.balanceWarning || ''} ${(res.meta?.warnings || []).join(' ')}`.trim());
+      adoptLive(profile);
+      setMsg(`${res.message || 'CSV parsed'} — source: csv. Dashboard + Simulator ab isi data pe chal rahe hain. ${res.balanceWarning || ''} ${(res.meta?.warnings || []).join(' ')}`.trim());
     }
   });
   const handleDelete = () => run(async () => {
-    await deleteMyData(); setLive(null); setStep('idle'); setMsg('All session data deleted (DPDP).');
+    await deleteMyData(); setLive(null); setStep('idle'); clearLiveData(); setMsg('All session data deleted (DPDP).');
   });
 
   const stepIdx = step === 'idle' ? 0 : step === 'consent' ? 1 : step === 'active' ? 2 : 3;
@@ -188,6 +209,7 @@ export default function ConnectPage() {
         </div>
       )}
 
+      {live && <DataSourceBanner source={expired ? 'mock' : live.source} />}
       {live && (
         <div className="rounded-[24px] bg-surface border border-safe/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(6,182,212,0.15)]">
           <h3 className="font-display font-extrabold flex items-center gap-2">

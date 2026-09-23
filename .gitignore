@@ -36,6 +36,10 @@ yarn-error.log*
 
 # beta signups (user PII — never commit)
 backend/data/beta-signups.json
+# session store (per-device runtime state — never commit)
+backend/data/sessions.json
+backend/data/*.tmp
+backend/data/*.corrupt-*
 
 # vercel
 .vercel

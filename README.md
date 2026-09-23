@@ -14,9 +14,12 @@ npm install && npm run dev                     # UI  → http://localhost:3000
 ```
 
 1. **Dashboard** (`/`) — Emergency Buffer · Runway · Financial Firewall bar · Goals · customer switcher
-2. **Simulator** (`/simulator`) — type `iPhone 16`, amount `80000`, mode Cash → **Simulate** (instant local engine) → **Verify with backend engine (:3001)** → MATCH badge proves single source of truth
-3. **Connect** (`/connect`) — AA mock 3-step flow (consent → approve → fetch) or CSV upload (`date, narration, amount, type`) → live profile + Delete My Data (DPDP)
-4. **Goals** (`/goals`) — progress + per-goal delay impact
+2. **Simulator** (`/simulator`) — type `iPhone 16`, amount `80000`, mode Cash/EMI/**Loan** + interest-rate + tenure → **Simulate** (instant local engine) → **Verify with backend engine (:3001)** → MATCH badge proves single source of truth
+3. **Connect** (`/connect`) — AA mock 3-step flow (consent → approve → fetch) or CSV upload (`date, narration, amount, type`) → live profile auto-adopted by Dashboard + Simulator (● Live persona) + Delete My Data (DPDP)
+4. **Goals** (`/goals`) — add / edit / delete goals + per-goal delay impact
+5. **Transactions** (`/transactions`) — parsed category breakdown + search/filter (live data only)
+6. **History** (`/history`) — every simulation auto-logged + Bought/Skipped feedback (Phase 3 training data)
+7. **Pro** (`/pro`) — Free vs Pro pricing + UPI AutoPay mandate stub · **Privacy** (`/privacy`) — DPDP policy + grievance · **Admin** (`/admin`) — token-gated beta signups
 
 > Legacy vanilla UI in `frontend/` is ARCHIVED reference only — backend no longer serves it (API-only mode).
 
@@ -46,19 +49,22 @@ goals delayed 2+mo → WAIT/caution · EMI >30% income → WAIT · runway ≥3mo
 
 ```
 backend/
-  server.js            # 15 API endpoints + session store (1h TTL)
-  engine/              # rules.js, simulator.js, firewall.js, types.js
+  server.js            # 17 API endpoints + disk-persisted sessions (1h TTL) + admin + OpenAPI
+  engine/              # rules.js, simulator.js (cash/emi/loan), firewall.js, types.js
   ledger/              # parser.js (61 categories), ledger.js, qa-parse-audit.js
-  aa/                  # consent.js, tsp.js (mock works, real stubbed)
+  aa/                  # consent.js (version-stamped v1-2026-09), tsp.js (mock works, real stubbed)
   autopay/             # stub.js (API-compatible, no real money)
-  data/                # mock.js (Priya Sharma profile)
+  data/                # mock.js (Priya Sharma profile) + sessions/signups (gitignored, runtime)
+  openapi.json         # OpenAPI 3.0 spec → GET /api/openapi.json
   qa-gate.js           # automated QA
 src/
-  app/                 # /, /simulator, /connect, /goals
-  components/          # Firewall, SplitView, TrajectoryChart, Navbar
-  store/               # useFinanceStore (local instant engine)
+  app/                 # /, /simulator, /connect, /goals, /transactions, /history, /pro, /privacy, /admin
+  components/          # Firewall, SplitView, TrajectoryChart, Navbar, DataSourceBanner
+  store/               # useFinanceStore (personas + live data + goals CRUD + history, persisted)
   lib/api.ts           # backend client + adapter (single source of truth via /api/simulate/custom)
+  lib/engine.ts        # frontend engine (backend parity) + engine.test.ts (vitest 8/8)
 frontend/              # ARCHIVED vanilla reference — NOT served
+Dockerfile / .github/workflows/ci.yml / .env.example
 ```
 
 ## API (main endpoints)
@@ -68,10 +74,15 @@ frontend/              # ARCHIVED vanilla reference — NOT served
 | GET | `/api/health` | Health check |
 | GET | `/api/profile/live` | Profile + financial state (live or mock fallback) |
 | POST | `/api/simulate` | `{name, amount, mode, emiMonths?, interestRate?}` → verdict |
-| POST | `/api/aa/consent` → `/approve` → `/fetch` | 3-step AA flow |
-| POST | `/api/upload/csv` | Bank statement upload + parse |
+| POST | `/api/simulate/custom` | `{profile, proposal}` → verdict (frontend parity check) |
+| POST | `/api/aa/consent` → `/approve` → `/fetch` | 3-step AA flow (consent stamped `v1-2026-09`) |
+| POST | `/api/upload/csv` | Bank statement upload + parse (multipart `statement` + `balance`) |
+| GET | `/api/profile/live` | Live profile + parsed transactions + accounts (mock fallback) |
+| POST | `/api/autopay/setup` → `GET /api/autopay/:id` | Pro mandate stub (wired to `/pro` page) |
 | DELETE | `/api/user/data` | DPDP right-to-erasure |
 | POST | `/api/beta/signup` | Beta signup capture |
+| GET | `/api/beta/signups` | Signup list (`x-admin-token` gated, emails masked) |
+| GET | `/api/openapi.json` | OpenAPI 3.0 spec |
 
 ## QA status
 
@@ -79,5 +90,7 @@ frontend/              # ARCHIVED vanilla reference — NOT served
 |---|---|
 | `node qa-gate.js` | **24/24** (verdicts, EMI math, firewall, 1000-sim load, security hygiene) |
 | `node ledger/qa-parse-audit.js` | **5/5** — 96 ground-truth samples (HDFC/SBI/ICICI/Axis/Kotak/Yes Bank), 96% coverage, 96% correctness |
+| `npx vitest run` | **8/8** — frontend↔backend engine parity (EMI math, verdict rules, loan branch, firewall) |
+| `npx eslint src` + `tsc --noEmit` + `next build` | **clean** (backend uses CommonJS `require()` by convention, excluded from web lint) |
 
 Built for hackathon — Phase 2 (India Stack) complete, beta-ready. Real AA/AutoPay providers stubbed pending contracts.

@@ -25,12 +25,16 @@ export interface UserFinancialState {
   earmarkedExpenses: EarmarkedExpense[];
 }
 
-export type PaymentMode = 'CASH' | 'EMI_3' | 'EMI_6' | 'EMI_12';
+export type PaymentMode = 'CASH' | 'EMI_3' | 'EMI_6' | 'EMI_12' | 'LOAN';
 
 export interface SimulationInput {
   itemName: string;
   price: number;
   mode: PaymentMode;
+  /** Annual interest % — defaults to 12 (backend default). UI exposes a selector. */
+  interestRate?: number;
+  /** Loan tenure in months — only used when mode === 'LOAN'. Defaults to 24. */
+  loanMonths?: number;
 }
 
 export interface SimulationResult {

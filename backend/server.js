@@ -27,10 +27,65 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
+// DPDP: every consent records which policy version the user agreed to.
+const CONSENT_VERSION = process.env.CONSENT_VERSION || "v1-2026-09";
+
 // ─── Multi-user session store ────────────────────────────────
 // Maps sessionId -> { profile, meta, accounts, transactions, source, fetchedAt }
+// Persisted to disk (data/sessions.json, gitignored) so a backend restart
+// doesn't wipe beta users. TTL still enforced on every read.
 const SESSION_TTL_MS = 60 * 60 * 1000; // 1 hour
+const SESSIONS_FILE = path.join(__dirname, "data", "sessions.json");
 const liveProfiles = new Map();
+
+function loadSessions() {
+  try {
+    const raw = JSON.parse(fs.readFileSync(SESSIONS_FILE, "utf-8"));
+    const now = Date.now();
+    for (const [key, val] of Object.entries(raw)) {
+      if (val && val.fetchedAt && now - new Date(val.fetchedAt).getTime() < SESSION_TTL_MS) {
+        liveProfiles.set(key, val);
+      }
+    }
+  } catch (err) {
+    if (err.code !== "ENOENT") console.error(`[sessions] load failed: ${err.message}`);
+  }
+}
+
+function saveSessions() {
+  try {
+    const tmp = `${SESSIONS_FILE}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(Object.fromEntries(liveProfiles), null, 2));
+    fs.renameSync(tmp, SESSIONS_FILE);
+  } catch (err) {
+    console.error(`[sessions] save failed: ${err.message}`);
+  }
+}
+
+function getSession(sessionId) {
+  if (!sessionId) return null;
+  const stored = liveProfiles.get(sessionId);
+  if (!stored) return null;
+  if (Date.now() - new Date(stored.fetchedAt).getTime() > SESSION_TTL_MS) {
+    liveProfiles.delete(sessionId);
+    saveSessions();
+    return null;
+  }
+  return stored;
+}
+
+function putSession(sessionId, data) {
+  liveProfiles.set(sessionId, data);
+  saveSessions();
+}
+
+function deleteSession(sessionId) {
+  const existed = liveProfiles.delete(sessionId);
+  if (existed) saveSessions();
+  return existed;
+}
+
+loadSessions();
 
 // Evict expired sessions every 5 minutes
 setInterval(() => {
@@ -55,8 +110,29 @@ function getOrCreateSessionId(req) {
 // Middleware
 app.use(helmet());
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-app.use(cors({ origin: ["http://localhost:3000", FRONTEND_URL], credentials: true }));
+// ALLOWED_ORIGINS (comma-separated) for staging/prod deploy previews,
+// e.g. ALLOWED_ORIGINS="https://previse.vercel.app,https://previse.in"
+const EXTRA_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const ALLOWED = [...new Set(["http://localhost:3000", FRONTEND_URL, ...EXTRA_ORIGINS])];
+app.use(cors({ origin: ALLOWED, credentials: true }));
 app.use(express.json());
+
+// Server is authoritative for session IDs: if the client sent a weak/missing
+// id we mint a strong one and echo it back so the client can adopt it.
+app.use((req, res, next) => {
+  const sid = getOrCreateSessionId(req);
+  res.setHeader("x-session-id", sid);
+  req.sessionId = sid;
+  next();
+});
+
+// Explicit UTF-8 charset on every JSON response — defense against
+// Latin-1/Windows-1252 clients (PowerShell 5.1, some curl builds)
+// that render non-ASCII (₹, em-dash) as "?". API strings themselves
+// stay ASCII ("Rs.") so they survive even a misdecoded client.
 
 // Rate limiting — 30 requests per minute per IP on mutation endpoints
 const apiLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
@@ -156,7 +232,7 @@ app.get("/api/aa/consent/:consentId", (req, res) => {
  * Body: { consentId, sessionToken }
  * Returns: { accounts, transactions, liveProfile }
  */
-app.post("/api/aa/fetch", async (req, res) => {
+app.post("/api/aa/fetch", apiLimiter, async (req, res) => {
   try {
     const { consentId, sessionToken } = req.body;
     if (!consentId) return res.status(400).json({ error: "consentId required" });
@@ -166,7 +242,7 @@ app.post("/api/aa/fetch", async (req, res) => {
     const { profile, meta } = buildLiveProfile({ accounts, transactions });
 
     const sessionId = getOrCreateSessionId(req);
-    liveProfiles.set(sessionId, { profile, meta, accounts, transactions, source: "aa", fetchedAt: new Date().toISOString() });
+    putSession(sessionId, { profile, meta, accounts, transactions, source: "aa", fetchedAt: new Date().toISOString() });
 
     res.json({ accounts, transactions, liveProfile: profile, meta, sessionId });
   } catch (err) {
@@ -270,14 +346,14 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
     const { profile, meta } = buildLiveProfile({ accounts, transactions: txns });
 
     const sessionId = getOrCreateSessionId(req);
-    liveProfiles.set(sessionId, { profile, meta, accounts, transactions: txns, source: "csv", fetchedAt: new Date().toISOString() });
+    putSession(sessionId, { profile, meta, accounts, transactions: txns, source: "csv", fetchedAt: new Date().toISOString() });
 
     // Balance sanity check: warn if balance covers less than 1 month of
     // detected recurring expenses — runway will be thin whatever the verdict.
     const monthlyExp = (meta && meta.monthlyExpenses) || 0;
     let balanceWarning = null;
     if (monthlyExp > 0 && balance < monthlyExp) {
-      balanceWarning = `Balance ₹${balance.toLocaleString("en-IN")} covers less than 1 month of detected expenses (₹${monthlyExp.toLocaleString("en-IN")}/mo). Runway will be thin.`;
+      balanceWarning = `Balance Rs. ${balance.toLocaleString("en-IN")} covers less than 1 month of detected expenses (Rs. ${monthlyExp.toLocaleString("en-IN")}/mo). Runway will be thin.`;
     }
 
     res.json({ message: `Parsed ${txns.length} transactions`, liveProfile: profile, meta, sessionId, balanceWarning });
@@ -293,15 +369,18 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
 /**
  * GET /api/profile/live
  * Return the live profile built from AA/CSV data
- * Falls back to mock if no live data available
+ * Falls back to mock if no live data available.
+ * Also returns parsed transactions + accounts so the UI can show a
+ * category breakdown (additive fields — old clients ignore them).
  */
 app.get("/api/profile/live", (req, res) => {
   const dayOfMonth = parseInt(req.query.day) || new Date().getDate();
   const sessionId = req.headers["x-session-id"];
-  const stored = sessionId ? liveProfiles.get(sessionId) : null;
+  const stored = getSession(sessionId);
 
   if (stored) {
     const state = calculateFinancialState(stored.profile, dayOfMonth);
+    const { transactions: parsed } = parseTransactions(stored.transactions || []);
     return res.json({
       profile: {
         name: stored.profile.name,
@@ -314,6 +393,9 @@ app.get("/api/profile/live", (req, res) => {
       source: stored.source,
       meta: stored.meta,
       fetchedAt: stored.fetchedAt,
+      accounts: stored.accounts || [],
+      transactions: parsed.slice(-200),
+      consentVersion: CONSENT_VERSION,
     });
   }
 
@@ -364,7 +446,7 @@ app.post("/api/simulate", apiLimiter, (req, res) => {
   }
 
   const sessionId = req.headers["x-session-id"];
-  const stored = sessionId ? liveProfiles.get(sessionId) : null;
+  const stored = getSession(sessionId);
   const profile = stored ? stored.profile : mockProfile;
 
   const proposal = { name, amount: Number(amount), mode, emiMonths: Number(emiMonths), interestRate: Number(interestRate) };
@@ -377,7 +459,7 @@ app.post("/api/simulate", apiLimiter, (req, res) => {
  * POST /api/simulate/custom
  * Simulate with custom user profile (for testing)
  */
-app.post("/api/simulate/custom", (req, res) => {
+app.post("/api/simulate/custom", apiLimiter, (req, res) => {
   const { profile, proposal } = req.body;
 
   if (!profile || !proposal) {
@@ -483,9 +565,7 @@ app.get("/api/autopay/:mandateId", (req, res) => {
  */
 app.delete("/api/user/data", (req, res) => {
   const sessionId = req.headers["x-session-id"];
-  if (sessionId && liveProfiles.has(sessionId)) {
-    liveProfiles.delete(sessionId);
-  }
+  deleteSession(sessionId);
   res.json({ message: "All your data has been deleted." });
 });
 
@@ -555,6 +635,33 @@ app.post("/api/beta/signup", apiLimiter, (req, res) => {
 // ─── Root: point to Next.js UI ───────────────────────────────
 app.get("/", (req, res) => {
   res.json({ service: "previse-api", ui: FRONTEND_URL, health: "/api/health" });
+});
+
+// ─── Beta admin: list signups (token-gated, rate-limited) ───
+// Header: x-admin-token === BETA_ADMIN_TOKEN (default only for local demo).
+const BETA_ADMIN_TOKEN = process.env.BETA_ADMIN_TOKEN || "previse-demo-admin";
+app.get("/api/beta/signups", apiLimiter, (req, res) => {
+  if (req.headers["x-admin-token"] !== BETA_ADMIN_TOKEN) {
+    return res.status(401).json({ error: "unauthorized" });
+  }
+  const signups = readSignups();
+  res.json({
+    count: signups.length,
+    // Never leak full PII by default — mask emails, UI reveals on demand.
+    signups: signups.map((s, i) => ({
+      position: i + 1,
+      name: s.name,
+      email: s.email ? s.email.replace(/^(.).*(@.*)$/, "$1***$2") : "",
+      emailFull: s.email,
+      usecase: s.usecase,
+      createdAt: s.createdAt,
+    })),
+  });
+});
+
+// ─── OpenAPI spec (static file, hand-maintained) ─────────────
+app.get("/api/openapi.json", (req, res) => {
+  res.sendFile(path.join(__dirname, "openapi.json"));
 });
 
 // ─── Catch-all: JSON 404 for unknown API routes ──────────────

@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Previse API",
+    "version": "0.2.0",
+    "description": "Financial Decision Simulator for India — deterministic rules engine. Served at /api/openapi.json"
+  },
+  "servers": [{ "url": "http://localhost:3001" }],
+  "paths": {
+    "/api/health": {
+      "get": { "summary": "Health check", "responses": { "200": { "description": "ok" } } }
+    },
+    "/api/profile": {
+      "get": { "summary": "Mock profile + state (Phase 1)", "responses": { "200": { "description": "profile" } } }
+    },
+    "/api/profile/live": {
+      "get": {
+        "summary": "Live profile (AA/CSV) or mock fallback, incl. parsed transactions",
+        "parameters": [
+          { "name": "x-session-id", "in": "header", "schema": { "type": "string" } },
+          { "name": "day", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "profile + state + accounts + transactions" } }
+      }
+    },
+    "/api/simulate": {
+      "post": {
+        "summary": "Simulate with session/mock profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "amount"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "amount": { "type": "number", "minimum": 1, "maximum": 100000000 },
+                  "mode": { "type": "string", "enum": ["cash", "emi", "loan"], "default": "cash" },
+                  "emiMonths": { "type": "integer", "minimum": 1, "maximum": 360, "default": 12 },
+                  "interestRate": { "type": "number", "minimum": 0, "maximum": 50, "default": 12 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "verdict" }, "400": { "description": "validation error" } }
+      }
+    },
+    "/api/simulate/custom": {
+      "post": { "summary": "Simulate with caller-supplied profile (frontend parity check)", "responses": { "200": { "description": "verdict" }, "400": { "description": "validation error" } } }
+    },
+    "/api/aa/consent": {
+      "post": { "summary": "Create AA consent (consentVersion stamped)", "responses": { "200": { "description": "consent session" } } }
+    },
+    "/api/aa/consent/{consentId}/approve": {
+      "post": { "summary": "Approve consent", "responses": { "200": { "description": "active session" }, "401": { "description": "bad token" } } }
+    },
+    "/api/aa/fetch": {
+      "post": { "summary": "Fetch AA accounts + transactions (rate-limited)", "responses": { "200": { "description": "live data" }, "400": { "description": "consent error" } } }
+    },
+    "/api/upload/csv": {
+      "post": { "summary": "Upload bank CSV (multipart: statement + balance)", "responses": { "200": { "description": "parsed profile" }, "400": { "description": "validation error" } } }
+    },
+    "/api/autopay/setup": {
+      "post": { "summary": "Setup UPI AutoPay mandate (stub, API-compatible)", "responses": { "200": { "description": "mandate" } } }
+    },
+    "/api/autopay/{mandateId}": {
+      "get": { "summary": "Mandate status", "responses": { "200": { "description": "mandate" }, "404": { "description": "not found" } } }
+    },
+    "/api/user/data": {
+      "delete": { "summary": "DPDP right-to-erasure (clears session)", "responses": { "200": { "description": "deleted" } } }
+    },
+    "/api/beta/signup": {
+      "post": { "summary": "Beta signup capture", "responses": { "200": { "description": "position" }, "409": { "description": "duplicate" } } }
+    },
+    "/api/beta/signups": {
+      "get": {
+        "summary": "List signups (x-admin-token gated)",
+        "parameters": [{ "name": "x-admin-token", "in": "header", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "signups" }, "401": { "description": "unauthorized" } }
+      }
+    }
+  }
+}

@@ -24,10 +24,10 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 | Phase | Status | Key Metric |
 |---|---|---|
 | Phase 0 — Concept | Done | Pitch validated |
-| Phase 1 — MVP | Done | QA 22/22 green |
-| Phase 2 — India Stack | **85% done** | Parser 98.4% coverage, 100% correctness |
-| Phase 3 — ML/LLM | Planned | — |
-| Phase 4 — Monetization | Planned | — |
+| Phase 1 — MVP | Done | QA 24/24 green |
+| Phase 2 — India Stack | **~100% code, beta pending** | Parser 61 categories, QA 24/24 + vitest 8/8 |
+| Phase 3 — ML/LLM | Kicked off (foundation) | Simulation history + feedback loop live |
+| Phase 4 — Monetization | UI ready, provider pending | `/pro` + AutoPay stub wired; Razorpay keys pending |
 | Phase 5 — B2B | Planned | — |
 
 ---
@@ -35,31 +35,43 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 ## Phase 2 — India Stack (Current) — Weeks 7-12
 
 ### ✅ Already Done
-- [x] AA consent flow (MockTSP working, Setu/OneMoney stubbed)
+- [x] AA consent flow (MockTSP working, Setu/OneMoney stubbed) — consent version-stamped (`v1-2026-09`)
 - [x] CSV upload fallback with balance input
-- [x] Transaction parser — 51 categories, 98.4% coverage, 100% correctness
+- [x] Transaction parser — 61 categories (verified via `listCategories()`)
 - [x] Real bank format testing (HDFC, SBI, ICICI, Axis, Kotak, Yes Bank)
-- [x] `qa-parse-audit.js` — 33/33 checks, 124 ground truth samples
-- [x] Multi-user session isolation (x-session-id headers)
-- [x] TTL eviction on all in-memory stores
+- [x] `qa-parse-audit.js` — 5/5 checks, 96 ground truth samples
+- [x] Multi-user session isolation (x-session-id headers, server-minted, disk-persisted across restarts)
+- [x] TTL eviction on all in-memory stores (+ TTL enforced on every read)
 - [x] Input validation + balance sanity check
 - [x] Session expiry toast notification
 - [x] UI v5 — Professional dark theme, SVG icons, no glass
-- [x] Rate limiting (30 req/min on mutation endpoints)
-- [x] CORS restricted to localhost:3001/3000
+- [x] Rate limiting (30 req/min on mutation endpoints, incl. `/aa/fetch` + `/simulate/custom`)
+- [x] CORS allowlist (localhost + `FRONTEND_URL` + `ALLOWED_ORIGINS` for previews)
+- [x] Live profile wired into Dashboard + Simulator (● Live persona, was mock-only)
+- [x] Loan mode + interest-rate + tenure (frontend↔backend parity, vitest 8/8)
+- [x] Transactions view (category breakdown, search/filter)
+- [x] Goals CRUD (add/edit/delete)
+- [x] Simulation history + Bought/Skipped feedback (`/history`, server log at `/api/simulations`)
+- [x] Pro pricing + AutoPay stub wired (`/pro`)
+- [x] Beta signup storage (JSON, atomic writes) + token-gated admin list (`/admin`)
+- [x] "Delete My Data" endpoint + Privacy page (retention, consent versioning, grievance officer)
+- [x] `helmet` middleware for security headers
+- [x] Session IDs server-minted (`crypto.randomBytes`, echoed via `x-session-id`)
+- [x] OpenAPI spec (`backend/openapi.json` → `/api/openapi.json`)
+- [x] Dockerfile + CI (backend QA + parse audit + eslint/tsc/build)
+- [x] QA gate run — 24/24 green after all changes (vitest 8/8, eslint src clean, next build green)
 
 ### Week 7-8 — Hardening & Beta Prep
 
 | Task | Owner | Priority | Status |
 |---|---|---|---|
-| Visual verification — browser check all 4 tabs (Chrome, Firefox, Safari, mobile) | Aanchal | P0 | Pending |
-| Edge case testing — empty CSV, malformed data, huge files, Unicode narration | Ritika | P0 | Pending |
-| Error handling cleanup — generic error messages, no internal leakage | Ritika | P1 | Pending |
-| Health check endpoint cleanup — remove env var exposure | Ritika | P1 | Pending |
-| Add `helmet` middleware for security headers | Ritika | P1 | Pending |
-| Session token as `crypto.randomBytes` (already done, verify) | Ritika | P1 | Verify |
-| Landing page beta signup → actual storage (not just console.log) | Aanchal | P1 | Pending |
-| QA gate run — confirm 22/22 still green after all changes | Ritika | P0 | Pending |
+| Visual verification — browser check all tabs (Chrome, Firefox, Safari, mobile) | Aanchal | P0 | Pending (now 9 routes: +txns/history/pro/privacy/admin) |
+| Edge case testing — empty CSV, malformed data, huge files, Unicode narration | Ritika | P0 | Partially done (backend validates; UI file-size precheck pending) |
+| Error handling cleanup — generic error messages, no internal leakage | Ritika | P1 | Done (API returns `{error}` only; stack traces never leak) |
+| Health check endpoint cleanup — remove env var exposure | Ritika | P1 | Done (returns status/engine/phase/timestamp only) |
+| Session token as `crypto.randomBytes` (already done, verify) | Ritika | P1 | Done + server-minted + disk-persisted |
+| Landing page beta signup → actual storage (not just console.log) | Aanchal | P1 | Done (JSON file + `/admin` list) |
+| QA gate run — confirm 24/24 still green after all changes | Ritika | P0 | Done |
 
 ### Week 9-10 — 50-User Beta Launch
 
@@ -89,10 +101,10 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 
 | Metric | Target | Actual |
 |---|---|---|
-| Coverage | >95% | **98.4%** (121/123) |
-| Correctness | >90% | **100%** (121/121) |
-| Categories | >50 | **51** |
-| Ground truth | >100 txns | **124** |
+| Coverage | >95% | **96%** (qa-parse-audit) |
+| Correctness | >90% | **96%** (qa-parse-audit) |
+| Categories | >50 | **61** (`listCategories()`) |
+| Ground truth | >100 txns | **96** (HDFC/SBI/ICICI/Axis/Kotak/Yes Bank) |
 
 ---
 
@@ -104,8 +116,8 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 
 | Deliverable | Description | Owner |
 |---|---|---|
-| Event logging | Track every simulation (input, verdict, user action) — anonymized | Ritika |
-| Feedback loop | "Did you buy? What happened?" post-verdict follow-up | Aanchal |
+| Event logging | Track every simulation (input, verdict, user action) — anonymized | ✅ Done (local `/history` + `POST /api/simulations`; move to Postgres before 1K users) |
+| Feedback loop | "Did you buy? What happened?" post-verdict follow-up | ✅ Done (Bought/Skipped on simulator + history) |
 | Data pipeline | Aggregate anonymized data for model training | TBD (ML hire) |
 | Goal projections | Rule-based "months to goal" with trendline estimation | Ritika |
 
@@ -274,15 +286,16 @@ CMD ["node", "backend/server.js"]
 India's Digital Personal Data Protection Act — critical for financial data.
 
 | Requirement | Status | Action |
-|---|---|---|
-| Explicit consent before data collection | ✅ Done | AA consent flow |
-| Purpose limitation (use data only for stated purpose) | ✅ Done | Simulation only |
+|---|---|---|---|
+| Explicit consent before data collection | ✅ Done | AA consent flow (version-stamped `v1-2026-09`) |
+| Purpose limitation (use data only for stated purpose) | ✅ Done | Simulation only (`/privacy`) |
 | Data minimization (collect only what's needed) | ✅ Done | Balance + transactions |
-| Right to erasure (user can delete data) | ❌ Pending | Add "Delete My Data" endpoint |
-| Data breach notification | ❌ Pending | Add error monitoring + notification flow |
-| No cross-border transfer without consent | ✅ Done | Hosted in India |
-| Children's data protection (if applicable) | ⚠️ Review | Age gate on signup |
-| Grievance officer designation | ❌ Pending | Required for production |
+| Right to erasure (user can delete data) | ✅ Done | `DELETE /api/user/data` + Connect tab button |
+| Data retention policy | ✅ Done | Sessions 1h TTL auto-wipe; signups 90-day inactivity (`/privacy`) |
+| Data breach notification | ❌ Pending | Add error monitoring (Sentry) + notification flow |
+| No cross-border transfer without consent | ✅ Done | Host in India (ap-south) |
+| Children's data protection (if applicable) | ✅ Done | 18+ / parent consent note (`/privacy`) |
+| Grievance officer designation | ✅ Done | grievance@previse.in, 48hr SLA (`/privacy`) |
 
 **Action Items:**
 1. Add "Delete My Data" button in Profile tab (clears session + all stored data)
@@ -330,13 +343,13 @@ India's Digital Personal Data Protection Act — critical for financial data.
 
 ### Phase 2 DONE when:
 - [x] AA works 90%+ (or fallback shipping)
-- [x] Parser coverage >95% — **98.4%**
-- [x] Parser correctness >90% — **100%**
+- [x] Parser coverage >95% — **96%**
+- [x] Parser correctness >90% — **96%**
 - [ ] 50-user beta, <5 P0/P1 bugs
-- [ ] Security audit passed
-- [ ] DPDP compliance checklist complete
-- [ ] Visual verification across browsers
-- [ ] AutoPay stub documented (real integration deferred)
+- [ ] Security audit passed (helmet + rate limits + validation done; manual review pending)
+- [x] DPDP compliance checklist complete (Sentry breach-notification pending)
+- [ ] Visual verification across browsers (9 routes now)
+- [x] AutoPay stub documented (real integration deferred, `/pro` wired)
 
 ### Launch READY when:
 - [ ] All P0/P1 fixed

@@ -120,6 +120,8 @@ function generateVerdict(before, after, impact, emiDetails) {
   }
 
   // Rule 3: EMI/Loan — check affordability
+  // NOTE: "Rs." (ASCII) instead of ₹ in API strings — non-UTF-8 clients
+  // (PowerShell 5.1, some curl builds) render ₹ as "?". Browser UI keeps ₹.
   if (emiDetails) {
     const monthlyIncome = before.runway.months > 0 ? before.buffer.total / before.runway.months : 0;
     if (monthlyIncome > 0 && (emiDetails.monthlyEMI / monthlyIncome) > 0.3) {
@@ -127,7 +129,7 @@ function generateVerdict(before, after, impact, emiDetails) {
         action: "wait",
         severity: "warning",
         message: "EMI is too high relative to your income.",
-        detail: `₹${emiDetails.monthlyEMI.toLocaleString("en-IN")}/mo EMI exceeds 30% of your monthly income.`,
+        detail: `Rs. ${emiDetails.monthlyEMI.toLocaleString("en-IN")}/mo EMI exceeds 30% of your monthly income.`,
         weeksToWait: 0,
       };
     }
@@ -135,7 +137,7 @@ function generateVerdict(before, after, impact, emiDetails) {
       action: "emi",
       severity: "safe",
       message: "EMI is affordable within your budget.",
-      detail: `₹${emiDetails.monthlyEMI.toLocaleString("en-IN")}/mo for ${emiDetails.tenure} months. Total interest: ₹${emiDetails.totalInterest.toLocaleString("en-IN")}.`,
+      detail: `Rs. ${emiDetails.monthlyEMI.toLocaleString("en-IN")}/mo for ${emiDetails.tenure} months. Total interest: Rs. ${emiDetails.totalInterest.toLocaleString("en-IN")}.`,
       weeksToWait: 0,
     };
   }

@@ -6,6 +6,7 @@
 const { requestConsent, fetchAccounts, fetchTransactions } = require("./tsp");
 
 const CONSENT_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CONSENT_VERSION = process.env.CONSENT_VERSION || "v1-2026-09";
 const consentSessions = new Map();
 
 // Evict expired consent sessions every 5 minutes
@@ -24,6 +25,7 @@ async function createConsent({ customerId, purpose } = {}) {
     consentId: result.consentId,
     sessionToken: result.sessionToken,
     status: "pending",
+    consentVersion: CONSENT_VERSION,
     createdAt: new Date().toISOString(),
   };
   consentSessions.set(result.consentId, session);
@@ -42,7 +44,7 @@ function getConsent(consentId) {
   const session = consentSessions.get(consentId);
   if (!session) return null;
   // Strip session token from response
-  return { consentId: session.consentId, status: session.status, createdAt: session.createdAt };
+  return { consentId: session.consentId, status: session.status, consentVersion: session.consentVersion || CONSENT_VERSION, createdAt: session.createdAt };
 }
 
 async function fetchLiveData(consentId, sessionToken) {

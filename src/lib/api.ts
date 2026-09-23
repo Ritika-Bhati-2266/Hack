@@ -28,6 +28,13 @@ async function req<T>(path: string, opts: RequestInit = {}): Promise<T> {
       ...(opts.headers || {}),
     },
   });
+  // Server is authoritative for session IDs — adopt a stronger one if minted.
+  try {
+    const minted = res.headers.get('x-session-id');
+    if (typeof window !== 'undefined' && minted && minted.length >= 8 && minted !== localStorage.getItem(SESSION_KEY)) {
+      localStorage.setItem(SESSION_KEY, minted);
+    }
+  } catch { /* non-browser / opaque — ignore */ }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error((body as { error?: string }).error || `API ${res.status}`);
@@ -87,11 +94,14 @@ export function toBackendProfile(
 export function toBackendProposal(
   itemName: string,
   price: number,
-  mode: PaymentMode
+  mode: PaymentMode,
+  interestRate = 12,
+  loanMonths = 24
 ): { name: string; amount: number; mode: string; emiMonths: number; interestRate: number } {
-  if (mode === 'CASH') return { name: itemName, amount: price, mode: 'cash', emiMonths: 12, interestRate: 12 };
+  if (mode === 'CASH') return { name: itemName, amount: price, mode: 'cash', emiMonths: 12, interestRate };
+  if (mode === 'LOAN') return { name: itemName, amount: price, mode: 'loan', emiMonths: loanMonths, interestRate };
   const months = mode === 'EMI_3' ? 3 : mode === 'EMI_6' ? 6 : 12;
-  return { name: itemName, amount: price, mode: 'emi', emiMonths: months, interestRate: 12 };
+  return { name: itemName, amount: price, mode: 'emi', emiMonths: months, interestRate };
 }
 
 // ─── API calls ───
@@ -110,14 +120,32 @@ export async function simulateOnBackend(
   goals: Goal[],
   itemName: string,
   price: number,
-  mode: PaymentMode
+  mode: PaymentMode,
+  interestRate = 12,
+  loanMonths = 24
 ): Promise<BackendVerdict> {
   const profile = toBackendProfile(user, goals);
-  const proposal = toBackendProposal(itemName, price, mode);
+  const proposal = toBackendProposal(itemName, price, mode, interestRate, loanMonths);
   return req<BackendVerdict>('/api/simulate/custom', {
     method: 'POST',
     body: JSON.stringify({ profile, proposal }),
   });
+}
+
+export interface LiveTransaction {
+  date: string;
+  narration: string;
+  amount: number;
+  type: string;
+  parsedCategory?: string;
+  parsedType?: string;
+}
+
+export interface LiveAccount {
+  accountId: string;
+  bank: string;
+  balance: number;
+  type: string;
 }
 
 export interface LiveProfileRes {
@@ -136,6 +164,61 @@ export interface LiveProfileRes {
     totalTransactions: number;
     warnings: string[];
   } | null;
+  fetchedAt?: string;
+  consentVersion?: string;
+  accounts?: LiveAccount[];
+  transactions?: LiveTransaction[];
+}
+
+/**
+ * Adapter: backend engine profile -> Next.js store shapes.
+ * Commitment category is heuristic (backend has no category field):
+ * name contains rent/sip/emi-ish keywords, else bill.
+ */
+export function backendProfileToStore(
+  profile: BackendProfile
+): { user: UserFinancialState; goals: Goal[] } {
+  const cat = (name: string): UserFinancialState['earmarkedExpenses'][number]['category'] => {
+    const n = name.toLowerCase();
+    if (/rent/.test(n)) return 'rent';
+    if (/sip|mutual|investment/.test(n)) return 'sip';
+    if (/emi|loan/.test(n)) return 'emi';
+    return 'bill';
+  };
+  const user: UserFinancialState = {
+    totalBalance: profile.balance,
+    monthlyIncome: profile.monthlyInflow,
+    // Backend doesn't track daily burn — derive from commitments so runway math agrees.
+    dailyBurnRate: Math.max(
+      0,
+      Math.round(profile.commitments.reduce((s, c) => s + c.amount, 0) / 30)
+    ),
+    earmarkedExpenses: profile.commitments.map((c, i) => ({
+      id: `live-${i}`,
+      name: c.name,
+      amount: c.amount,
+      category: cat(c.name),
+      dueDate: `${c.dayOfMonth}${c.dayOfMonth === 1 ? 'st' : c.dayOfMonth === 2 ? 'nd' : c.dayOfMonth === 3 ? 'rd' : 'th'} of month`,
+      autoDebit: true,
+    })),
+  };
+  const goals: Goal[] = (profile.goals || []).map((g, i) => {
+    const remaining = Math.max(0, g.targetAmount - g.currentAmount);
+    const monthly = g.deadline > 0 ? Math.ceil(remaining / Math.max(1, g.deadline)) : remaining;
+    const d = new Date();
+    d.setMonth(d.getMonth() + (g.deadline || 12));
+    return {
+      id: `live-g${i}`,
+      name: g.name,
+      targetAmount: g.targetAmount,
+      currentAmount: g.currentAmount,
+      monthlyContribution: monthly,
+      targetDate: d.toISOString().slice(0, 10),
+      category: 'emergency',
+      delayInMonths: 0,
+    };
+  });
+  return { user, goals };
 }
 
 export const getLiveProfile = () => req<LiveProfileRes>('/api/profile/live');
@@ -179,6 +262,29 @@ export async function uploadCSV(file: File, balance: number) {
 }
 
 export const deleteMyData = () => req<{ message: string }>('/api/user/data', { method: 'DELETE' });
+
+export const setupAutopay = (amount = 149, frequency = 'monthly', purpose = 'Previse Pro') =>
+  req<{ mandateId: string; status: string; amount: number; frequency: string }>(
+    '/api/autopay/setup',
+    { method: 'POST', body: JSON.stringify({ amount, frequency, purpose }) }
+  );
+
+export const getMandate = (mandateId: string) =>
+  req<{ mandateId: string; status: string; amount: number }>('/api/autopay/' + mandateId);
+
+export interface BetaSignupRow {
+  position: number;
+  name: string;
+  email: string;
+  emailFull: string;
+  usecase: string;
+  createdAt: string;
+}
+
+export const getBetaSignups = (adminToken: string) =>
+  req<{ count: number; signups: BetaSignupRow[] }>('/api/beta/signups', {
+    headers: { 'x-admin-token': adminToken },
+  });
 
 export const betaSignup = (name: string, email: string, usecase = '') =>
   req<{ message: string; position: number }>('/api/beta/signup', {

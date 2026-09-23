@@ -43,6 +43,12 @@ function bSafeDaily(usable: number, monthlyExp: number, day: number): number {
   const available = Math.max(0, usable - monthlyExp);
   return daysRemaining > 0 ? Math.floor(available / daysRemaining) : 0;
 }
+
+/** Firewall-aware liquid buffer — single helper so Navbar/Firewall/Dashboard agree. */
+export function usableBalance(user: UserFinancialState, dayOverride?: number): number {
+  const day = dayOverride ?? new Date().getDate();
+  return bFirewall(user.totalBalance, toBCommitments(user), day);
+}
 function bMonthsToGoal(g: BGoal, monthlySavings: number): number {
   const remaining = g.targetAmount - g.currentAmount;
   return monthlySavings > 0 ? Math.ceil(remaining / monthlySavings) : Infinity;
@@ -99,7 +105,8 @@ export function previewSimulation(user: UserFinancialState, goals: Goal[], input
   const beforeSafe = bSafeDaily(beforeUsable, monthlyExp, day);
   const beforeSavings = user.monthlyIncome - monthlyExp;
 
-  const emiN = input.mode === 'CASH' ? 0 : input.mode === 'EMI_3' ? 3 : input.mode === 'EMI_6' ? 6 : 12;
+  const emiN = input.mode === 'CASH' ? 0 : input.mode === 'EMI_3' ? 3 : input.mode === 'EMI_6' ? 6 : input.mode === 'LOAN' ? Math.min(360, Math.max(1, Math.round(input.loanMonths ?? 24))) : 12;
+  const rate = input.interestRate ?? 12;
   let simBalance = user.totalBalance;
   let simCommitments = commitments;
   let monthlyEMI = 0, emiDetails: { monthlyEMI: number; tenure: number; totalInterest: number } | null = null;
@@ -107,8 +114,15 @@ export function previewSimulation(user: UserFinancialState, goals: Goal[], input
   if (input.mode === 'CASH') {
     downPayment = input.price;
     simBalance = user.totalBalance - input.price;
+  } else if (input.mode === 'LOAN') {
+    // Backend parity (simulator.js loan branch): loan credits the balance,
+    // then the EMI becomes a recurring commitment.
+    monthlyEMI = backendEMI(input.price, emiN, rate);
+    emiDetails = { monthlyEMI, tenure: emiN, totalInterest: monthlyEMI * emiN - input.price };
+    simBalance = user.totalBalance + input.price;
+    simCommitments = [...commitments, { name: `Loan EMI: ${input.itemName || 'Custom Item'}`, amount: monthlyEMI, dayOfMonth: 1, active: true }];
   } else {
-    monthlyEMI = backendEMI(input.price, emiN, 12);
+    monthlyEMI = backendEMI(input.price, emiN, rate);
     emiDetails = { monthlyEMI, tenure: emiN, totalInterest: monthlyEMI * emiN - input.price };
     simCommitments = [...commitments, { name: `EMI: ${input.itemName || 'Custom Item'}`, amount: monthlyEMI, dayOfMonth: 1, active: true }];
   }
@@ -126,6 +140,7 @@ export function previewSimulation(user: UserFinancialState, goals: Goal[], input
     v.action === 'wait' && v.severity === 'critical' ? 'Wait — Keep Buffer Safe' :
     v.action === 'wait' && v.severity === 'warning' ? 'Wait — Risky Right Now' :
     v.action === 'wait' ? 'Wait — Goals at Risk' :
+    v.action === 'emi' && input.mode === 'LOAN' ? 'Loan Affordable' :
     v.action === 'emi' ? 'EMI Recommended' :
     v.severity === 'safe' ? 'Safe to Buy Now' : 'Buy With Caution';
   const verdictBadge =

@@ -3,7 +3,27 @@ import { persist } from 'zustand/middleware';
 import { UserFinancialState, Goal, SimulationInput, SimulationResult, PaymentMode } from '@/types';
 import { previewSimulation } from '@/lib/engine';
 
-export type CustomerId = 'spender' | 'saver' | 'chaser' | string;
+export type CustomerId = 'spender' | 'saver' | 'chaser' | 'live' | string;
+
+export interface LiveData {
+  user: UserFinancialState;
+  goals: Goal[];
+  source: string;
+  meta: { parsingAccuracy: number; parsedCount: number; totalTransactions: number; warnings: string[] } | null;
+  accounts: Array<{ accountId: string; bank: string; balance: number; type: string }>;
+  transactions: Array<{ date: string; narration: string; amount: number; type: string; parsedCategory?: string }>;
+  fetchedAt?: string;
+}
+
+export interface HistoryEntry {
+  id: string;
+  timestamp: string;
+  itemName: string;
+  price: number;
+  mode: PaymentMode;
+  verdict: 'WAIT' | 'EMI' | 'BUY';
+  feedback?: 'bought' | 'skipped' | null;
+}
 
 interface FinanceStore {
   user: UserFinancialState;
@@ -11,13 +31,22 @@ interface FinanceStore {
   currentSimulation: SimulationResult | null;
   activeCustomer: CustomerId;
   customProfiles: Record<string, { label: string; sub: string; user: UserFinancialState; goals: Goal[] }>;
+  liveData: LiveData | null;
+  history: HistoryEntry[];
   switchCustomer: (id: CustomerId) => void;
   createProfile: (data: { name: string; monthlyIncome: number; totalBalance: number; dailyBurnRate: number; rent: number; sip: number; bills: number }) => string;
   deleteProfile: (id: string) => void;
+  setLiveData: (data: LiveData) => void;
+  clearLiveData: () => void;
+  addGoal: (g: { name: string; targetAmount: number; currentAmount: number; monthlyContribution: number; targetDate: string; category: Goal['category'] }) => void;
+  updateGoal: (id: string, patch: Partial<Goal>) => void;
+  deleteGoal: (id: string) => void;
   runSimulation: (input: SimulationInput) => SimulationResult;
   clearSimulation: () => void;
   acceptWaitRecommendation: () => void;
   confirmPurchaseAnyway: () => void;
+  feedbackHistory: (id: string, feedback: 'bought' | 'skipped') => void;
+  clearHistory: () => void;
 }
 
 export type CustomerRecord = { label: string; sub: string; user: UserFinancialState; goals: Goal[] };
@@ -89,11 +118,43 @@ export const useFinanceStore = create<FinanceStore>()(
   currentSimulation: null,
   activeCustomer: 'spender',
   customProfiles: {},
+  liveData: null,
+  history: [],
   switchCustomer: (id) => {
+    if (id === 'live') {
+      const live = get().liveData;
+      if (!live) return;
+      set({ activeCustomer: 'live', user: live.user, goals: live.goals, currentSimulation: null });
+      return;
+    }
     const custom = get().customProfiles[id];
     const c = (CUSTOMERS as Record<string, CustomerRecord>)[id] || custom;
     if (!c) return;
     set({ activeCustomer: id, user: c.user, goals: c.goals, currentSimulation: null });
+  },
+  setLiveData: (data) => {
+    set({ liveData: data, activeCustomer: 'live', user: data.user, goals: data.goals, currentSimulation: null });
+  },
+  clearLiveData: () => {
+    const { activeCustomer } = get();
+    set({ liveData: null });
+    if (activeCustomer === 'live') {
+      set({ activeCustomer: 'spender', user: CUSTOMERS.spender.user, goals: CUSTOMERS.spender.goals, currentSimulation: null });
+    }
+  },
+  addGoal: (g) => {
+    const goal: Goal = {
+      id: `g-${Date.now()}`,
+      delayInMonths: 0,
+      ...g,
+    };
+    set((s) => ({ goals: [...s.goals, goal] }));
+  },
+  updateGoal: (id, patch) => {
+    set((s) => ({ goals: s.goals.map((g) => (g.id === id ? { ...g, ...patch } : g)) }));
+  },
+  deleteGoal: (id) => {
+    set((s) => ({ goals: s.goals.filter((g) => g.id !== id) }));
   },
   createProfile: (data) => {
     // CSV-style rule: never trust raw input, never invent history.
@@ -144,11 +205,41 @@ export const useFinanceStore = create<FinanceStore>()(
   runSimulation: (input: SimulationInput): SimulationResult => {
     const { user, goals } = get();
     const result = previewSimulation(user, goals, input);
-    set({ currentSimulation: result });
+    const entry: HistoryEntry = {
+      id: `${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      itemName: result.itemName,
+      price: result.purchasePrice,
+      mode: result.mode,
+      verdict: result.verdict,
+      feedback: null,
+    };
+    // Fire-and-forget server log (Phase 3 training data); local history is source of truth.
+    try {
+      fetch('/api/simulations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry),
+      }).catch(() => {});
+    } catch { /* SSR / offline — ignore */ }
+    set((s) => ({ currentSimulation: result, history: [entry, ...s.history].slice(0, 50) }));
     return result;
   },
 
   clearSimulation: () => set({ currentSimulation: null }),
+
+  feedbackHistory: (id, feedback) => {
+    set((s) => ({ history: s.history.map((h) => (h.id === id ? { ...h, feedback } : h)) }));
+    try {
+      fetch('/api/simulations', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, feedback }),
+      }).catch(() => {});
+    } catch { /* offline — local history still updated */ }
+  },
+
+  clearHistory: () => set({ history: [] }),
 
   acceptWaitRecommendation: () => {
     set({ currentSimulation: null });
@@ -191,7 +282,7 @@ export const useFinanceStore = create<FinanceStore>()(
 }),
     {
       name: 'previse-customer',
-      partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles, user: state.user, goals: state.goals }),
+      partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles, user: state.user, goals: state.goals, liveData: state.liveData, history: state.history }),
       onRehydrateStorage: () => (state) => {
         // Keep persisted user/goals when present (e.g. EMI added via
         // confirmPurchaseAnyway) — else they were silently lost on reload.

@@ -59,6 +59,11 @@ export default function RootLayout({
               </span>
               <span className="hidden sm:inline">Built for hackathon demo</span>
             </div>
+            <nav className="flex items-center gap-3 text-[11px] font-bold text-dusk">
+              <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+              <a href="/pro" className="hover:text-white transition-colors">Pro</a>
+              <a href="/admin" className="hover:text-white transition-colors">Admin</a>
+            </nav>
           </div>
         </footer>
       </body>

@@ -1,0 +1,6 @@
+node_modules/
+.next/
+backend/node_modules/
+backend/data/*.json
+!backend/data/.gitkeep
+*.log

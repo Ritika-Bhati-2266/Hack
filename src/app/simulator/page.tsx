@@ -6,24 +6,28 @@ import Link from 'next/link';
 import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
 import TrajectoryChart from '@/components/TrajectoryChart';
+import DataSourceBanner from '@/components/DataSourceBanner';
 import { PaymentMode } from '@/types';
 import { simulateOnBackend, BackendVerdict } from '@/lib/api';
 import { backendEMI } from '@/lib/engine';
 
 export default function SimulatorPage() {
-  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, goals, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
+  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
   const [itemName, setItemName] = useState('iPhone 16 Pro Max');
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
+  const [interestRate, setInterestRate] = useState(12);
+  const [loanMonths, setLoanMonths] = useState(24);
   const [backendVerdict, setBackendVerdict] = useState<BackendVerdict | null>(null);
   const [backendLoading, setBackendLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
+  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : 'mock';
 
   const handleVerifyBackend = async () => {
     setBackendLoading(true);
     setBackendError(null);
     try {
-      const res = await simulateOnBackend(user, goals, itemName.trim(), price, mode);
+      const res = await simulateOnBackend(user, goals, itemName.trim(), price, mode, interestRate, loanMonths);
       setBackendVerdict(res);
     } catch (e) {
       setBackendError(e instanceof Error ? e.message : 'Backend unreachable — is Express running on :3001?');
@@ -38,7 +42,7 @@ export default function SimulatorPage() {
 
   const handleSimulate = () => {
     if (!canSimulate) return;
-    runSimulation({ itemName: itemName.trim(), price, mode });
+    runSimulation({ itemName: itemName.trim(), price, mode, interestRate, loanMonths });
   };
 
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
@@ -47,9 +51,10 @@ export default function SimulatorPage() {
   // Displayed estimates use the same reducing-balance formula as the verdict engine
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
     { id: 'CASH', label: 'Full Cash', sub: inr(price) },
-    { id: 'EMI_3', label: '3 EMI', sub: `~${inr(backendEMI(price, 3, 12))}/mo` },
-    { id: 'EMI_6', label: '6 EMI', sub: `~${inr(backendEMI(price, 6, 12))}/mo` },
-    { id: 'EMI_12', label: '12 EMI', sub: `~${inr(backendEMI(price, 12, 12))}/mo` },
+    { id: 'EMI_3', label: '3 EMI', sub: `~${inr(backendEMI(price, 3, interestRate))}/mo` },
+    { id: 'EMI_6', label: '6 EMI', sub: `~${inr(backendEMI(price, 6, interestRate))}/mo` },
+    { id: 'EMI_12', label: '12 EMI', sub: `~${inr(backendEMI(price, 12, interestRate))}/mo` },
+    { id: 'LOAN', label: `Loan ${loanMonths}mo`, sub: `~${inr(backendEMI(price, loanMonths, interestRate))}/mo` },
   ];
 
   const verdict = currentSimulation?.verdict;
@@ -70,9 +75,10 @@ export default function SimulatorPage() {
       </div>
 
       {/* Persona strip */}
+      <DataSourceBanner source={liveSource} />
       <div className="glass rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
         <span className="text-xs text-mist shrink-0">
-          Simulating for <b className="text-primary">{CUSTOMERS[activeCustomer]?.label || activeCustomer}</b>
+          Simulating for <b className="text-primary">{activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV real' : 'AA mock'})` : CUSTOMERS[activeCustomer]?.label || activeCustomer}</b>
           <span className="text-dusk"> • Bal {inr(user.totalBalance)}</span>
         </span>
         <div className="flex gap-2 sm:ml-auto overflow-x-auto max-w-full pb-0.5">
@@ -164,6 +170,37 @@ export default function SimulatorPage() {
                   </button>
                 ))}
               </div>
+              {(mode !== 'CASH') && (
+                <div className="mt-3 rounded-2xl bg-well/60 border border-white/[0.08] p-3.5 space-y-3">
+                  <div>
+                    <div className="flex justify-between text-[10px] font-black tracking-[0.18em] text-dusk">
+                      <span>INTEREST RATE</span>
+                      <span className="text-white font-mono">{interestRate}% p.a.</span>
+                    </div>
+                    <input
+                      type="range" min={0} max={24} step={0.5} value={interestRate}
+                      onChange={(e) => setInterestRate(Number(e.target.value))}
+                      className="volt-range w-full mt-2"
+                      style={{ ['--fill' as string]: `${(interestRate / 24) * 100}%` }}
+                    />
+                  </div>
+                  {mode === 'LOAN' && (
+                    <div>
+                      <div className="flex justify-between text-[10px] font-black tracking-[0.18em] text-dusk">
+                        <span>LOAN TENURE</span>
+                        <span className="text-white font-mono">{loanMonths} months</span>
+                      </div>
+                      <div className="flex gap-1.5 mt-2">
+                        {[12, 24, 36, 60].map((m) => (
+                          <button key={m} onClick={() => setLoanMonths(m)} className={`flex-1 py-1.5 rounded-full text-[11px] font-bold border ${loanMonths === m ? 'bg-primary text-white border-primary' : 'bg-white/5 text-mist border-white/[0.08]'}`}>
+                            {m}mo
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -259,7 +296,7 @@ export default function SimulatorPage() {
                 </>
               ) : currentSimulation.verdict === 'EMI' ? (
                 <>
-                  <button onClick={() => runSimulation({ itemName, price, mode: 'EMI_6' })} className="flex-1 py-3.5 rounded-2xl bg-amber-400 text-black font-bold text-[13px] hover:brightness-110 transition">
+                  <button onClick={() => runSimulation({ itemName, price, mode: 'EMI_6', interestRate })} className="flex-1 py-3.5 rounded-2xl bg-amber-400 text-black font-bold text-[13px] hover:brightness-110 transition">
                     Switch to 6 EMI
                   </button>
                   <button onClick={confirmPurchaseAnyway} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/[0.08] font-bold text-[13px] hover:bg-white/10 transition">
@@ -287,6 +324,30 @@ export default function SimulatorPage() {
           <p className="font-display font-extrabold text-lg mt-4">No simulation yet</p>
           <p className="text-sm text-mist mt-1">Item + amount + mode chuno, phir SIMULATE dabao — 5 second me verdict.</p>
           <p className="text-xs text-dusk mt-2">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
+        </div>
+      )}
+
+      {/* ── HISTORY + FEEDBACK (Phase 3 training data) ── */}
+      {history.length > 0 && (
+        <div className="rounded-[28px] border border-white/[0.08] bg-surface p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display font-extrabold text-lg">Recent simulations</h2>
+            <Link href="/history" className="text-xs font-bold text-primary hover:brightness-125">
+              Full history →
+            </Link>
+          </div>
+          {history.slice(0, 3).map((h) => (
+            <div key={h.id} className="flex items-center justify-between gap-3 rounded-2xl bg-well/60 border border-white/[0.08] px-4 py-3">
+              <div className="min-w-0">
+                <p className="font-bold text-sm truncate">{h.itemName} • {inr(h.price)} • {h.mode}</p>
+                <p className="text-[11px] font-mono text-dusk">{new Date(h.timestamp).toLocaleString('en-IN')} • <b className={h.verdict === 'WAIT' ? 'text-red-300' : h.verdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{h.verdict}</b></p>
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                <button onClick={() => feedbackHistory(h.id, 'bought')} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border ${h.feedback === 'bought' ? 'bg-safe text-black border-safe' : 'bg-white/5 text-mist border-white/[0.08]'}`}>Bought</button>
+                <button onClick={() => feedbackHistory(h.id, 'skipped')} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border ${h.feedback === 'skipped' ? 'bg-white text-black border-white' : 'bg-white/5 text-mist border-white/[0.08]'}`}>Skipped</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
