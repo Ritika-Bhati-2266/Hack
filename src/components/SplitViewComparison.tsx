@@ -10,18 +10,8 @@ export default function SplitViewComparison({ simulation }: { simulation: Simula
   const border = isWait ? 'border-red-500/30' : isEMI ? 'border-amber-400/30' : 'border-[#10B981]/25';
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
-  const card = (title: string, highlight: boolean) => (
-    <div className={`rounded-[24px] border bg-[#0B111E] p-6 relative overflow-hidden ${highlight ? border : 'border-white/10'}`}>
-      {highlight && (
-        <div className={`absolute top-0 left-0 right-0 h-1 ${isWait ? 'bg-red-500' : isEMI ? 'bg-amber-400' : 'bg-[#10B981]'}`} />
-      )}
-      {!highlight && <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500/60" />}
-    </div>
-  );
-  void card;
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       <div className="flex items-end justify-between">
         <div>
           <h3 className="font-display font-extrabold text-lg">Before vs After</h3>
@@ -32,7 +22,7 @@ export default function SplitViewComparison({ simulation }: { simulation: Simula
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* TODAY */}
-        <div className="rounded-[24px] border border-white/10 bg-[#0B111E] p-6 relative overflow-hidden">
+        <div className="rounded-[24px] border border-white/10 bg-[#0B111E] p-4 sm:p-6 relative overflow-hidden min-w-0 card-hover">
           <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500/70" />
           <div className="flex items-center justify-between mb-5">
             <span className="text-[10px] font-black tracking-[0.18em] text-slate-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">STATE TODAY</span>
@@ -58,7 +48,7 @@ export default function SplitViewComparison({ simulation }: { simulation: Simula
         </div>
 
         {/* SIMULATED */}
-        <div className={`rounded-[24px] border bg-[#0B111E] p-6 relative overflow-hidden ${border}`}>
+        <div className={`rounded-[24px] border bg-[#0B111E] p-4 sm:p-6 relative overflow-hidden min-w-0 card-hover ${border}`}>
           <div className={`absolute top-0 left-0 right-0 h-1 ${isWait ? 'bg-red-500' : isEMI ? 'bg-amber-400' : 'bg-[#10B981]'}`} />
           <div className="flex items-center justify-between mb-5">
             <span className="text-[10px] font-black tracking-[0.18em] text-slate-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">STATE SIMULATED</span>

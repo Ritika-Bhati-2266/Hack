@@ -64,7 +64,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* ── Ticker ─────────────────────────────── */}
-      <div className="overflow-hidden rounded-full border border-white/10 bg-white/[0.03] py-2 select-none">
+      <div className="overflow-hidden max-w-full rounded-full border border-white/10 bg-white/[0.03] py-2 select-none" aria-hidden="true">
         <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-slate-400 w-max">
           {[0, 1].map((k) => (
             <span key={k} className="flex gap-8">
@@ -91,7 +91,7 @@ export default function DashboardPage() {
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-full text-xs font-bold border transition-all ${
+              className={`px-4 py-2 rounded-full text-xs font-bold border transition-all active:scale-95 ${
                 activeCustomer === id
                   ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]'
                   : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
@@ -107,7 +107,7 @@ export default function DashboardPage() {
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-full text-xs font-bold border flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-full text-xs font-bold border flex items-center gap-2 transition-all active:scale-95 ${
                 activeCustomer === id ? 'bg-emerald-400 text-black border-emerald-400' : 'bg-white/5 text-emerald-300 border-emerald-400/20'
               }`}
             >
@@ -119,7 +119,7 @@ export default function DashboardPage() {
           ))}
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-white/20 text-slate-300 text-xs font-bold hover:border-[#10B981]/50 hover:text-[#10B981]"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-dashed border-white/20 text-slate-300 text-xs font-bold transition-all active:scale-95 hover:border-[#10B981]/50 hover:text-[#10B981]"
           >
             <Plus className="w-3.5 h-3.5" /> Apni profile
           </button>
@@ -132,14 +132,14 @@ export default function DashboardPage() {
         <div className="absolute -top-32 left-1/4 w-[500px] h-[300px] bg-[#10B981]/10 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute -bottom-24 right-0 w-[400px] h-[300px] bg-emerald-500/15 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-8 p-6 sm:p-10">
+        <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-6 sm:gap-8 p-4 sm:p-10">
           {/* Left copy */}
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5 min-w-0">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/25 text-[#10B981] text-[11px] font-bold tracking-wide">
               <BadgeCheck className="w-3.5 h-3.5" />
               EXPENSE TRACKERS SHOW PAST • PREVISE SIMULATES FUTURE
             </div>
-            <h1 className="font-display font-black tracking-tight leading-[0.95] text-[42px] sm:text-[64px]">
+            <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2.5rem,9vw,4rem)]">
               Buy it or
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-300 to-cyan-300">
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             <div className="flex flex-wrap gap-3 pt-1">
               <Link
                 href="/simulator"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-[#10B981] text-black font-extrabold text-sm shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-[#10B981] text-black font-extrabold text-sm shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
               >
                 <Zap className="w-4 h-4 fill-black" />
                 Launch What-If Simulator
@@ -164,7 +164,7 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/connect"
-                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-slate-200 hover:bg-white/10 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-slate-200 transition-all active:scale-[0.98] hover:bg-white/10"
               >
                 <Lock className="w-4 h-4 text-amber-300" />
                 Connect Bank (AA)
@@ -178,7 +178,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Right — live verdict card */}
-          <div className="relative">
+          <div className="relative min-w-0">
             <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/50 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.07]">
                 <div className="flex items-center gap-2.5">
@@ -298,7 +298,7 @@ export default function DashboardPage() {
           </div>
           <div className="divide-y divide-white/[0.06]">
             {user.earmarkedExpenses.map((e) => (
-              <div key={e.id} className="flex items-center justify-between py-4 group">
+              <div key={e.id} className="flex items-center justify-between gap-3 py-4 group rounded-xl px-2 -mx-2 transition-colors hover:bg-white/[0.03]">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-[10px] border ${
                     e.category === 'rent' ? 'bg-amber-400/10 text-amber-300 border-amber-400/20' :
@@ -363,7 +363,7 @@ export default function DashboardPage() {
       {/* Create profile modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-[#0B111E] border border-white/10 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-[#0B111E] border border-white/10 rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-extrabold">Apni profile banao</h3>
               <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-slate-400" /></button>

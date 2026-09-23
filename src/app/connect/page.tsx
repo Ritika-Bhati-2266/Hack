@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpreadsheet, Loader2, AlertTriangle, PlugZap } from 'lucide-react';
 import {
   createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, LiveProfileRes,
 } from '@/lib/api';
@@ -91,9 +91,10 @@ export default function ConnectPage() {
           </p>
 
           {/* Stepper */}
-          <div className="flex items-center gap-2 mt-6">
+          <div className="mt-6 overflow-x-auto max-w-full pb-1 -mx-1 px-1">
+          <div className="flex items-center gap-2 min-w-[480px]">
             {['Consent', 'Approve', 'Fetch'].map((s, i) => (
-              <div key={s} className="flex items-center gap-2 flex-1">
+              <div key={s} className="flex items-center gap-2 flex-1 min-w-0">
                 <div className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs font-bold whitespace-nowrap transition-all ${
                   stepIdx > i ? 'bg-[#10B981] text-black border-[#10B981]' : stepIdx === i + 1 || (stepIdx === 0 && i === 0) ? 'bg-white/10 text-white border-white/20' : 'bg-white/[0.03] text-slate-500 border-white/10'
                 }`}>
@@ -103,11 +104,22 @@ export default function ConnectPage() {
               </div>
             ))}
           </div>
+          </div>
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-2xl p-4">{error}</p>}
-      {msg && !expired && <p className="text-sm text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-2xl p-4">{msg}</p>}
+      {error && (
+        <div className="flex items-start gap-2.5 text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-fade-up" role="alert">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <p className="min-w-0 break-words">{error}</p>
+        </div>
+      )}
+      {msg && !expired && (
+        <div className="flex items-start gap-2.5 text-sm text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-2xl p-4 animate-fade-up">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+          <p className="min-w-0 break-words">{msg}</p>
+        </div>
+      )}
       {expired && (
         <div className="text-sm text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 animate-fade-up">
           <b>Session expired (1h TTL)</b> — {msg || 'ye demo data hai, live nahi.'} AA ya CSV se dobara connect karo, 10 second me restore ho jayega.
@@ -122,14 +134,15 @@ export default function ConnectPage() {
               MOCK DEMO
             </span>
           </h2>
-          <p className="text-[11px] text-slate-500 leading-relaxed">Mock TSP — fake transactions. Real bank sync nahi.</p>
           <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-slate-300 border border-white/10' : 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_25px_rgba(16,185,129,0.3)]'} disabled:opacity-50`}>
             1. Create consent {stepIdx >= 1 && '✓'}
           </button>
-          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 disabled:opacity-40">
+          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+            {loading && step === 'consent' && <Loader2 className="w-4 h-4 animate-spin" />}
             2. Approve consent {stepIdx >= 2 && '✓'}
           </button>
-          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="w-full py-3 rounded-2xl bg-emerald-400 text-black text-sm font-extrabold hover:brightness-110 disabled:opacity-40">
+          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="w-full py-3 rounded-2xl bg-emerald-400 text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+            {loading && (step === 'active' || step === 'fetched') && <Loader2 className="w-4 h-4 animate-spin" />}
             3. Fetch my data {stepIdx >= 3 && '✓'}
           </button>
           {consentId && <p className="text-[10px] font-mono text-slate-600 break-all">consent: {consentId.slice(0, 32)}…</p>}
@@ -153,9 +166,26 @@ export default function ConnectPage() {
         </div>
       </div>
 
+      {loading && !live && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-hidden="true">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-20 rounded-2xl" />
+          ))}
+        </div>
+      )}
+
+      {!live && !loading && (
+        <div className="rounded-[24px] border border-dashed border-white/15 bg-white/[0.02] p-8 text-center animate-fade-up">
+          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">
+            <PlugZap className="w-5 h-5 text-slate-500" />
+          </div>
+          <p className="font-display font-extrabold text-lg mt-3">No live data yet</p>
+          <p className="text-sm text-slate-400 mt-1 max-w-md mx-auto">Upar Option A (AA mock demo) ya Option B (CSV — asli numbers) se connect karo. Phir yahan balance, runway aur safe-spend dikhega.</p>
+        </div>
+      )}
+
       {live && (
         <div className="rounded-[24px] bg-[#0B111E] border border-emerald-400/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(16,185,129,0.15)]">
-          <DataSourceBanner source={expired ? 'mock' : live.source} />
           <h3 className="font-display font-extrabold flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-300" /> {expired || live.source !== 'csv' ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired || live.source !== 'csv' ? 'text-amber-300' : 'text-emerald-300'}`}>{expired ? 'mock' : live.source}{!expired && live.source === 'aa' ? ' (mock TSP)' : ''}</span>
           </h3>

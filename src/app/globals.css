@@ -29,6 +29,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -45,6 +50,14 @@ body {
   font-family: var(--font-display);
 }
 
+/* ── Design scale (dark volt) ─────────────────────────────
+   Radius:  hero 28px → card 24px → inner 16px → pill 999px
+   Border:  white/10 default • colored/25-30 semantic
+             (emerald = safe/real • amber/orange = warn/mock • red = critical)
+   Spacing: 4 / 8 / 12 / 16 / 24 / 32px (p-1/2/3/4/6/8)
+   Numbers: financial figures → font-mono (tabular) + bold, ≥28px on hero stats
+   ─────────────────────────────────────────────────────────── */
+
 /* glass + cards */
 .glass {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
@@ -58,6 +71,31 @@ body {
   transform: translateY(-2px);
   border-color: rgba(16, 185, 129, 0.35);
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
+}
+
+/* tabular figures — keeps ₹ amounts from jittering */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* skeleton shimmer (loading states) */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* focus visibility (keyboard users) */
+:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
 }
 
 .text-volt {
@@ -84,6 +122,10 @@ body {
 @keyframes ticker {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
 }
 @keyframes glow-pulse {
   0%, 100% { opacity: 0.6; }
@@ -140,3 +182,11 @@ input[type="range"].volt-range::-webkit-slider-thumb {
 .animate-fade-in { animation: var(--animate-fade-up); }
 
 ::selection { background: #10b981; color: #06090f; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker,
+  .animate-stamp-in,
+  .skeleton::after {
+    animation: none;
+  }
+}

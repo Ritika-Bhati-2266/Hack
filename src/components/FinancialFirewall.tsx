@@ -18,7 +18,7 @@ export default function FinancialFirewall() {
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-6 sm:p-8">
+    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0B111E] p-4 sm:p-8 min-w-0">
       <div className="absolute -top-24 right-0 w-[400px] h-[250px] bg-amber-400/[0.07] blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute -bottom-24 left-0 w-[400px] h-[250px] bg-[#10B981]/[0.06] blur-[100px] rounded-full pointer-events-none" />
 
@@ -70,8 +70,8 @@ export default function FinancialFirewall() {
             { label: emi > 0 ? 'BILLS • 10th' : 'BILLS • 10th', amt: bills, dot: 'bg-cyan-400', text: 'text-cyan-300' },
             ...(emi > 0 ? [{ label: 'EMI • 1st', amt: emi, dot: 'bg-orange-400', text: 'text-orange-300' }] : []),
           ].map((c) => (
-            <div key={c.label} className="rounded-2xl bg-black/40 border border-white/[0.07] p-4 flex items-center justify-between">
-              <div>
+            <div key={c.label} className="rounded-2xl bg-black/40 border border-white/[0.07] p-4 flex items-center justify-between gap-2 min-w-0 transition-colors hover:border-white/20">
+              <div className="min-w-0">
                 <p className="text-[10px] font-black tracking-[0.15em] text-slate-500">{c.label}</p>
                 <p className="font-mono font-black text-lg mt-1">{inr(c.amt)}</p>
               </div>

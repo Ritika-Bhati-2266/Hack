@@ -38,15 +38,27 @@ export default function GoalsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {goals.length === 0 && (
+          <div className="md:col-span-2 rounded-[24px] border border-dashed border-white/15 bg-white/[0.02] p-8 text-center animate-fade-up">
+            <div className="w-12 h-12 rounded-2xl bg-violet-400/10 border border-violet-400/25 flex items-center justify-center mx-auto">
+              <Target className="w-5 h-5 text-violet-300" />
+            </div>
+            <p className="font-display font-extrabold text-lg mt-3">No goals yet</p>
+            <p className="text-sm text-slate-400 mt-1 max-w-md mx-auto">Dashboard pe apni profile banao ya Connect se CSV upload karo — goals yahan progress + delay impact ke saath dikhenge.</p>
+            <Link href="/connect" className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-slate-200 transition-all active:scale-95 hover:bg-white/10">
+              Connect data →
+            </Link>
+          </div>
+        )}
         {goals.map((g, i) => {
           const pct = Math.min(100, Math.round((g.currentAmount / Math.max(1, g.targetAmount)) * 100));
           const delay = currentSimulation?.perGoalDelays?.find((d) => d.goalId === g.id)?.delayMonths ?? 0;
           const remaining = g.targetAmount - g.currentAmount;
           return (
-            <div key={g.id} className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6 space-y-4 card-hover animate-fade-up" style={{ animationDelay: `${i * 0.07}s` }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-display font-extrabold text-[17px]">{g.name}</h3>
+            <div key={g.id} className="rounded-[24px] bg-[#0B111E] border border-white/10 p-4 sm:p-6 space-y-4 card-hover animate-fade-up min-w-0" style={{ animationDelay: `${i * 0.07}s` }}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-display font-extrabold text-[17px] break-words">{g.name}</h3>
                   <p className="text-[11px] text-slate-500 font-mono mt-1 flex items-center gap-1.5">
                     <CalendarClock className="w-3 h-3" /> target {g.targetDate} • {inr(g.monthlyContribution)}/mo
                   </p>

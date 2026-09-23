@@ -38,9 +38,9 @@ export default function TrajectoryChart({ simulation }: { simulation: Simulation
   const gap = data.length > 4 ? data[4].baselineSavings - data[4].simulatedSavings : 0;
 
   return (
-    <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-6">
+    <div className="rounded-[24px] bg-[#0B111E] border border-white/10 p-4 sm:p-6 min-w-0 card-hover">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-        <div>
+        <div className="min-w-0">
           <h3 className="font-display font-extrabold text-lg">3-Year Wealth Trajectory</h3>
           <p className="text-[11px] text-slate-500 font-mono">
             Baseline vs simulated • firewall {`₹${simulation.todayEarmarked.toLocaleString('en-IN')}`} never counted
@@ -59,7 +59,7 @@ export default function TrajectoryChart({ simulation }: { simulation: Simulation
         </div>
       </div>
 
-      <div ref={chartRef} className="h-[300px] w-full">
+      <div ref={chartRef} className="h-[260px] sm:h-[300px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />

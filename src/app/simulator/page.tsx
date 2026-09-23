@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
@@ -70,17 +70,17 @@ export default function SimulatorPage() {
       </div>
 
       {/* Persona strip */}
-      <div className="glass rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="glass rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
         <span className="text-xs text-slate-400 shrink-0">
           Simulating for <b className="text-[#10B981]">{CUSTOMERS[activeCustomer]?.label || activeCustomer}</b>
           <span className="text-slate-500"> • Bal {inr(user.totalBalance)}</span>
         </span>
-        <div className="flex gap-2 sm:ml-auto">
+        <div className="flex gap-2 sm:ml-auto overflow-x-auto max-w-full pb-0.5">
           {(Object.keys(CUSTOMERS) as CustomerId[]).map((id) => (
             <button
               key={id}
               onClick={() => switchCustomer(id)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${activeCustomer === id ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 whitespace-nowrap ${activeCustomer === id ? 'bg-[#10B981] text-black border-[#10B981]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}
             >
               {CUSTOMERS[id].label.split(' ')[0]}
             </button>
@@ -157,7 +157,7 @@ export default function SimulatorPage() {
                   <button
                     key={m.id}
                     onClick={() => setMode(m.id)}
-                    className={`py-2.5 rounded-2xl text-xs font-bold border text-left px-3.5 transition-all ${mode === m.id ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/[0.04] text-slate-400 border-white/10 hover:text-white'}`}
+                    className={`py-2.5 rounded-2xl text-xs font-bold border text-left px-3.5 transition-all active:scale-95 ${mode === m.id ? 'bg-[#10B981] text-black border-[#10B981] shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/[0.04] text-slate-400 border-white/10 hover:text-white'}`}
                   >
                     {m.label}
                     <span className={`block text-[10px] font-mono font-normal mt-0.5 ${mode === m.id ? 'text-black/60' : 'opacity-60'}`}>{m.sub}</span>
@@ -172,21 +172,37 @@ export default function SimulatorPage() {
           <button
             onClick={handleSimulate}
             disabled={!canSimulate}
-            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-orange-400 text-black hover:brightness-110 shadow-[0_0_40px_rgba(251,146,60,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/10'}`}
+            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-[#10B981] text-black hover:brightness-110 shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/10'}`}
           >
             ⚡ SIMULATE BEFORE YOU SWIPE
           </button>
           <button
             onClick={handleVerifyBackend}
             disabled={!canSimulate || backendLoading}
-            className="mt-2.5 w-full py-3 rounded-2xl font-bold text-xs border border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-300 hover:bg-emerald-400/15 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className="mt-2.5 w-full py-3 rounded-2xl font-bold text-xs border border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-300 hover:bg-emerald-400/15 active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
           >
-            <Server className="w-4 h-4" />
+            {backendLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Server className="w-4 h-4" />}
             {backendLoading ? 'Verifying with backend engine…' : 'Verify with backend engine (:3001) — single source of truth'}
           </button>
-          {backendError && <p className="text-[11px] text-red-300 mt-2 text-center">{backendError}</p>}
+          {backendLoading && (
+            <div className="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="skeleton h-9 rounded-xl" />
+              ))}
+            </div>
+          )}
+          {backendError && (
+            <div className="mt-2.5 flex items-start gap-2.5 rounded-2xl border border-red-500/30 bg-red-500/[0.08] px-4 py-3 animate-fade-up" role="alert">
+              <AlertTriangle className="w-4 h-4 text-red-300 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-black tracking-[0.14em] text-red-300">BACKEND UNREACHABLE</p>
+                <p className="text-xs text-slate-300 mt-1 break-words">{backendError}</p>
+                <p className="text-[11px] text-slate-500 mt-1">Express <span className="font-mono">:3001</span> chal raha hai? Local engine upar wala result abhi bhi valid hai.</p>
+              </div>
+            </div>
+          )}
           {backendVerdict && (
-            <div className="mt-3 p-4 rounded-2xl bg-black/60 border border-emerald-400/20 text-xs space-y-1 animate-fade-up">
+            <div className="mt-3 p-4 rounded-2xl bg-black/60 border border-emerald-400/20 text-xs space-y-1 animate-fade-up min-w-0">
               <p className="font-black tracking-widest text-emerald-300">BACKEND: {backendVerdict.verdict.action.toUpperCase()} ({backendVerdict.verdict.severity})</p>
               <p className="text-slate-300">{backendVerdict.verdict.message}</p>
               <p className="text-slate-500 font-mono">
@@ -264,12 +280,13 @@ export default function SimulatorPage() {
       )}
 
       {!currentSimulation && (
-        <div className="rounded-[28px] border border-dashed border-white/15 bg-white/[0.02] p-10 text-center">
+        <div className="rounded-[28px] border border-dashed border-white/15 bg-white/[0.02] p-8 sm:p-10 text-center animate-fade-up">
           <div className="w-14 h-14 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center mx-auto">
             {verdict ? <CheckCircle2 className="w-6 h-6 text-[#10B981]" /> : <Clock className="w-6 h-6 text-slate-500" />}
           </div>
-          <p className="text-sm text-slate-300 font-bold mt-4">No simulation yet — hit SIMULATE above.</p>
-          <p className="text-xs text-slate-500 mt-1">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
+          <p className="font-display font-extrabold text-lg mt-4">No simulation yet</p>
+          <p className="text-sm text-slate-400 mt-1">Item + amount + mode chuno, phir SIMULATE dabao — 5 second me verdict.</p>
+          <p className="text-xs text-slate-500 mt-2">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
         </div>
       )}
     </div>
