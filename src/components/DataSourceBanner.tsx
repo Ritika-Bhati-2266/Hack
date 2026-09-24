@@ -1,8 +1,8 @@
 'use client';
 
-import { FileCheck2, Landmark, Pencil, PlugZap } from 'lucide-react';
+import { FileCheck2, Landmark, PlugZap } from 'lucide-react';
 
-type Source = 'aa' | 'csv' | 'custom' | string;
+type Source = 'aa' | 'csv' | string;
 
 /**
  * DataSourceBanner — production mode: only real sources.
@@ -41,26 +41,6 @@ export default function DataSourceBanner({ source }: { source: Source }) {
           <p className="mt-1 text-[13px] leading-relaxed text-mist">
             Bank se sidha aaya hua <b className="text-white">live data</b> — yahi numbers
             Dashboard + Simulator me chal rahe hain.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Manually-entered custom profile — real numbers, but not bank-verified.
-  if (source === 'custom') {
-    return (
-      <div className="flex items-start gap-3 rounded-2xl border border-violet-400/30 bg-violet-400/[0.08] px-4 py-3.5">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-400/15 border border-violet-400/30">
-          <Pencil className="h-4 w-4 text-violet-300" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-[11px] font-black tracking-[0.18em] text-violet-300">
-            CUSTOM PROFILE — NOT BANK-VERIFIED
-          </p>
-          <p className="mt-1 text-[13px] leading-relaxed text-mist">
-            Ye haath se dale hue numbers hain. Sahi runway aur verdict ke liye{' '}
-            <b className="text-white">Connect</b> page se AA ya CSV se jodo.
           </p>
         </div>
       </div>

@@ -15,6 +15,8 @@ export default function GoalsPage() {
   const blankForm = { name: '', targetAmount: 100000, currentAmount: 0, monthlyContribution: 10000, targetDate: '', category: 'emergency' as Goal['category'] };
   const [form, setForm] = useState(blankForm);
   const [editForm, setEditForm] = useState({ currentAmount: 0, monthlyContribution: 0, targetAmount: 0, targetDate: '' });
+  // Frozen "today" for days-left math (stable across re-renders).
+  const [nowMs] = useState(() => Date.now());
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   const canAdd = form.name.trim().length >= 2 && form.targetAmount > 0 && form.monthlyContribution >= 0 && form.currentAmount >= 0 && form.targetDate !== '';
@@ -90,6 +92,11 @@ export default function GoalsPage() {
           const pct = Math.min(100, Math.round((g.currentAmount / Math.max(1, g.targetAmount)) * 100));
           const delay = currentSimulation?.perGoalDelays?.find((d) => d.goalId === g.id)?.delayMonths ?? 0;
           const remaining = g.targetAmount - g.currentAmount;
+          // Days left from existing targetDate only — invalid/empty date skips the line.
+          const deadlineMs = new Date(g.targetDate + 'T00:00:00').getTime();
+          const daysLeft = g.targetDate && !Number.isNaN(deadlineMs)
+            ? Math.max(0, Math.ceil((deadlineMs - nowMs) / 86400000))
+            : null;
           const isEditing = editing === g.id;
           return (
             <div key={g.id} className="rounded-[24px] bg-surface border border-white/[0.08] p-4 sm:p-6 space-y-4 card-hover animate-fade-up min-w-0" style={{ animationDelay: `${i * 0.07}s` }}>
@@ -98,6 +105,10 @@ export default function GoalsPage() {
                   <h3 className="font-display font-extrabold text-[17px] break-words">{g.name}</h3>
                   <p className="text-[11px] text-dusk font-mono mt-1 flex items-center gap-1.5">
                     <CalendarClock className="w-3 h-3" /> target {g.targetDate} • {inr(g.monthlyContribution)}/mo
+                  </p>
+                  <p className="text-[11px] font-mono mt-1 text-mist">
+                    {inr(g.currentAmount)} saved of {inr(g.targetAmount)}
+                    {daysLeft !== null && <span className="text-dusk"> • {daysLeft}d left</span>}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">

@@ -1,6 +1,18 @@
 import Link from 'next/link';
-import { ShieldCheck, Lock, PlugZap } from 'lucide-react';
+import { ShieldCheck, Info, Lock, PlugZap } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
+
+/** Hover/tap tooltip (CSS-only: mouse hover + keyboard/touch focus). */
+function Tip({ text }: { text: string }) {
+  return (
+    <span className="relative inline-flex group/tip" tabIndex={0}>
+      <Info className="w-3 h-3 text-dusk hover:text-mist transition-colors cursor-help" />
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 z-10 mb-1.5 w-48 rounded-xl border border-white/10 bg-elevated px-3 py-2 text-[10px] font-normal normal-case tracking-normal text-mist opacity-0 shadow-xl transition-opacity group-hover/tip:opacity-100 group-focus-within/tip:opacity-100">
+        {text}
+      </span>
+    </span>
+  );
+}
 
 export default function FinancialFirewall() {
   const { user, liveData } = useFinanceStore();
@@ -82,8 +94,8 @@ export default function FinancialFirewall() {
 
         {/* Bar */}
         <div className="mb-2 flex items-center justify-between text-[11px] font-bold tracking-widest">
-          <span className="text-amber-300/80">■ EARMARKED {earmarkedPct}%</span>
-          <span className="text-safe">■ FREE BUFFER {100 - earmarkedPct}%</span>
+          <span className="text-amber-300/80 inline-flex items-center gap-1.5">■ EARMARKED {earmarkedPct}% <Tip text="Essential/committed expenses (rent, SIP, bills) — locked before spending" /></span>
+          <span className="text-safe inline-flex items-center gap-1.5">■ FREE BUFFER {100 - earmarkedPct}% <Tip text="Amount available after locked expenses are covered" /></span>
         </div>
         <div className="h-5 w-full bg-well/70 rounded-full p-1 flex overflow-hidden border border-white/[0.08]">
           <div style={{ width: `${(rent / Math.max(1, user.totalBalance)) * 100}%` }} className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-l-full" title={`Rent ${inr(rent)}`} />

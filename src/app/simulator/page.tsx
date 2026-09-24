@@ -11,8 +11,22 @@ import { PaymentMode } from '@/types';
 import { simulateOnBackend, BackendVerdict } from '@/lib/api';
 import { backendEMI } from '@/lib/engine';
 
+const PRESETS = [
+  { label: 'iPhone 16 Pro Max', Icon: Smartphone },
+  { label: 'MacBook Air', Icon: Laptop },
+  { label: 'Bali Trip', Icon: Plane },
+] as const;
+
+function ItemIcon({ name, className }: { name: string; className?: string }) {
+  const n = name.toLowerCase();
+  if (/(iphone|phone|mobile|pixel|galaxy)/.test(n)) return <Smartphone className={className} />;
+  if (/(macbook|laptop|tablet|ipad|computer)/.test(n)) return <Laptop className={className} />;
+  if (/(trip|bali|flight|travel|vacation|goa)/.test(n)) return <Plane className={className} />;
+  return <ShoppingBag className={className} />;
+}
+
 export default function SimulatorPage() {
-  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, customProfiles, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
+  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
   const [itemName, setItemName] = useState('iPhone 16 Pro Max');
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
@@ -21,7 +35,7 @@ export default function SimulatorPage() {
   const [backendVerdict, setBackendVerdict] = useState<BackendVerdict | null>(null);
   const [backendLoading, setBackendLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
-  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : customProfiles[activeCustomer] ? 'custom' : 'none';
+  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : 'none';
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
 
   const handleVerifyBackend = async () => {
@@ -48,21 +62,6 @@ export default function SimulatorPage() {
 
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
   const pct = Math.min(100, Math.max(0, (price / Math.max(1, user.totalBalance)) * 100));
-
-  const PRESETS = [
-    { label: 'iPhone 16 Pro Max', Icon: Smartphone },
-    { label: 'MacBook Air', Icon: Laptop },
-    { label: 'Bali Trip', Icon: Plane },
-  ] as const;
-
-  const itemIconFor = (name: string) => {
-    const n = name.toLowerCase();
-    if (/(iphone|phone|mobile|pixel|galaxy)/.test(n)) return Smartphone;
-    if (/(macbook|laptop|tablet|ipad|computer)/.test(n)) return Laptop;
-    if (/(trip|bali|flight|travel|vacation|goa)/.test(n)) return Plane;
-    return ShoppingBag;
-  };
-  const ActiveItemIcon = itemIconFor(itemName);
 
   // Displayed estimates use the same reducing-balance formula as the verdict engine
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
@@ -123,7 +122,7 @@ export default function SimulatorPage() {
             <div>
               <label className="text-[10px] font-black tracking-[0.18em] text-dusk">WHAT ARE YOU BUYING?</label>
               <div className="relative mt-2">
-                <ActiveItemIcon className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-dusk pointer-events-none" />
+                <ItemIcon name={itemName} className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-dusk pointer-events-none" />
                 <input
                   value={itemName}
                   onChange={(e) => setItemName(e.target.value)}

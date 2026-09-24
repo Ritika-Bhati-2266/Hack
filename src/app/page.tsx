@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ShieldCheck,
   TrendingUp,
@@ -22,14 +22,29 @@ import {
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { previewSimulation } from '@/lib/engine';
 import FinancialFirewall from '@/components/FinancialFirewall';
+import InsightsPanel from '@/components/InsightsPanel';
 import DataSourceBanner from '@/components/DataSourceBanner';
 
 export default function DashboardPage() {
   const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
+  const [gateDismissed, setGateDismissed] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem('previse-gate-dismissed') === '1'
+  );
+  // Hydration guard: zustand persist restores after first paint — gate only
+  // evaluates once restored state is in, so returning users see no flash.
+  const [hydrated, setHydrated] = useState(
+    () => useFinanceStore.persist?.hasHydrated() ?? false
+  );
+  useEffect(() => useFinanceStore.persist?.onFinishHydration(() => setHydrated(true)), []);
   const [form, setForm] = useState({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 });
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
-  const bannerSource = liveData ? liveData.source : customProfiles[activeCustomer] ? 'custom' : 'none';
+  // First-visit gate: no bank data + no saved profiles + not guest-dismissed.
+  const showGate = hydrated && !liveData && Object.keys(customProfiles).length === 0 && !gateDismissed;
+  const dismissGate = () => {
+    try { localStorage.setItem('previse-gate-dismissed', '1'); } catch { /* private mode — ignore */ }
+    setGateDismissed(true);
+  };
   const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
   const earmarkedTotal = form.rent + form.sip + form.bills;
 
@@ -79,37 +94,8 @@ export default function DashboardPage() {
       {/* Background Cyber Lights */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
 
-      {/* ── Ticker ─────────────────────────────── */}
-      <div className="overflow-hidden max-w-full rounded-full border border-cyan-500/20 bg-cyan-950/20 backdrop-blur-md py-3 px-5 select-none shadow-[0_0_20px_rgba(0,240,255,0.1)]" aria-hidden="true">
-        <div className="flex whitespace-nowrap animate-ticker gap-10 sm:gap-12 text-[11px] sm:text-xs font-mono text-cyan-300/80 w-max">
-          {[0, 1].map((k) => (
-            <span key={k} className="flex gap-10 sm:gap-12 shrink-0 pr-10 sm:pr-12">
-              {hasData ? (
-                <>
-                  <span className="shrink-0">RUNWAY <b className="text-cyan-400 font-bold">{safeRunway} MO</b></span>
-                  <span className="shrink-0">BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
-                  <span className="shrink-0">FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
-                  <span className="shrink-0">ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
-                  <span className="shrink-0">AA <b className="text-safe font-bold">LIVE</b></span>
-                  <span className="shrink-0">CSV <b className="text-white font-bold">REAL DATA</b></span>
-                  <span className="shrink-0">QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
-                </>
-              ) : (
-                <>
-                  <span className="shrink-0">STATUS <b className="text-amber-300 font-bold">NO DATA CONNECTED</b></span>
-                  <span className="shrink-0">CONNECT <b className="text-cyan-400 font-bold">AA / CSV REQUIRED</b></span>
-                  <span className="shrink-0">ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO MOCK NUMBERS</b></span>
-                  <span className="shrink-0">FIREWALL <b className="text-white font-bold">LOCKS EXPENSES AUTOMATICALLY</b></span>
-                  <span className="shrink-0">QA <b className="text-emerald-400 font-bold">SYSTEM ACTIVE</b></span>
-                </>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {/* ── Profiles (live + custom only, no demo) ──────── */}
-      {<DataSourceBanner source={bannerSource} />}
+      {liveData ? <DataSourceBanner source={liveData.source} /> : customProfiles[activeCustomer] ? null : <DataSourceBanner source="none" />}
       <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
@@ -298,6 +284,9 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* ── PERSONAL INSIGHTS (skips lines without data) ── */}
+      <InsightsPanel />
+
       {/* ── FULL TRACKING (teaser when no bank data) ── */}
       {!liveData && (
         <div className="flex items-center gap-2.5 px-1 animate-fade-up">
@@ -426,6 +415,39 @@ export default function DashboardPage() {
           </div>
         ))}
       </section>
+
+      {/* Profile gate (first visit only) */}
+      {showGate && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-base/85 backdrop-blur-md p-4 animate-fade-up">
+          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-5 text-center shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-500 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(0,240,255,0.4)]">
+              <span className="font-display font-black text-white text-2xl leading-none">P</span>
+            </div>
+            <div>
+              <h2 className="font-display font-black text-2xl tracking-tight text-white">Pehle profile chuno</h2>
+              <p className="text-sm text-mist mt-2 leading-relaxed">Simulate kiske paison pe karna hai? Manual profile banao ya bank connect karo — bina profile ke numbers zero rahenge.</p>
+            </div>
+            <div className="space-y-2.5">
+              <button
+                onClick={() => setShowCreate(true)}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(0,240,255,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
+              >
+                Create Profile (manual)
+              </button>
+              <Link
+                href="/connect"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white hover:bg-white/10 transition-all"
+              >
+                <Lock className="w-4 h-4 text-amber-300" />
+                Connect Bank (AA / CSV)
+              </Link>
+              <button onClick={dismissGate} className="w-full py-2 text-xs font-bold text-dusk hover:text-mist transition-colors">
+                Explore with zeros →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create profile modal */}
       {showCreate && (

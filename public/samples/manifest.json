@@ -1,0 +1,18 @@
+{
+  "samples": [
+    {
+      "id": "spender",
+      "file": "spender.csv",
+      "label": "Spender — travel & food heavy",
+      "blurb": "Frequent flyer, high outflow",
+      "balance": 200000
+    },
+    {
+      "id": "saver",
+      "file": "saver.csv",
+      "label": "Saver — high surplus",
+      "blurb": "Salary in, SIP out, little else",
+      "balance": 500000
+    }
+  ]
+}

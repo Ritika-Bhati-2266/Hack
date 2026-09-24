@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpreadsheet, Loader2, AlertTriangle, PlugZap } from 'lucide-react';
 import {
@@ -19,8 +19,23 @@ export default function ConnectPage() {
   const [expired, setExpired] = useState(false);
   const [balance, setBalance] = useState('150000');
   const [msg, setMsg] = useState<string | null>(null);
+  const [samples, setSamples] = useState<Array<{ id: string; file: string; label: string; blurb: string; balance: number }>>([]);
+  const [sampleId, setSampleId] = useState('');
   const setLiveData = useFinanceStore((s) => s.setLiveData);
   const clearLiveData = useFinanceStore((s) => s.clearLiveData);
+
+  // Sample list comes from the manifest — never hardcoded here.
+  useEffect(() => {
+    fetch('/samples/manifest.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((m) => {
+        if (m && Array.isArray(m.samples)) {
+          setSamples(m.samples);
+          setSampleId(m.samples[0]?.id || '');
+        }
+      })
+      .catch(() => { /* no samples — section stays hidden */ });
+  }, []);
 
   const adoptLive = (profile: LiveProfileRes) => {
     if (!profile || !profile.profile) return false;
@@ -75,6 +90,21 @@ export default function ConnectPage() {
   });
   const handleDelete = () => run(async () => {
     await deleteMyData(); setLive(null); setStep('idle'); clearLiveData(); setMsg('All session data deleted (DPDP).');
+  });
+
+  // Sample statements reuse the exact upload/parser flow (uploadCSV +
+  // adoptLive) — no separate logic. Loading replaces previous live data.
+  const handleSample = () => run(async () => {
+    const meta = samples.find((s) => s.id === sampleId);
+    if (!meta) throw new Error('Select a sample statement first.');
+    const res = await fetch(`/samples/${meta.file}`);
+    if (!res.ok) throw new Error(`Sample file missing (${meta.file}) — is public/samples deployed?`);
+    const blob = await res.blob();
+    const up = await uploadCSV(new File([blob], meta.file, { type: 'text/csv' }), Number(balance) || meta.balance);
+    const profile = await getLiveProfile();
+    setLive(profile); setStep('fetched');
+    adoptLive(profile);
+    setMsg(`✓ ${meta.file} loaded — ${up.message || 'parsed'}. Previous data replaced. Dashboard + Simulator ab isi data pe chal rahe hain.`);
   });
 
   const stepIdx = step === 'idle' ? 0 : step === 'consent' ? 1 : step === 'active' ? 2 : 3;
@@ -173,6 +203,28 @@ export default function ConnectPage() {
             <Upload className="w-4 h-4" /> Choose CSV statement
             <input type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCSV(f); }} />
           </label>
+          {samples.length > 0 && (
+            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-3.5 space-y-2.5">
+              <p className="text-[10px] font-black tracking-[0.18em] text-dusk">OR TRY A SAMPLE — NO UPLOAD NEEDED</p>
+              <select
+                value={sampleId}
+                onChange={(e) => {
+                  setSampleId(e.target.value);
+                  const meta = samples.find((s) => s.id === e.target.value);
+                  if (meta) setBalance(String(meta.balance));
+                }}
+                className="w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-xs font-bold text-mist outline-none"
+              >
+                {samples.map((s) => (
+                  <option key={s.id} value={s.id}>{s.label} — {s.blurb}</option>
+                ))}
+              </select>
+              <button onClick={handleSample} disabled={loading} className="w-full py-2.5 rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-extrabold hover:bg-cyan-500/20 active:scale-[0.99] disabled:opacity-40 transition-all flex items-center justify-center gap-2">
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Load selected sample
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

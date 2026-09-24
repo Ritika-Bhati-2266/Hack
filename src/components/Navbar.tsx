@@ -22,7 +22,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Home', icon: LayoutDashboard },
-    { href: '/simulator', label: 'Simulator', icon: FlaskConical, hot: true },
+    { href: '/simulator', label: 'Simulator', icon: FlaskConical },
     { href: '/transactions', label: 'Txns', icon: List },
     { href: '/connect', label: 'Connect', icon: PlugZap },
     { href: '/goals', label: 'Goals', icon: Target },
@@ -69,11 +69,6 @@ export default function Navbar() {
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-cyan-400/80'}`} />
                 <span>{link.label}</span>
-                {link.hot && !isActive && (
-                  <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                    AI
-                  </span>
-                )}
               </Link>
             );
           })}

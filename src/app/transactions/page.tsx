@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, ListFilter, Search, PlugZap } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import DataSourceBanner from '@/components/DataSourceBanner';
+import InsightsPanel from '@/components/InsightsPanel';
 
 export default function TransactionsPage() {
   const { liveData } = useFinanceStore();
@@ -71,6 +72,8 @@ export default function TransactionsPage() {
       </Link>
 
       <DataSourceBanner source={liveData.source} />
+
+      <InsightsPanel />
 
       <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-surface p-6 sm:p-8">
         <div className="absolute inset-0 bg-grid opacity-60" />
