@@ -268,7 +268,16 @@ export default function DashboardPage() {
 
       {/* ── STATS BENTO ────────────────────────── */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up stagger-2">
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group col-span-2 lg:col-span-1 border-cyan-400/40 shadow-[0_0_35px_rgba(0,240,255,0.18)] bg-cyan-500/[0.06]">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-mono font-black tracking-[0.16em] text-cyan-300">SPEND TODAY ★</span>
+            <Wallet className="w-5 h-5 text-cyan-300 group-hover:scale-110 transition-transform" />
+          </div>
+          <p className="font-display font-black text-[40px] leading-none text-cyan-300 font-mono">{inr(safeToSpendToday)}</p>
+          <p className="text-[11px] mt-2 font-mono text-gray-300">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
+        </div>
+
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">SAFE BUFFER</span>
             <ShieldCheck className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
@@ -280,7 +289,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">RUNWAY</span>
             <Clock className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform" />
@@ -291,22 +300,13 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
+        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">GOALS</span>
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
           </div>
           <p className="font-display font-black text-[32px] leading-none text-white">{goalsOnTrack} <span className="text-base font-bold text-cyan-400">on track</span></p>
           <p className="text-[11px] text-gray-400 mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
-        </div>
-
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">SPEND TODAY</span>
-            <Wallet className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="font-display font-black text-[32px] leading-none text-cyan-300 font-mono">{inr(safeToSpendToday)}</p>
-          <p className="text-[11px] mt-2 font-mono text-gray-400">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
         </div>
       </section>
 
@@ -355,17 +355,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl overflow-hidden border border-white/[0.08] bg-gradient-to-b from-surface to-well p-6 flex flex-col justify-between relative">
+        <div className="rounded-3xl overflow-hidden border border-white/[0.08] bg-gradient-to-b from-surface to-well p-7 flex flex-col justify-between relative">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
               <Zap className="w-6 h-6 text-primary" />
             </div>
             <h3 className="font-display font-extrabold text-xl leading-tight">Know before you swipe</h3>
             <p className="text-xs text-mist leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroVerdict}</b>. Live data pe based.</p>
-            <div className="rounded-2xl bg-well/60 border border-white/[0.08] p-3.5 font-mono text-[11px] space-y-1.5">
-              <div className="flex justify-between"><span className="text-dusk">INPUT</span><span className="text-white">iPhone ₹80k cash</span></div>
-              <div className="flex justify-between"><span className="text-dusk">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold' : 'text-safe font-bold'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
+            <div className="rounded-2xl bg-well/60 border border-white/[0.08] p-4 font-mono text-[11px] space-y-2.5">
+              <div className="flex justify-between gap-4"><span className="text-dusk shrink-0">INPUT</span><span className="text-white text-right">iPhone ₹80k cash</span></div>
+              <div className="h-px bg-white/[0.06]" />
+              <div className="flex justify-between gap-4"><span className="text-dusk shrink-0">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold text-right' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold text-right' : 'text-safe font-bold text-right'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
             </div>
           </div>
           <Link href="/simulator" className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm hover:brightness-110 transition-colors">
