@@ -10,23 +10,20 @@ import {
   ArrowRight,
   Lock,
   Wallet,
-  Plus,
-  X,
-  Trash2,
   Smartphone,
   Laptop,
   Plane,
   BadgeCheck,
-  Flame,
 } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { previewSimulation } from '@/lib/engine';
 import FinancialFirewall from '@/components/FinancialFirewall';
 import InsightsPanel from '@/components/InsightsPanel';
 import DataSourceBanner from '@/components/DataSourceBanner';
+import CreateProfileModal from '@/components/CreateProfileModal';
 
 export default function DashboardPage() {
-  const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
+  const { user, goals, activeCustomer, customProfiles, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
   // Hydration-safe: server snapshot is always false, so server HTML and the
   // first client render both omit the gate. After zustand persist restores,
@@ -36,16 +33,9 @@ export default function DashboardPage() {
     () => useFinanceStore.persist?.hasHydrated() ?? false,
     () => false
   );
-  const [form, setForm] = useState({ name: '', monthlyIncome: '', totalBalance: '', dailyBurnRate: '', rent: '', sip: '', bills: '' });
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
   // First-visit gate: no bank data + no saved profiles.
   const showGate = hydrated && !liveData && Object.keys(customProfiles).length === 0;
-  // String-backed inputs so fields can be cleared/typed freely; parsed only for validation/submit.
-  const toNum = (v: string) => (v.trim() === '' ? 0 : Number(v));
-  const incomeNum = toNum(form.monthlyIncome);
-  const balanceNum = toNum(form.totalBalance);
-  const canCreate = form.name.trim().length >= 2 && Number.isFinite(incomeNum) && incomeNum > 0 && incomeNum <= 100000000 && Number.isFinite(balanceNum) && balanceNum > 0 && balanceNum <= 100000000 && [form.dailyBurnRate, form.rent, form.sip, form.bills].every((v) => { const n = toNum(v); return Number.isFinite(n) && n >= 0 && n <= 100000000; });
-  const earmarkedTotal = toNum(form.rent) + toNum(form.sip) + toNum(form.bills);
 
   const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
   // Single source of truth: same backend-parity engine as the Simulator.
@@ -93,51 +83,7 @@ export default function DashboardPage() {
       {/* Background Cyber Lights */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
 
-      {/* ── Profiles (live + custom only, no demo) ──────── */}
       {liveData ? <DataSourceBanner source={liveData.source} /> : customProfiles[activeCustomer] ? null : <DataSourceBanner source="none" />}
-      <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center gap-2 px-1 shrink-0">
-          <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
-          <span className="text-[11px] font-mono font-extrabold tracking-[0.18em] text-cyan-300">PROFILES</span>
-        </div>
-        <div className="flex flex-wrap gap-2 flex-1">
-          {liveData && (
-            <button
-              onClick={() => switchCustomer('live')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
-                activeCustomer === 'live'
-                  ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-                  : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
-              }`}
-            >
-              ● Live
-              <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-80">
-                • {liveData.source === 'csv' ? 'CSV' : 'AA'}
-              </span>
-            </button>
-          )}
-          {Object.keys(customProfiles).map((id) => (
-            <button
-              key={id}
-              onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all active:scale-95 ${
-                activeCustomer === id ? 'bg-cyan-400 text-black border-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.5)]' : 'bg-white/5 text-cyan-300 border-cyan-500/20'
-              }`}
-            >
-              {customProfiles[id].label.split(' ')[0]}
-              <span onClick={(e) => { e.stopPropagation(); deleteProfile(id); }} className="opacity-60 hover:opacity-100">
-                <Trash2 className="w-3 h-3" />
-              </span>
-            </button>
-          ))}
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dashed border-cyan-500/40 text-cyan-300 text-xs font-bold transition-all active:scale-95 hover:border-cyan-400 hover:bg-cyan-500/10"
-          >
-            <Plus className="w-3.5 h-3.5" /> Create Profile
-          </button>
-        </div>
-      </div>
 
       {/* ── HERO (landing-first) ───────────────── */}
       <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#070b14]/90 backdrop-blur-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)] animate-fade-up stagger-1">
@@ -445,39 +391,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Create profile modal */}
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 backdrop-blur-sm p-4 pb-safe" onClick={() => setShowCreate(false)}>
-          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90dvh] overflow-y-auto overscroll-contain animate-fade-up" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-extrabold">Create Profile</h3>
-              <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-mist" /></button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="sm:col-span-2">
-                <label className="text-[11px] font-bold tracking-widest text-dusk">NAME</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name" className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
-              </div>
-              {([['monthlyIncome', 'MONTHLY INCOME (₹)'], ['totalBalance', 'TOTAL BALANCE (₹)'], ['dailyBurnRate', 'DAILY BURN (₹)'], ['rent', 'RENT (₹)'], ['sip', 'SIP (₹)'], ['bills', 'BILLS (₹)']] as const).map(([k, label]) => (
-                <div key={k}>
-                  <label className="text-[11px] font-bold tracking-widest text-dusk">{label}</label>
-                  <input type="number" min={0} inputMode="decimal" placeholder="0" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
-                </div>
-              ))}
-            </div>
-            {earmarkedTotal > balanceNum && balanceNum > 0 && (
-              <p className="text-[11px] text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">Monthly earmarked (₹{earmarkedTotal.toLocaleString('en-IN')}) exceeds your balance — runway will start from 0.</p>
-            )}
-            <button
-              disabled={!canCreate}
-              onClick={() => { createProfile({ name: form.name.trim(), monthlyIncome: Number(form.monthlyIncome) || 0, totalBalance: Number(form.totalBalance) || 0, dailyBurnRate: Number(form.dailyBurnRate) || 0, rent: Number(form.rent) || 0, sip: Number(form.sip) || 0, bills: Number(form.bills) || 0 }); setShowCreate(false); setForm({ name: '', monthlyIncome: '', totalBalance: '', dailyBurnRate: '', rent: '', sip: '', bills: '' }); }}
-              className={`w-full py-3 rounded-xl font-bold text-sm ${canCreate ? 'bg-primary text-white hover:brightness-110' : 'bg-white/5 text-dusk cursor-not-allowed'}`}
-            >
-              Create & Switch
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Create profile modal (shared with navbar) */}
+      <CreateProfileModal open={showCreate} onClose={() => setShowCreate(false)} />
     </div>
   );
 }

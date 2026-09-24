@@ -1,24 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FlaskConical, PlugZap, Target, List, History, Star } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, PlugZap, Target, List, History, Star, Plus } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
-import { usableBalance } from '@/lib/engine';
+import CreateProfileModal from '@/components/CreateProfileModal';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, activeCustomer, customProfiles, liveData } = useFinanceStore();
+  const { activeCustomer, customProfiles, liveData } = useFinanceStore();
+  const [showCreate, setShowCreate] = useState(false);
 
-  const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
-  // Firewall-aware: commitments due till today are locked (matches engine).
-  const buffer = usableBalance(user);
-
-  const displayName =
+  const pillLabel =
     activeCustomer === 'live' && liveData
-      ? `Live (${liveData.source === 'csv' ? 'CSV' : 'AA'})`
+      ? `Live • ${liveData.source === 'csv' ? 'CSV' : 'AA'}`
       : customProfiles[activeCustomer]?.label || 'No Data';
-  const initial = (displayName.trim().charAt(0) || 'N').toUpperCase();
 
   const navLinks = [
     { href: '/', label: 'Home', icon: LayoutDashboard },
@@ -74,27 +71,22 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Profile cluster (right) — Simulator lives in the pill nav, no extra CTA */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden sm:flex items-center gap-2.5 pr-1 shrink-0">
-            <span className="w-8 h-8 rounded-full bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-xs font-black text-cyan-300 shrink-0">
-              {initial}
-            </span>
-            <span className="text-xs font-bold text-gray-200 max-w-[90px] truncate whitespace-nowrap">{displayName}</span>
+        {/* Profile cluster (right) — matches dashboard PROFILES pill style */}
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <div
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-bold border border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            {pillLabel}
           </div>
-          <div className="hidden sm:block text-right leading-none shrink-0">
-            <p className="text-[10px] font-mono font-bold tracking-widest text-gray-400 whitespace-nowrap">SAFE BUFFER</p>
-            {hasData ? (
-              <p className="font-mono font-bold text-[15px] text-cyan-300 mt-1 whitespace-nowrap drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-                ₹{(buffer / 1000).toFixed(1)}k
-              </p>
-            ) : (
-              <p className="font-mono font-bold text-[12px] text-amber-300/90 mt-1 whitespace-nowrap">
-                --
-              </p>
-            )}
-          </div>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dashed border-cyan-500/40 text-cyan-300 text-xs font-bold transition-all active:scale-95 hover:border-cyan-400 hover:bg-cyan-500/10"
+          >
+            <Plus className="w-3.5 h-3.5" /> Create Profile
+          </button>
         </div>
+        <CreateProfileModal open={showCreate} onClose={() => setShowCreate(false)} />
       </div>
 
       {/* Mobile nav */}
