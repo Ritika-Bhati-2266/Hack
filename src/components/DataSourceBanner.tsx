@@ -20,8 +20,8 @@ export default function DataSourceBanner({ source }: { source: Source }) {
             LIVE DATA — YOUR CSV ✓ REAL
           </p>
           <p className="mt-1 text-[13px] leading-relaxed text-mist">
-            Ye tumhare upload kiye statement ke <b className="text-white">asli numbers</b> hain
-            + tumhara diya hua balance.
+            These are the <b className="text-white">real numbers</b> from your uploaded
+            statement, plus the balance you entered.
           </p>
         </div>
       </div>
@@ -39,8 +39,8 @@ export default function DataSourceBanner({ source }: { source: Source }) {
             LIVE DATA — ACCOUNT AGGREGATOR ✓
           </p>
           <p className="mt-1 text-[13px] leading-relaxed text-mist">
-            Bank se sidha aaya hua <b className="text-white">live data</b> — yahi numbers
-            Dashboard + Simulator me chal rahe hain.
+            <b className="text-white">Live data</b> straight from your bank — powering
+            these same numbers in the Dashboard + Simulator.
           </p>
         </div>
       </div>
@@ -58,8 +58,8 @@ export default function DataSourceBanner({ source }: { source: Source }) {
           NO DATA — CONNECT REQUIRED
         </p>
         <p className="mt-1 text-[13px] leading-relaxed text-mist">
-          Abhi koi bank data nahi hai. <b className="text-white">Connect</b> page se AA ya CSV
-          se jodo — tabhi runway aur verdict sahi aayega.
+            No bank data connected yet. <b className="text-white">Connect</b> via AA or CSV
+            on the Connect page — only then will runway and verdicts be accurate.
         </p>
       </div>
     </div>

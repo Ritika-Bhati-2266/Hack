@@ -37,7 +37,7 @@ export default function AdminPage() {
           <Users className="w-3.5 h-3.5" /> BETA ADMIN {rows ? `• ${rows.length} SIGNUPS` : ''}
         </div>
         <h1 className="font-display font-black text-3xl tracking-tight">Beta signups</h1>
-        <p className="text-sm text-mist">Token-gated list — backend <span className="font-mono">BETA_ADMIN_TOKEN</span> se match hona chahiye (env var set karo).</p>
+        <p className="text-sm text-mist">Token-gated list — must match <span className="font-mono">BETA_ADMIN_TOKEN</span> on the backend (set the env var).</p>
         <div className="flex gap-2">
           <div className="flex items-center gap-2 flex-1 bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5">
             <KeyRound className="w-4 h-4 text-dusk shrink-0" />
@@ -47,7 +47,7 @@ export default function AdminPage() {
             {loading && <Loader2 className="w-4 h-4 animate-spin" />} Load
           </button>
         </div>
-        {error && <p className="text-xs text-red-300">{error} — token galat hai ya backend :3001 down hai.</p>}
+        {error && <p className="text-xs text-red-300">{error} — wrong token or backend :3001 is down.</p>}
         <label className="flex items-center gap-2 text-xs text-mist">
           <input type="checkbox" checked={reveal} onChange={(e) => setReveal(e.target.checked)} /> Full emails dikhao (default masked — PII hygiene)
         </label>
@@ -64,7 +64,7 @@ export default function AdminPage() {
               <span className="text-[10px] font-mono text-dusk shrink-0">{r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN') : ''}</span>
             </div>
           ))}
-          {rows.length === 0 && <p className="text-sm text-dusk text-center py-8">Abhi koi signup nahi.</p>}
+          {rows.length === 0 && <p className="text-sm text-dusk text-center py-8">No signups yet.</p>}
         </div>
       )}
     </div>

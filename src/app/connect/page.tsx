@@ -73,20 +73,20 @@ export default function ConnectPage() {
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
     adoptLive(profile);
-    setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator ab isi data pe chal rahe hain.`);
+    setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator now run on this data.`);
   });
   const handleCSV = async (file: File) => run(async () => {
     // Backend requires explicit balance — CSV has no balance column.
     const trimmed = balance.trim();
     const b = Number(trimmed);
     if (trimmed === '' || !Number.isFinite(b) || b < 0) {
-      throw new Error('Current balance dalo (₹ me number) — CSV me balance column nahi hota, iske bina runway galat aayega.');
+      throw new Error('Enter your current balance (number in ₹) — CSVs have no balance column, and without it the runway will be wrong.');
     }
     const res = await uploadCSV(file, b);
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
     adoptLive(profile);
-    setMsg(`${res.message || 'CSV parsed'} — source: csv. Dashboard + Simulator ab isi data pe chal rahe hain. ${res.balanceWarning || ''} ${(res.meta?.warnings || []).join(' ')}`.trim());
+    setMsg(`${res.message || 'CSV parsed'} — source: csv. Dashboard + Simulator now run on this data. ${res.balanceWarning || ''} ${(res.meta?.warnings || []).join(' ')}`.trim());
   });
   const handleDelete = () => run(async () => {
     await deleteMyData(); setLive(null); setStep('idle'); clearLiveData(); setMsg('All session data deleted (DPDP).');
@@ -104,7 +104,7 @@ export default function ConnectPage() {
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
     adoptLive(profile);
-    setMsg(`✓ ${meta.file} loaded — ${up.message || 'parsed'}. Previous data replaced. Dashboard + Simulator ab isi data pe chal rahe hain.`);
+    setMsg(`✓ ${meta.file} loaded — ${up.message || 'parsed'}. Previous data replaced. Dashboard + Simulator now run on this data.`);
   });
 
   const stepIdx = step === 'idle' ? 0 : step === 'consent' ? 1 : step === 'active' ? 2 : 3;
@@ -123,7 +123,7 @@ export default function ConnectPage() {
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight mt-3">Connect your money.</h1>
           <p className="text-sm text-mist mt-2 max-w-lg">
-            AA flow ya CSV upload — backend <span className="font-mono text-safe">:3001</span> pe session-isolated. Real bank data, koi demo nahi.
+            AA flow or CSV upload — session-isolated on backend <span className="font-mono text-safe">:3001</span>. Real bank data, no demo.
           </p>
 
           {/* Stepper */}
@@ -158,7 +158,7 @@ export default function ConnectPage() {
       )}
       {expired && (
         <div className="text-sm text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 animate-fade-up">
-          <b>Session expired (1h TTL)</b> — {msg || 'dobara connect karo.'} AA ya CSV se dobara connect karo, 10 second me restore ho jayega.
+          <b>Session expired (1h TTL)</b> — {msg || 'reconnect to restore.'} Reconnect via AA or CSV, restored in 10 seconds.
         </div>
       )}
 
@@ -242,7 +242,7 @@ export default function ConnectPage() {
             <PlugZap className="w-5 h-5 text-dusk" />
           </div>
           <p className="font-display font-extrabold text-lg mt-3">No live data yet</p>
-          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Upar Option A (AA) ya Option B (CSV) se connect karo. Phir yahan balance, runway aur safe-spend dikhega.</p>
+          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Connect via Option A (AA) or Option B (CSV) above. Balance, runway and safe-spend will appear here.</p>
         </div>
       )}
 

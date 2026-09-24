@@ -80,7 +80,7 @@ export default function FinancialFirewall() {
                 </span>
               </div>
               <p className="text-xs text-gray-400 mt-0.5">
-                Rent + SIP + bills pehle lock — uske baad hi safe-to-spend.
+                Rent + SIP + bills lock first — only then safe-to-spend.
               </p>
             </div>
           </div>

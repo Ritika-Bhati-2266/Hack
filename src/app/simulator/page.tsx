@@ -114,7 +114,7 @@ export default function SimulatorPage() {
             </div>
             <div>
               <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight">What-If Simulator</h1>
-              <p className="text-[13px] text-dusk">Swipe se pehle — runway, buffer, goals. Instant verdict.</p>
+              <p className="text-[13px] text-dusk">Before you swipe — runway, buffer, goals. Instant verdict.</p>
             </div>
           </div>
 
@@ -222,7 +222,7 @@ export default function SimulatorPage() {
               <AlertTriangle className="w-3.5 h-3.5 text-red-300 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[11px] font-bold text-red-300">{priceError}</p>
-                <p className="text-[11px] text-mist mt-0.5">Ye {pct.toFixed(0)}% of balance ({inr(user.totalBalance)}) hai — amount kam karo ya EMI / Loan mode try karo.</p>
+                <p className="text-[11px] text-mist mt-0.5">That&apos;s {pct.toFixed(0)}% of your balance ({inr(user.totalBalance)}) — lower the amount or try an EMI / Loan mode.</p>
               </div>
             </div>
           )}
@@ -255,7 +255,7 @@ export default function SimulatorPage() {
               <div className="min-w-0">
                 <p className="text-[11px] font-black tracking-[0.14em] text-red-300">BACKEND UNREACHABLE</p>
                 <p className="text-xs text-mist mt-1 break-words">{backendError}</p>
-                <p className="text-[11px] text-dusk mt-1">Express <span className="font-mono">:3001</span> chal raha hai? Local engine upar wala result abhi bhi valid hai.</p>
+                <p className="text-[11px] text-dusk mt-1">Is Express <span className="font-mono">:3001</span> running? The local-engine result above is still valid.</p>
               </div>
             </div>
           )}
@@ -353,13 +353,13 @@ export default function SimulatorPage() {
             </span>
           </div>
           <p className="font-display font-extrabold text-lg mt-4">No simulation yet</p>
-          <p className="text-sm text-mist mt-1">Item + amount + mode chuno, phir SIMULATE dabao — instant verdict.</p>
+          <p className="text-sm text-mist mt-1">Pick an item + amount + mode, then hit SIMULATE — instant verdict.</p>
           <div className="mt-4 inline-flex flex-wrap justify-center gap-2 font-mono text-[11px] text-dusk">
-            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">1 • Item likho</span>
-            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">2 • Amount set karo</span>
-            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">3 • SIMULATE dabao</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">1 • Type the item</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">2 • Set the amount</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">3 • Hit SIMULATE</span>
           </div>
-          <p className="text-xs text-dusk mt-3">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
+          <p className="text-xs text-dusk mt-3">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Then try 6 EMI → <b className="text-amber-300">EMI OK</b>.</p>
         </div>
       )}
 

@@ -163,8 +163,8 @@ export default function DashboardPage() {
               Know instantly.
             </h1>
             <p className="text-gray-300 text-[16px] leading-relaxed max-w-xl font-normal">
-              <b className="text-white font-semibold">“Mere paise ka kya hoga agar main ye kharidu?”</b> — Previse
-              runway, buffer aur goal-delay simulate karta hai <b className="text-cyan-300 font-semibold">swipe se pehle</b>.
+              <b className="text-white font-semibold">“What happens to my money if I buy this?”</b> — Previse
+              simulates runway, buffer and goal-delay <b className="text-cyan-300 font-semibold">before you swipe</b>.
               Deterministic rules. Zero hallucination.
             </p>
             <div className="flex flex-wrap gap-3.5 pt-2">
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                 </div>
               )}
               <div className="flex items-center justify-between px-1">
-                <span className="text-[11px] text-dusk">{hasData ? 'Live numbers pe based.' : 'Demo numbers — real ke liye connect karo.'}</span>
+                <span className="text-[11px] text-dusk">{hasData ? 'Based on live numbers.' : 'Demo numbers — connect for the real ones.'}</span>
                 <Link href="/simulator" className="inline-flex items-center gap-1 text-xs font-extrabold text-cyan-400 hover:gap-2 transition-all">
                   Full simulator <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -352,7 +352,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
             <div>
               <h3 className="font-display font-extrabold text-lg">Earmarked Ledger</h3>
-              <p className="text-xs text-dusk">Rent + SIP + bills — firewall locked, spend me count nahi</p>
+              <p className="text-xs text-dusk">Rent + SIP + bills — firewall-locked, excluded from spend</p>
             </div>
             {hasData ? (
               <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
@@ -367,7 +367,7 @@ export default function DashboardPage() {
           <div className="divide-y divide-white/[0.08]">
             {user.earmarkedExpenses.length === 0 && (
               <div className="py-8 text-center">
-                <p className="text-sm text-mist">Abhi kuch lock nahi hai — bank connect karo, earmarked funds yahan dikhenge.</p>
+                <p className="text-sm text-mist">Nothing locked yet — connect your bank and earmarked funds will appear here.</p>
                 <Link href="/connect" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400/15 text-amber-300 border border-amber-400/30 text-xs font-extrabold hover:bg-amber-400/25 transition-colors">
                   <Lock className="w-3.5 h-3.5" /> Connect bank to see earmarked funds
                 </Link>
@@ -424,25 +424,22 @@ export default function DashboardPage() {
               <span className="font-display font-black text-white text-2xl leading-none">P</span>
             </div>
             <div>
-              <h2 className="font-display font-black text-2xl tracking-tight text-white">Pehle profile chuno</h2>
-              <p className="text-sm text-mist mt-2 leading-relaxed">Simulate kiske paison pe karna hai? Manual profile banao ya bank connect karo — bina profile ke numbers zero rahenge.</p>
+              <h2 className="font-display font-black text-2xl tracking-tight text-white">No profile connected</h2>
+              <p className="text-sm text-mist mt-2 leading-relaxed">Connect your bank data or load a sample to see personalized financial insights.</p>
             </div>
             <div className="space-y-2.5">
-              <button
-                onClick={() => setShowCreate(true)}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(0,240,255,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
-              >
-                Create Profile (manual)
-              </button>
               <Link
                 href="/connect"
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white hover:bg-white/10 transition-all"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(0,240,255,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
               >
-                <Lock className="w-4 h-4 text-amber-300" />
-                Connect Bank (AA / CSV)
+                <Lock className="w-4 h-4 text-white" />
+                Connect Data (AA / CSV)
               </Link>
-              <button onClick={dismissGate} className="w-full py-2 text-xs font-bold text-dusk hover:text-mist transition-colors">
-                Explore with zeros →
+              <button
+                onClick={() => setShowCreate(true)}
+                className="w-full py-3.5 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white hover:bg-white/10 transition-all"
+              >
+                Create Profile Manually
               </button>
             </div>
           </div>

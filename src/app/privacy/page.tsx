@@ -17,15 +17,15 @@ export default function PrivacyPage() {
           <ShieldCheck className="w-3.5 h-3.5" /> DPDP COMPLIANCE • CONSENT {CONSENT_VERSION}
         </div>
         <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight">Privacy & data policy</h1>
-        <p className="text-sm text-mist">India’s Digital Personal Data Protection Act ke hisaab se — short, honest version.</p>
+        <p className="text-sm text-mist">A short, honest version aligned with India’s Digital Personal Data Protection Act.</p>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         {[
-          { icon: FileText, t: 'Purpose limitation', d: 'Tumhara data sirf ek kaam ke liye use hota hai — purchase simulation. Marketing, resale, kuch nahi.' },
-          { icon: ShieldCheck, t: 'Explicit consent', d: `AA flow me consent approve karne pe hi data fetch hota hai. Har consent pe version stamp lagta hai (current: ${CONSENT_VERSION}).` },
-          { icon: Clock, t: 'Retention — 1 hour sessions', d: 'Bank data sirf session me rehta hai, 1 hour TTL ke saath auto-delete. Beta signup emails 90 din ki inactivity ke baad delete — retention policy v1.' },
-          { icon: Trash2, t: 'Right to erasure', d: 'Connect tab → “Delete My Data” dabao — session, accounts, transactions turant wipe. Koi backup nahi rakha jata.' },
+          { icon: FileText, t: 'Purpose limitation', d: 'Your data is used for exactly one thing — purchase simulation. No marketing, no resale, nothing else.' },
+          { icon: ShieldCheck, t: 'Explicit consent', d: `Data is fetched only after you approve consent in the AA flow. Every consent carries a version stamp (current: ${CONSENT_VERSION}).` },
+          { icon: Clock, t: 'Retention — 1 hour sessions', d: 'Bank data lives only in the session and auto-deletes with the 1-hour TTL. Beta signup emails are deleted after 90 days of inactivity — retention policy v1.' },
+          { icon: Trash2, t: 'Right to erasure', d: 'Connect tab → “Delete My Data” — wipes session, accounts and transactions instantly. No backups kept.' },
         ].map((c) => (
           <div key={c.t} className="rounded-[24px] bg-surface border border-white/[0.08] p-5 space-y-2">
             <c.icon className="w-5 h-5 text-safe" />
@@ -38,8 +38,8 @@ export default function PrivacyPage() {
       <div className="rounded-[24px] bg-surface border border-white/[0.08] p-5 sm:p-6 space-y-2">
         <h2 className="font-display font-extrabold flex items-center gap-2"><Mail className="w-5 h-5 text-amber-300" /> Grievance officer</h2>
         <p className="text-[13px] text-mist leading-relaxed">
-          Data deletion ya privacy complaint ke liye: <b className="text-white">grievance@previse.in</b> (beta me team member handle karega, 48hr SLA).
-          Hosting India me (Railway/Render ap-south). 18 se kam umar ke users ke liye parent consent required.
+          For data deletion or privacy complaints: <b className="text-white">grievance@previse.in</b> (handled by a team member during beta, 48hr SLA).
+          Hosted in India (Railway/Render ap-south). Users under 18 need parent consent.
         </p>
         <div className="flex gap-2 pt-1">
           <Link href="/connect" className="text-xs font-bold px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20">

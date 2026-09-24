@@ -36,8 +36,8 @@ export default function HistoryPage() {
 
       {history.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-white/[0.08] bg-white/[0.02] p-10 text-center">
-          <p className="font-display font-extrabold text-lg">Koi history nahi</p>
-          <p className="text-sm text-mist mt-1">Simulator me pehla simulation chalao — yahan auto-log hoga.</p>
+          <p className="font-display font-extrabold text-lg">No history yet</p>
+          <p className="text-sm text-mist mt-1">Run your first simulation in the Simulator — it gets auto-logged here.</p>
           <Link href="/simulator" className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold">
             Open simulator →
           </Link>

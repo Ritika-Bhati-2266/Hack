@@ -59,7 +59,7 @@ export default function GoalsPage() {
               <Target className="w-3.5 h-3.5" /> {goals.length} ACTIVE GOALS
             </div>
             <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight mt-3">Goals, with consequences.</h1>
-            <p className="text-sm text-mist mt-2">Har simulation batata hai — ye purchase tumhare goal ko kitne months delay karega.</p>
+            <p className="text-sm text-mist mt-2">Every simulation shows how many months this purchase delays your goal.</p>
           </div>
           <div className="flex gap-2">
             {currentSimulation ? (
@@ -85,7 +85,7 @@ export default function GoalsPage() {
               <Target className="w-5 h-5 text-violet-300" />
             </div>
             <p className="font-display font-extrabold text-lg mt-3">No goals yet</p>
-            <p className="text-sm text-mist mt-1 max-w-md mx-auto">Upar “Add goal” dabao — naam, target, monthly contribution set karo.</p>
+            <p className="text-sm text-mist mt-1 max-w-md mx-auto">Hit “Add goal” above — set a name, target and monthly contribution.</p>
           </div>
         )}
         {goals.map((g, i) => {
