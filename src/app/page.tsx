@@ -36,12 +36,16 @@ export default function DashboardPage() {
     () => useFinanceStore.persist?.hasHydrated() ?? false,
     () => false
   );
-  const [form, setForm] = useState({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 });
+  const [form, setForm] = useState({ name: '', monthlyIncome: '', totalBalance: '', dailyBurnRate: '', rent: '', sip: '', bills: '' });
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
   // First-visit gate: no bank data + no saved profiles.
   const showGate = hydrated && !liveData && Object.keys(customProfiles).length === 0;
-  const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
-  const earmarkedTotal = form.rent + form.sip + form.bills;
+  // String-backed inputs so fields can be cleared/typed freely; parsed only for validation/submit.
+  const toNum = (v: string) => (v.trim() === '' ? 0 : Number(v));
+  const incomeNum = toNum(form.monthlyIncome);
+  const balanceNum = toNum(form.totalBalance);
+  const canCreate = form.name.trim().length >= 2 && Number.isFinite(incomeNum) && incomeNum > 0 && incomeNum <= 100000000 && Number.isFinite(balanceNum) && balanceNum > 0 && balanceNum <= 100000000 && [form.dailyBurnRate, form.rent, form.sip, form.bills].every((v) => { const n = toNum(v); return Number.isFinite(n) && n >= 0 && n <= 100000000; });
+  const earmarkedTotal = toNum(form.rent) + toNum(form.sip) + toNum(form.bills);
 
   const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
   // Single source of truth: same backend-parity engine as the Simulator.
@@ -457,16 +461,16 @@ export default function DashboardPage() {
               {([['monthlyIncome', 'MONTHLY INCOME (₹)'], ['totalBalance', 'TOTAL BALANCE (₹)'], ['dailyBurnRate', 'DAILY BURN (₹)'], ['rent', 'RENT (₹)'], ['sip', 'SIP (₹)'], ['bills', 'BILLS (₹)']] as const).map(([k, label]) => (
                 <div key={k}>
                   <label className="text-[11px] font-bold tracking-widest text-dusk">{label}</label>
-                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
+                  <input type="number" min={0} inputMode="decimal" placeholder="0" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
                 </div>
               ))}
             </div>
-            {earmarkedTotal > form.totalBalance && form.totalBalance > 0 && (
+            {earmarkedTotal > balanceNum && balanceNum > 0 && (
               <p className="text-[11px] text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">Monthly earmarked (₹{earmarkedTotal.toLocaleString('en-IN')}) exceeds your balance — runway will start from 0.</p>
             )}
             <button
               disabled={!canCreate}
-              onClick={() => { createProfile(form); setShowCreate(false); setForm({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 }); }}
+              onClick={() => { createProfile({ name: form.name.trim(), monthlyIncome: Number(form.monthlyIncome) || 0, totalBalance: Number(form.totalBalance) || 0, dailyBurnRate: Number(form.dailyBurnRate) || 0, rent: Number(form.rent) || 0, sip: Number(form.sip) || 0, bills: Number(form.bills) || 0 }); setShowCreate(false); setForm({ name: '', monthlyIncome: '', totalBalance: '', dailyBurnRate: '', rent: '', sip: '', bills: '' }); }}
               className={`w-full py-3 rounded-xl font-bold text-sm ${canCreate ? 'bg-primary text-white hover:brightness-110' : 'bg-white/5 text-dusk cursor-not-allowed'}`}
             >
               Create & Switch

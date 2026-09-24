@@ -1,11 +1,15 @@
 /**
  * Previse — Backend API client (Option B: Next.js is the UI, Express is API-only)
- * Backend: http://localhost:3001 | UI: http://localhost:3000
+ * Local dev: UI http://localhost:3000, backend http://localhost:3001 (both
+ * processes running separately). Deployed (Render/Docker single-service):
+ * requests go to '' (same origin as the UI) and next.config.ts rewrites
+ * /api/* to the backend over localhost inside the container — no CORS,
+ * no NEXT_PUBLIC_API_URL needed. Set NEXT_PUBLIC_API_URL explicitly only
+ * if the backend is deployed as a separate reachable service.
  */
 import type { UserFinancialState, Goal, PaymentMode } from '@/types';
 
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 const SESSION_KEY = 'previse-session-id';
 
