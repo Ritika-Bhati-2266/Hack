@@ -14,18 +14,18 @@ export default function PrivacyPage() {
 
       <div className="rounded-[28px] border border-white/[0.08] bg-surface p-6 sm:p-8 space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-safe/10 border border-safe/25 text-safe text-[11px] font-bold">
-          <ShieldCheck className="w-3.5 h-3.5" /> DPDP COMPLIANCE • CONSENT {CONSENT_VERSION}
+          <ShieldCheck className="w-3.5 h-3.5" /> DPDP ALIGNED • CONSENT {CONSENT_VERSION}
         </div>
         <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight">Privacy & data policy</h1>
-        <p className="text-sm text-mist">A short, honest version aligned with India’s Digital Personal Data Protection Act.</p>
+        <p className="text-sm text-mist">A short, honest version designed with DPDP principles in mind.</p>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         {[
           { icon: FileText, t: 'Purpose limitation', d: 'Your data is used for exactly one thing — purchase simulation. No marketing, no resale, nothing else.' },
           { icon: ShieldCheck, t: 'Explicit consent', d: `Data is fetched only after you approve consent in the AA flow. Every consent carries a version stamp (current: ${CONSENT_VERSION}).` },
-          { icon: Clock, t: 'Retention — 1 hour sessions', d: 'Bank data lives only in the session and auto-deletes with the 1-hour TTL. Beta signup emails are deleted after 90 days of inactivity — retention policy v1.' },
-          { icon: Trash2, t: 'Right to erasure', d: 'Connect tab → “Delete My Data” — wipes session, accounts and transactions instantly. No backups kept.' },
+          { icon: Clock, t: 'Retention — 1 hour sessions', d: 'Bank data lives only in your session and auto-deletes after 1 hour of inactivity. Beta signup emails are kept until you ask for deletion.' },
+          { icon: Trash2, t: 'Right to erasure', d: 'Connect tab → “Delete My Data” — deletes your session, accounts and transactions in the same request.' },
         ].map((c) => (
           <div key={c.t} className="rounded-[24px] bg-surface border border-white/[0.08] p-5 space-y-2">
             <c.icon className="w-5 h-5 text-safe" />
@@ -38,8 +38,8 @@ export default function PrivacyPage() {
       <div className="rounded-[24px] bg-surface border border-white/[0.08] p-5 sm:p-6 space-y-2">
         <h2 className="font-display font-extrabold flex items-center gap-2"><Mail className="w-5 h-5 text-amber-300" /> Grievance officer</h2>
         <p className="text-[13px] text-mist leading-relaxed">
-          For data deletion or privacy complaints: <b className="text-white">grievance@previse.in</b> (handled by a team member during beta, 48hr SLA).
-          Hosted in India (Railway/Render ap-south). Users under 18 need parent consent.
+          For data deletion or privacy complaints: <b className="text-white">grievance@previse.in</b> (handled on a best-effort basis).
+          If you are under 18, please review this policy with a parent. This demo is hosted on Render.
         </p>
         <div className="flex gap-2 pt-1">
           <Link href="/connect" className="text-xs font-bold px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20">
