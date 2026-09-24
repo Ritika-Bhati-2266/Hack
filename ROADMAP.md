@@ -24,8 +24,8 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 | Phase | Status | Key Metric |
 |---|---|---|
 | Phase 0 — Concept | Done | Pitch validated |
-| Phase 1 — MVP | Done | QA 24/24 green |
-| Phase 2 — India Stack | **~100% code, beta pending** | Parser 61 categories, QA 24/24 + vitest 8/8 |
+| Phase 1 — MVP | Done | QA 25/25 green |
+| Phase 2 — India Stack | **~100% code, beta pending** | Parser 61 categories, QA 25/25 + vitest 14/14 |
 | Phase 3 — ML/LLM | Kicked off (foundation) | Simulation history + feedback loop live |
 | Phase 4 — Monetization | UI ready, provider pending | `/pro` + AutoPay stub wired; Razorpay keys pending |
 | Phase 5 — B2B | Planned | — |
@@ -48,7 +48,7 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 - [x] Rate limiting (30 req/min on mutation endpoints, incl. `/aa/fetch` + `/simulate/custom`)
 - [x] CORS allowlist (localhost + `FRONTEND_URL` + `ALLOWED_ORIGINS` for previews)
 - [x] Live profile wired into Dashboard + Simulator (● Live persona, was mock-only)
-- [x] Loan mode + interest-rate + tenure (frontend↔backend parity, vitest 8/8)
+- [x] Loan mode + interest-rate + tenure (frontend↔backend parity, vitest 14/14)
 - [x] Transactions view (category breakdown, search/filter)
 - [x] Goals CRUD (add/edit/delete)
 - [x] Simulation history + Bought/Skipped feedback (`/history`, server log at `/api/simulations`)
@@ -59,7 +59,7 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 - [x] Session IDs server-minted (`crypto.randomBytes`, echoed via `x-session-id`)
 - [x] OpenAPI spec (`backend/openapi.json` → `/api/openapi.json`)
 - [x] Dockerfile + CI (backend QA + parse audit + eslint/tsc/build)
-- [x] QA gate run — 24/24 green after all changes (vitest 8/8, eslint src clean, next build green)
+- [x] QA gate run — 25/25 green after all changes (vitest 14/14, eslint src clean, next build green)
 
 ### Week 7-8 — Hardening & Beta Prep
 
@@ -71,7 +71,7 @@ Unlike expense trackers (past), Previse simulates the **future** — before you 
 | Health check endpoint cleanup — remove env var exposure | Ritika | P1 | Done (returns status/engine/phase/timestamp only) |
 | Session token as `crypto.randomBytes` (already done, verify) | Ritika | P1 | Done + server-minted + disk-persisted |
 | Landing page beta signup → actual storage (not just console.log) | Aanchal | P1 | Done (JSON file + `/admin` list) |
-| QA gate run — confirm 24/24 still green after all changes | Ritika | P0 | Done |
+| QA gate run — confirm 25/25 still green after all changes | Ritika | P0 | Done |
 
 ### Week 9-10 — 50-User Beta Launch
 

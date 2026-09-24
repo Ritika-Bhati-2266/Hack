@@ -12,6 +12,16 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const fs = require("fs");
 
+// Load env from backend/.env first, then repo-root .env (both gitignored).
+// Pre-set process.env always wins (dotenv default override:false) — prod managers unaffected.
+try {
+  const dotenv = require("dotenv");
+  dotenv.config({ path: path.join(__dirname, ".env") });
+  dotenv.config({ path: path.join(__dirname, "..", ".env") });
+} catch {
+  /* dotenv optional — server runs on defaults without it */
+}
+
 const { calculateFinancialState } = require("./engine/rules");
 const { simulate, calculateEMI } = require("./engine/simulator");
 const { applyFirewall } = require("./engine/firewall");

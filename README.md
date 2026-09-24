@@ -62,7 +62,7 @@ src/
   components/          # Firewall, SplitView, TrajectoryChart, Navbar, DataSourceBanner
   store/               # useFinanceStore (personas + live data + goals CRUD + history, persisted)
   lib/api.ts           # backend client + adapter (single source of truth via /api/simulate/custom)
-  lib/engine.ts        # frontend engine (backend parity) + engine.test.ts (vitest 8/8)
+  lib/engine.ts        # frontend engine (backend parity) + engine.test.ts (8/8) + insights.test.ts (6/6) = vitest 14/14
 frontend/              # ARCHIVED vanilla reference — NOT served
 Dockerfile / .github/workflows/ci.yml / .env.example
 ```
@@ -88,9 +88,9 @@ Dockerfile / .github/workflows/ci.yml / .env.example
 
 | Suite | Result |
 |---|---|
-| `node qa-gate.js` | **24/24** (verdicts, EMI math, firewall, 1000-sim load, security hygiene) |
+| `node qa-gate.js` | **25/25** (verdicts, EMI math, firewall, 1000-sim load, security hygiene) |
 | `node ledger/qa-parse-audit.js` | **5/5** — 96 ground-truth samples (HDFC/SBI/ICICI/Axis/Kotak/Yes Bank), 96% coverage, 96% correctness |
-| `npx vitest run` | **8/8** — frontend↔backend engine parity (EMI math, verdict rules, loan branch, firewall) |
+| `npx vitest run` | **14/14** — frontend↔backend engine parity (EMI math, verdict rules, loan branch, firewall) + insights |
 | `npx eslint src` + `tsc --noEmit` + `next build` | **clean** (backend uses CommonJS `require()` by convention, excluded from web lint) |
 
 Built for hackathon — Phase 2 (India Stack) complete, beta-ready. Real AA/AutoPay providers stubbed pending contracts.
