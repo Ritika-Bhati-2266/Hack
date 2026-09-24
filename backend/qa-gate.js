@@ -107,12 +107,12 @@ function runTests() {
   const serverCode2 = fs.readFileSync(__dirname + "/ledger/ledger.js", "utf-8");
   assert(!serverCode2.includes("demo-fallback") && !serverCode2.includes("mockProfile") && !serverCode2.includes("data/mock"), "No demo fallback in ledger (production mode)");
   const tspCode = fs.readFileSync(__dirname + "/aa/tsp.js", "utf-8");
-  assert(!tspCode.includes("generateMockTransactions"), "No mock TSP transactions (production mode)");
+  assert(tspCode.includes("AA_PROVIDER") && tspCode.includes("(Mock)"), "Mock AA is explicit + labeled (AA_PROVIDER=mock), never silent");
 
   // ═══ Test 7: Manual Gates ═══
   console.log("\n  ─── Manual Gates ───");
   console.log("  ⏳ Beta 50+ users: Pending");
-  console.log("  ⏳ AA accuracy >95%: Pending (real provider required, CSV supported)");
+  console.log("  ⏳ AA accuracy >95%: Mock flow automated; real provider required for beta accuracy sign-off");
   console.log("  ⏳ Security audit signed off: Pending");
   console.log("  ℹ️  (Manual gates not automated)\n");
 

@@ -21,16 +21,16 @@ export default function ConnectPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [samples, setSamples] = useState<Array<{ id: string; file: string; label: string; blurb: string; balance: number }>>([]);
   const [sampleId, setSampleId] = useState('');
-  // Real AA provider wired? Backend health reports aa: ready|unconfigured.
-  // Unconfigured → Option A buttons stay disabled with a pointer to Option B.
-  const [aaReady, setAaReady] = useState<boolean | null>(null);
+  // Real AA provider or explicit demo bank? Backend health reports the mode.
+  // "unconfigured" → Option A stays disabled with a pointer to Option B.
+  const [aaMode, setAaMode] = useState<string | null>(null);
   const setLiveData = useFinanceStore((s) => s.setLiveData);
   const clearLiveData = useFinanceStore((s) => s.clearLiveData);
 
   useEffect(() => {
     getHealth()
-      .then((h) => setAaReady(h.aa === 'ready'))
-      .catch(() => setAaReady(null));
+      .then((h) => setAaMode(h.aa || 'unconfigured'))
+      .catch(() => setAaMode(null));
   }, []);
 
   // Sample list comes from the manifest — never hardcoded here.
@@ -181,22 +181,27 @@ export default function ConnectPage() {
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <Landmark className="w-5 h-5 text-primary" /> Option A — AA Flow
             <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-safe/15 text-safe border border-safe/30">
-              LIVE
+              {aaMode === 'mock' ? 'MOCK' : 'LIVE'}
             </span>
           </h2>
-          {aaReady === false && (
+          {aaMode === 'unconfigured' && (
             <p className="text-[11px] leading-relaxed text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">
               Bank link needs a real AA provider contract (pending) — these steps are paused. <b>Option B works fully</b>, same results.
             </p>
           )}
-          <button onClick={handleCreate} disabled={loading || aaReady === false} title={aaReady === false ? 'Needs a real AA provider — use Option B' : undefined} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-mist border border-white/[0.08]' : 'bg-primary text-white hover:brightness-110 shadow-[0_0_25px_rgba(83,134,94,0.3)]'} disabled:opacity-50`}>
+          {aaMode === 'mock' && (
+            <p className="text-[11px] leading-relaxed text-cyan-300 bg-cyan-400/10 border border-cyan-400/25 rounded-xl px-3 py-2">
+              Demo bank link (mock AA) — 1-click live data for trying the flow. Your own statements via <b>Option B</b>.
+            </p>
+          )}
+          <button onClick={handleCreate} disabled={loading || aaMode === 'unconfigured'} title={aaMode === 'unconfigured' ? 'Needs a real AA provider — use Option B' : undefined} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-mist border border-white/[0.08]' : 'bg-primary text-white hover:brightness-110 shadow-[0_0_25px_rgba(83,134,94,0.3)]'} disabled:opacity-50`}>
             1. Create consent {stepIdx >= 1 && '✓'}
           </button>
-          <button onClick={handleApprove} disabled={loading || step === 'idle' || aaReady === false} className="w-full py-3 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleApprove} disabled={loading || step === 'idle' || aaMode === 'unconfigured'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && step === 'consent' && <Loader2 className="w-4 h-4 animate-spin" />}
             2. Approve consent {stepIdx >= 2 && '✓'}
           </button>
-          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched') || aaReady === false} className="w-full py-3 rounded-2xl bg-safe text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched') || aaMode === 'unconfigured'} className="w-full py-3 rounded-2xl bg-safe text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && (step === 'active' || step === 'fetched') && <Loader2 className="w-4 h-4 animate-spin" />}
             3. Fetch my data {stepIdx >= 3 && '✓'}
           </button>

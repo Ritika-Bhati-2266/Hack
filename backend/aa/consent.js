@@ -3,7 +3,7 @@
  * In-memory consent flow for Account Aggregator
  */
 
-const { requestConsent, fetchAccounts, fetchTransactions, isConfigured } = require("./tsp");
+const { requestConsent, fetchAccounts, fetchTransactions, providerMode } = require("./tsp");
 
 const CONSENT_TTL_MS = 60 * 60 * 1000; // 1 hour
 const CONSENT_VERSION = process.env.CONSENT_VERSION || "v1-2026-09";
@@ -64,4 +64,4 @@ async function fetchLiveData(consentId, sessionToken) {
   return { accounts, transactions };
 }
 
-module.exports = { createConsent, approveConsent, getConsent, fetchLiveData, isConfigured };
+module.exports = { createConsent, approveConsent, getConsent, fetchLiveData, providerMode };

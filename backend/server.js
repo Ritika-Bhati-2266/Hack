@@ -27,7 +27,7 @@ const { simulate, calculateEMI } = require("./engine/simulator");
 const { applyFirewall } = require("./engine/firewall");
 
 // Phase 2 imports
-const { createConsent, approveConsent, getConsent, fetchLiveData, isConfigured: isAAConfigured } = require("./aa/consent");
+const { createConsent, approveConsent, getConsent, fetchLiveData, providerMode: aaMode } = require("./aa/consent");
 const { buildLiveProfile } = require("./ledger/ledger");
 const { parseTransactions } = require("./ledger/parser");
 const { setupMandate, getMandate } = require("./autopay/stub");
@@ -160,8 +160,9 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     engine: "rules-v1",
     phase: "2",
-    // UI greys out Option A (AA flow) when no real provider is wired.
-    aa: isAAConfigured() ? "ready" : "unconfigured",
+    // UI enables Option A (AA flow) for "mock" and "live" alike; mock data is
+    // explicitly labeled and never mixed into real profiles (see aa/tsp.js).
+    aa: aaMode(),
     timestamp: new Date().toISOString(),
   });
 });
