@@ -51,12 +51,6 @@ export default function RootLayout({
               </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-dusk">
-              <span className="px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/5 font-mono">
-                QA 24/24
-              </span>
-              <span className="px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/5 font-mono">
-                FW-RBI-2026
-              </span>
               <span className="hidden sm:inline">Real data only — no demo</span>
             </div>
             <nav className="flex items-center gap-3 text-[11px] font-bold text-dusk">

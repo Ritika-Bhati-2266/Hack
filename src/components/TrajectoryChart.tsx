@@ -67,7 +67,12 @@ export default function TrajectoryChart({ simulation }: { simulation: Simulation
             <YAxis stroke="#6B699E" tick={{ fontSize: 11, fill: '#6B699E' }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={70} />
             <Tooltip
               contentStyle={{ backgroundColor: '#191854', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
-              formatter={(value: unknown, name: unknown) => [`₹${Number(value).toLocaleString('en-IN')}`, String(name) === 'baselineSavings' ? 'Baseline' : 'Simulated']}
+              formatter={(value: unknown, _name: unknown, entry: unknown) => {
+                // NB: 2nd arg is the Line's display name ("Baseline"/"Simulated"),
+                // not the dataKey — read dataKey off the payload entry instead.
+                const key = (entry as { dataKey?: unknown } | undefined)?.dataKey;
+                return [`₹${Number(value).toLocaleString('en-IN')}`, key === 'baselineSavings' ? 'Baseline' : 'Simulated'];
+              }}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px', color: '#A8A6D6' }} />
             {showFirewall && (
