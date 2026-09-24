@@ -30,4 +30,8 @@ async function fetchTransactions(consentId, accountId) {
   throw new Error(`AA provider "${TSP}" not implemented yet. Use CSV upload.`);
 }
 
-module.exports = { requestConsent, fetchAccounts, fetchTransactions };
+function isConfigured() {
+  return !!TSP && TSP !== "mock";
+}
+
+module.exports = { requestConsent, fetchAccounts, fetchTransactions, isConfigured };

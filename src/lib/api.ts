@@ -307,4 +307,4 @@ export const betaSignup = (name: string, email: string, usecase = '') =>
     body: JSON.stringify({ name, email, usecase }),
   });
 
-export const getHealth = () => req<{ status: string; engine: string; phase: string }>('/api/health');
+export const getHealth = () => req<{ status: string; engine: string; phase: string; aa?: 'ready' | 'unconfigured' }>('/api/health');

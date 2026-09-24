@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Landmark, Upload, Trash2, CheckCircle2, ShieldCheck, FileSpreadsheet, Loader2, AlertTriangle, PlugZap } from 'lucide-react';
 import {
-  createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, LiveProfileRes, backendProfileToStore,
+  createConsent, approveConsent, fetchAAData, uploadCSV, deleteMyData, getLiveProfile, getHealth, LiveProfileRes, backendProfileToStore,
 } from '@/lib/api';
 import DataSourceBanner from '@/components/DataSourceBanner';
 import { useFinanceStore } from '@/store/useFinanceStore';
@@ -21,8 +21,17 @@ export default function ConnectPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [samples, setSamples] = useState<Array<{ id: string; file: string; label: string; blurb: string; balance: number }>>([]);
   const [sampleId, setSampleId] = useState('');
+  // Real AA provider wired? Backend health reports aa: ready|unconfigured.
+  // Unconfigured → Option A buttons stay disabled with a pointer to Option B.
+  const [aaReady, setAaReady] = useState<boolean | null>(null);
   const setLiveData = useFinanceStore((s) => s.setLiveData);
   const clearLiveData = useFinanceStore((s) => s.clearLiveData);
+
+  useEffect(() => {
+    getHealth()
+      .then((h) => setAaReady(h.aa === 'ready'))
+      .catch(() => setAaReady(null));
+  }, []);
 
   // Sample list comes from the manifest — never hardcoded here.
   useEffect(() => {
@@ -144,12 +153,17 @@ export default function ConnectPage() {
         </div>
       </div>
 
-      {error && (
+      {error && error.includes('AA provider not configured') ? (
+        <div className="flex items-start gap-2.5 text-sm text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 animate-fade-up" role="alert">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <p className="min-w-0 break-words">No live bank link yet — a real AA provider (Setu/OneMoney) isn&apos;t wired in this build. <b>Use Option B below (CSV or 1-click sample)</b> — same parser, same engine, same verdicts.</p>
+        </div>
+      ) : error ? (
         <div className="flex items-start gap-2.5 text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-fade-up" role="alert">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <p className="min-w-0 break-words">{error}</p>
         </div>
-      )}
+      ) : null}
       {msg && !expired && (
         <div className="flex items-start gap-2.5 text-sm text-safe bg-safe/10 border border-safe/25 rounded-2xl p-4 animate-fade-up">
           <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
@@ -170,14 +184,19 @@ export default function ConnectPage() {
               LIVE
             </span>
           </h2>
-          <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-mist border border-white/[0.08]' : 'bg-primary text-white hover:brightness-110 shadow-[0_0_25px_rgba(83,134,94,0.3)]'} disabled:opacity-50`}>
+          {aaReady === false && (
+            <p className="text-[11px] leading-relaxed text-amber-300 bg-amber-400/10 border border-amber-400/25 rounded-xl px-3 py-2">
+              Bank link needs a real AA provider contract (pending) — these steps are paused. <b>Option B works fully</b>, same results.
+            </p>
+          )}
+          <button onClick={handleCreate} disabled={loading || aaReady === false} title={aaReady === false ? 'Needs a real AA provider — use Option B' : undefined} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-mist border border-white/[0.08]' : 'bg-primary text-white hover:brightness-110 shadow-[0_0_25px_rgba(83,134,94,0.3)]'} disabled:opacity-50`}>
             1. Create consent {stepIdx >= 1 && '✓'}
           </button>
-          <button onClick={handleApprove} disabled={loading || step === 'idle'} className="w-full py-3 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleApprove} disabled={loading || step === 'idle' || aaReady === false} className="w-full py-3 rounded-2xl bg-white/5 border border-white/[0.08] text-sm font-bold hover:bg-white/10 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && step === 'consent' && <Loader2 className="w-4 h-4 animate-spin" />}
             2. Approve consent {stepIdx >= 2 && '✓'}
           </button>
-          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched')} className="w-full py-3 rounded-2xl bg-safe text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
+          <button onClick={handleFetch} disabled={loading || (step !== 'active' && step !== 'fetched') || aaReady === false} className="w-full py-3 rounded-2xl bg-safe text-black text-sm font-extrabold hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-wait flex items-center justify-center gap-2">
             {loading && (step === 'active' || step === 'fetched') && <Loader2 className="w-4 h-4 animate-spin" />}
             3. Fetch my data {stepIdx >= 3 && '✓'}
           </button>

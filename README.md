@@ -15,7 +15,7 @@ npm install && npm run dev                     # UI  → http://localhost:3000
 
 1. **Dashboard** (`/`) — Emergency Buffer · Runway · Financial Firewall bar · Goals · customer switcher
 2. **Simulator** (`/simulator`) — type `iPhone 16`, amount `80000`, mode Cash/EMI/**Loan** + interest-rate + tenure → **Simulate** (instant local engine) → **Verify with backend engine (:3001)** → MATCH badge proves single source of truth
-3. **Connect** (`/connect`) — AA mock 3-step flow (consent → approve → fetch) or CSV upload (`date, narration, amount, type`) → live profile auto-adopted by Dashboard + Simulator (● Live persona) + Delete My Data (DPDP). No statement handy? Select a sample (Spender/Saver) to try instantly — same upload + parser flow, previous data replaced.
+3. **Connect** (`/connect`) — AA 3-step flow when a real provider is wired (Setu/OneMoney; until then the UI says so and points to CSV) or CSV upload (`date, narration, amount, type`) → live profile auto-adopted by Dashboard + Simulator (● Live persona) + Delete My Data (DPDP). No statement handy? Select a sample (Spender/Saver) to try instantly — same upload + parser flow, previous data replaced.
 4. **Goals** (`/goals`) — add / edit / delete goals + per-goal delay impact
 5. **Transactions** (`/transactions`) — parsed category breakdown + search/filter (live data only)
 6. **History** (`/history`) — every simulation auto-logged + Bought/Skipped feedback (Phase 3 training data)
