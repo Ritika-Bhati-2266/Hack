@@ -197,7 +197,7 @@ export default function ConnectPage() {
             value={balance}
             onChange={(e) => setBalance(e.target.value)}
             inputMode="numeric"
-            className="w-full bg-surface border border-cyan-500/30 rounded-2xl px-4 py-3 text-base font-mono font-extrabold text-cyan-300 placeholder-cyan-500/40 focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(6,182,212,0.3)] outline-none transition-all"
+            className="w-full bg-[#070b14] border border-cyan-500/30 rounded-2xl px-4 py-3 text-base font-mono font-extrabold text-cyan-300 placeholder-cyan-500/40 focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(0,240,255,0.3)] outline-none transition-all"
           />
           <label className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/[0.04] border border-dashed border-white/[0.14] text-sm font-bold text-mist cursor-pointer hover:bg-white/[0.07] hover:border-cyan-300/40 transition-all">
             <Upload className="w-4 h-4" /> Choose CSV statement

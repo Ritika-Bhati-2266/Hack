@@ -31,19 +31,19 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-base/80 border-b border-white/[0.08] pt-safe">
+    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] pt-safe">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 flex items-center justify-between gap-3 min-w-0">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_25px_rgba(83,134,94,0.4)] group-hover:scale-105 group-hover:rotate-6 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-500 flex items-center justify-center shadow-[0_0_25px_rgba(0,240,255,0.4)] group-hover:scale-105 group-hover:rotate-6 transition-all">
             <span className="font-display font-black text-white text-xl leading-none tracking-tight">P</span>
           </div>
           <div className="leading-none">
             <div className="flex items-center gap-2">
               <span className="font-display font-extrabold text-[20px] tracking-tight text-white">
-                PREVISE<span className="text-primary">.</span>
+                PREVISE<span className="text-cyan-400">.</span>
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]">
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 shadow-[0_0_12px_rgba(0,240,255,0.25)]">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 AA ENGINE
               </span>
@@ -63,11 +63,11 @@ export default function Navbar() {
                 href={link.href}
                 className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all ${
                   isActive
-                    ? 'bg-primary text-white shadow-[0_0_20px_rgba(83,134,94,0.4)] font-bold'
+                    ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_20px_rgba(0,240,255,0.4)] font-bold'
                     : 'text-gray-300 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-cyan-400/80'}`} />
                 <span>{link.label}</span>
               </Link>
             );
@@ -85,7 +85,7 @@ export default function Navbar() {
           <div className="hidden sm:block text-right leading-none shrink-0">
             <p className="text-[10px] font-mono font-bold tracking-widest text-gray-400 whitespace-nowrap">SAFE BUFFER</p>
             {hasData ? (
-              <p className="font-mono font-bold text-[15px] text-cyan-300 mt-1 whitespace-nowrap drop-shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+              <p className="font-mono font-bold text-[15px] text-cyan-300 mt-1 whitespace-nowrap drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
                 ₹{(buffer / 1000).toFixed(1)}k
               </p>
             ) : (
@@ -96,13 +96,13 @@ export default function Navbar() {
           </div>
           <Link
             href="/simulator"
-            className="md:hidden px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-xl bg-primary text-white text-[13px] font-extrabold shadow-[0_0_20px_rgba(83,134,94,0.4)] shrink-0"
+            className="md:hidden px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[13px] font-extrabold shadow-[0_0_20px_rgba(0,240,255,0.4)] shrink-0"
           >
             Simulate
           </Link>
           <Link
             href="/simulator"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-[13px] font-extrabold hover:brightness-125 hover:shadow-[0_0_30px_rgba(83,134,94,0.5)] transition-all transform hover:-translate-y-0.5 active:scale-95 shrink-0"
+            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white text-[13px] font-extrabold hover:brightness-125 hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all transform hover:-translate-y-0.5 active:scale-95 shrink-0"
           >
             <Sparkles className="w-4 h-4" />
             Try Simulator
@@ -120,7 +120,7 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg text-xs font-bold whitespace-nowrap shrink-0 ${
-                isActive ? 'bg-primary text-white shadow-[0_0_12px_rgba(83,134,94,0.4)]' : 'text-gray-300 bg-white/5'
+                isActive ? 'bg-cyan-500 text-white shadow-[0_0_12px_rgba(0,240,255,0.4)]' : 'text-gray-300 bg-white/5'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />

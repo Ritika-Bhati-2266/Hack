@@ -110,7 +110,7 @@ export default function TransactionsPage() {
                 <span className="text-white">{inr(amt)}</span>
               </div>
               <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-full" style={{ width: `${(amt / maxTop) * 100}%` }} />
+                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${(amt / maxTop) * 100}%` }} />
               </div>
             </div>
           ))}

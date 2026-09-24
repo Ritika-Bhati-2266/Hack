@@ -6,37 +6,32 @@
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
 
   /* ─────────────────────────────────────────────
-     INDIGO SAGE — DESIGN SYSTEM
-     base     = page background       (#0F0E47 deep indigo)
-     surface  = cards                 (#191854 indigo card)
-     well/elevated = tracks / wells / inputs / modals (#242166)
-     primary  = sage signature (CTAs, logo, active nav, focus)
-     safe     = clarity cyan (safe/success, real-data)
+     CYBER FRAMER / ONETEXT — DESIGN SYSTEM
      ───────────────────────────────────────────── */
 
-  --color-base: #0f0e47;
-  --color-surface: #191854;
-  --color-well: #242166;
-  --color-elevated: #242166;
+  --color-base: #030712;
+  --color-surface: #0b0f19;
+  --color-well: #111827;
+  --color-elevated: #1f293d;
 
-  --color-ink-950: #0f0e47;
-  --color-ink-900: #191854;
-  --color-ink-800: #242166;
-  --color-ink-700: #2e2c6e;
+  --color-ink-950: #030712;
+  --color-ink-900: #0b0f19;
+  --color-ink-800: #111827;
+  --color-ink-700: #1f293d;
 
-  --color-primary: #53865e;
-  --color-primary-hover: #436d4b;
-  --color-primary-pressed: #35573c;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-primary-pressed: #1d4ed8;
 
-  --color-safe: #06b6d4;
+  --color-safe: #00f0ff;
 
-  --color-frost: #f5f5f7;
-  --color-mist: #a8a6d6;
-  --color-dusk: #6b699e;
+  --color-frost: #f9fafb;
+  --color-mist: #b8bfcb;
+  --color-dusk: #939cab;
 
-  --color-volt-300: #93bd9a;
-  --color-volt-400: #6fa277;
-  --color-volt-500: #53865e;
+  --color-volt-300: #60a5fa;
+  --color-volt-400: #3b82f6;
+  --color-volt-500: #2563eb;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-ticker: ticker 22s linear infinite;
@@ -45,39 +40,39 @@
 }
 
 :root {
-  --background: #0f0e47;
-  --foreground: #f5f5f7;
+  --background: #030712;
+  --foreground: #f9fafb;
 
-  --surface: #191854;
-  --well: #242166;
+  --surface: #0b0f17;
+  --well: #111827;
 
-  /* ── Indigo Sage palette ── */
+  /* ── Core palette ── */
 
-  --bg-base: #0f0e47;
-  --bg-surface: #191854;
-  --bg-elevated: #242166;
+  --bg-base: #030712;
+  --bg-surface: #0b0f17;
+  --bg-elevated: #151d30;
 
-  --primary: #53865e;
-  --primary-hover: #436d4b;
-  --primary-pressed: #35573c;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-pressed: #1d4ed8;
 
-  --status-safe: #06b6d4;
-  --status-warning: #f59e0b;
-  --status-critical: #ef4444;
+  --status-safe: #00f0ff;
+  --status-warning: #fbbf24;
+  --status-critical: #f87171;
 
-  --text-primary: #f5f5f7;
-  --text-secondary: #a8a6d6;
-  --text-muted: #6b699e;
+  --text-primary: #f9fafb;
+  --text-secondary: #b8bfcb;
+  --text-muted: #939cab;
 
   --border-default: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.14);
+  --border-hover: rgba(255, 255, 255, 0.2);
 
   /* ── Premium effects ── */
 
   --shadow-soft: 0 10px 35px rgba(0, 0, 0, 0.5);
   --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.7);
-  --shadow-primary: 0 12px 40px rgba(83, 134, 94, 0.35);
-  --shadow-cyan: 0 12px 40px rgba(6, 182, 212, 0.3);
+  --shadow-primary: 0 12px 40px rgba(59, 130, 246, 0.35);
+  --shadow-cyan: 0 12px 40px rgba(0, 240, 255, 0.3);
 }
 
 html {
@@ -100,17 +95,17 @@ body {
   background:
     radial-gradient(
       1200px 700px at 20% -10%,
-      rgba(83, 134, 94, 0.12),
+      rgba(59, 130, 246, 0.18),
       transparent 65%
     ),
     radial-gradient(
       1000px 600px at 85% 15%,
-      rgba(83, 134, 94, 0.1),
+      rgba(0, 240, 255, 0.12),
       transparent 60%
     ),
     radial-gradient(
       1200px 800px at 50% 110%,
-      rgba(139, 92, 246, 0.12),
+      rgba(139, 92, 246, 0.15),
       transparent 70%
     ),
     var(--bg-base);
@@ -713,26 +708,26 @@ input[type="range"].volt-range::-webkit-slider-thumb:hover {
 }
 
 .cyber-card:hover {
-  border-color: rgba(111, 162, 119, 0.35);
-  box-shadow: 0 0 35px rgba(83, 134, 94, 0.15), 0 20px 40px rgba(0, 0, 0, 0.6);
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.15), 0 20px 40px rgba(0, 0, 0, 0.6);
   transform: translateY(-3px);
 }
 
 .cyber-badge {
-  background: linear-gradient(135deg, rgba(83, 134, 94, 0.2), rgba(6, 182, 212, 0.1));
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  color: #06b6d4;
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(0, 240, 255, 0.1));
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: #00f0ff;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
 }
 
 .neon-glow-btn {
-  background: linear-gradient(135deg, #35573c 0%, #53865e 50%, #06b6d4 100%);
-  box-shadow: 0 0 25px rgba(83, 134, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #00f0ff 100%);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
 }
 
 .neon-glow-btn:hover {
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transform: translateY(-2px) scale(1.02);
 }
 
