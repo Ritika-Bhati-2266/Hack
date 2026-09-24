@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import {
   ShieldCheck,
   TrendingUp,
@@ -28,12 +28,14 @@ import DataSourceBanner from '@/components/DataSourceBanner';
 export default function DashboardPage() {
   const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
-  // Hydration guard: zustand persist restores after first paint — gate only
-  // evaluates once restored state is in, so returning users see no flash.
-  const [hydrated, setHydrated] = useState(
-    () => useFinanceStore.persist?.hasHydrated() ?? false
+  // Hydration-safe: server snapshot is always false, so server HTML and the
+  // first client render both omit the gate. After zustand persist restores,
+  // the subscription re-reads and the gate appears only for true first-timers.
+  const hydrated = useSyncExternalStore(
+    (cb) => useFinanceStore.persist?.onFinishHydration(cb) ?? (() => {}),
+    () => useFinanceStore.persist?.hasHydrated() ?? false,
+    () => false
   );
-  useEffect(() => useFinanceStore.persist?.onFinishHydration(() => setHydrated(true)), []);
   const [form, setForm] = useState({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 });
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
   // First-visit gate: no bank data + no saved profiles.
