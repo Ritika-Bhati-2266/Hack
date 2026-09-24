@@ -55,7 +55,7 @@ export default function TransactionsPage() {
             <PlugZap className="w-5 h-5 text-dusk" />
           </div>
           <p className="font-display font-extrabold text-lg mt-3">No transactions yet</p>
-          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Connect tab se AA mock ya CSV upload karo — yahan har transaction category ke saath dikhega.</p>
+          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Connect tab se AA ya CSV upload karo — yahan har transaction category ke saath dikhega.</p>
           <Link href="/connect" className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold">
             Connect data →
           </Link>
@@ -79,7 +79,7 @@ export default function TransactionsPage() {
             <ListFilter className="w-3.5 h-3.5" /> {summary.count} TRANSACTIONS • {liveData.meta?.parsedCount ?? 0} CATEGORIZED
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight mt-3">Where your money goes.</h1>
-          <p className="text-sm text-mist mt-2">Parser {(liveData.meta?.parsingAccuracy ?? 0)}% accuracy — {liveData.source === 'csv' ? 'tumhare asli statement se' : 'mock TSP demo data se'}.</p>
+          <p className="text-sm text-mist mt-2">Parser {(liveData.meta?.parsingAccuracy ?? 0)}% accuracy — {liveData.source === 'csv' ? 'tumhare asli statement se' : 'live AA data se'}.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
             <div className="p-4 rounded-2xl bg-well/60 border border-white/[0.08]">
               <p className="text-[11px] text-dusk font-semibold">INFLOW</p>

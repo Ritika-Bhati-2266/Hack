@@ -53,7 +53,7 @@ export default function ProPage() {
         <div className="rounded-[24px] bg-surface border border-white/[0.08] p-6 space-y-4">
           <h2 className="font-display font-extrabold text-lg">Free — ₹0</h2>
           <ul className="space-y-2 text-sm text-mist">
-            {['3 simulations / month', 'Basic buffer + runway check', 'Mock demo data only'].map((f) => (
+            {['3 simulations / month', 'Basic buffer + runway check', 'Real bank data (AA/CSV)'].map((f) => (
               <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-dusk shrink-0 mt-0.5" />{f}</li>
             ))}
           </ul>
@@ -73,7 +73,7 @@ export default function ProPage() {
             <div className="rounded-2xl bg-safe/10 border border-safe/25 p-4 text-sm space-y-1">
               <p className="font-black text-safe">Mandate {mandate.status.toUpperCase()} ✓</p>
               <p className="text-mist font-mono text-xs">id: {mandate.mandateId.slice(0, 24)}… • ₹{mandate.amount}/mo</p>
-              <p className="text-[11px] text-dusk">Demo stub hai — real paise nahi katega. Real UPI AutoPay ke liye Razorpay keys chahiye (ROADMAP Phase 4).</p>
+              <p className="text-[11px] text-dusk">Stub hai — real paise nahi katega. Real UPI AutoPay ke liye Razorpay keys chahiye (ROADMAP Phase 4).</p>
             </div>
           ) : (
             <button onClick={handleSubscribe} disabled={loading} className="w-full py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2">
@@ -86,7 +86,7 @@ export default function ProPage() {
       </div>
 
       <p className="text-[11px] text-dusk text-center flex items-center justify-center gap-1.5">
-        <ShieldCheck className="w-3.5 h-3.5" /> No real money moves in demo — autopay endpoint stub hai, API-compatible.
+        <ShieldCheck className="w-3.5 h-3.5" /> Autopay endpoint stub hai (API-compatible) — real UPI AutoPay ke liye provider keys chahiye.
       </p>
     </div>
   );

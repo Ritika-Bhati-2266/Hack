@@ -6,7 +6,7 @@
 const { calculateFinancialState } = require("./engine/rules");
 const { simulate, calculateEMI } = require("./engine/simulator");
 const { applyFirewall } = require("./engine/firewall");
-const { mockProfile } = require("./data/mock");
+const { testProfile: testProfile } = require("./data/test-profile");
 
 let passed = 0;
 let failed = 0;
@@ -24,7 +24,7 @@ function runTests() {
 
   const startTime = Date.now();
   const proposal = { name: "iPhone 16", amount: 80000, mode: "cash", emiMonths: 12, interestRate: 12 };
-  const result = simulate(mockProfile, proposal);
+  const result = simulate(testProfile, proposal);
   const elapsed = Date.now() - startTime;
 
   assert(elapsed < 30000, `Time-to-first-simulation < 30s (${elapsed}ms)`);
@@ -36,28 +36,28 @@ function runTests() {
   console.log("\n  ─── Verdict Rules ───");
 
   // Small purchase => buy
-  const small = simulate(mockProfile, { name: "Coffee", amount: 200, mode: "cash" });
+  const small = simulate(testProfile, { name: "Coffee", amount: 200, mode: "cash" });
   assert(small.verdict.action === "buy", `Small purchase => buy (got: ${small.verdict.action})`);
 
   // Huge purchase => wait
-  const huge = simulate(mockProfile, { name: "Car", amount: 1000000, mode: "cash" });
+  const huge = simulate(testProfile, { name: "Car", amount: 1000000, mode: "cash" });
   assert(huge.verdict.action === "wait", `Huge purchase => wait (got: ${huge.verdict.action})`);
   assert(huge.verdict.severity === "critical", `Huge purchase severity => critical (got: ${huge.verdict.severity})`);
 
   // EMI affordable
-  const emiOk = simulate(mockProfile, { name: "Phone", amount: 30000, mode: "emi", emiMonths: 12, interestRate: 12 });
+  const emiOk = simulate(testProfile, { name: "Phone", amount: 30000, mode: "emi", emiMonths: 12, interestRate: 12 });
   assert(emiOk.verdict.action === "emi", `Affordable EMI => emi (got: ${emiOk.verdict.action})`);
 
   // EMI > 30% income
-  const emiHigh = simulate(mockProfile, { name: "Expensive", amount: 500000, mode: "emi", emiMonths: 12, interestRate: 12 });
+  const emiHigh = simulate(testProfile, { name: "Expensive", amount: 500000, mode: "emi", emiMonths: 12, interestRate: 12 });
   assert(emiHigh.verdict.action === "wait", `High EMI => wait (got: ${emiHigh.verdict.action})`);
 
   // Mid purchase valid
-  const mid = simulate(mockProfile, { name: "Bike", amount: 50000, mode: "cash" });
+  const mid = simulate(testProfile, { name: "Bike", amount: 50000, mode: "cash" });
   assert(["buy", "wait"].includes(mid.verdict.action), `Mid purchase has valid action (got: ${mid.verdict.action})`);
 
   // Loan mode
-  const loan = simulate(mockProfile, { name: "Education", amount: 200000, mode: "loan", emiMonths: 24, interestRate: 10 });
+  const loan = simulate(testProfile, { name: "Education", amount: 200000, mode: "loan", emiMonths: 24, interestRate: 10 });
   assert(loan.verdict.action, `Loan mode works (got: ${loan.verdict.action})`);
 
   // ═══ Test 3: EMI Formula ═══
@@ -74,7 +74,7 @@ function runTests() {
   // ═══ Test 4: Firewall / Runway / Safe-to-Spend ═══
   console.log("\n  ─── Firewall / Runway / Safe-to-Spend ───");
 
-  const state = calculateFinancialState(mockProfile, 15);
+  const state = calculateFinancialState(testProfile, 15);
   assert(state.firewall.firewalled > 0, `Firewall has earmarked amount: ${state.firewall.firewalled}`);
   assert(state.buffer.total >= 0, `Buffer >= 0: ${state.buffer.total}`);
   assert(state.runway.months > 0, `Runway > 0: ${state.runway.months}`);
@@ -82,7 +82,7 @@ function runTests() {
   assert(state.safeToSpend.daily >= 0, `Safe-to-spend >= 0: ${state.safeToSpend.daily}`);
 
   // Broke user
-  const brokeProfile = { ...mockProfile, balance: 0 };
+  const brokeProfile = { ...testProfile, balance: 0 };
   const brokeState = calculateFinancialState(brokeProfile, 15);
   assert(brokeState.runway.status === "critical", `Broke user => critical (got: ${brokeState.runway.status})`);
 
@@ -91,7 +91,7 @@ function runTests() {
 
   const loadStart = Date.now();
   for (let i = 0; i < 1000; i++) {
-    simulate(mockProfile, { name: `Test ${i}`, amount: Math.random() * 100000, mode: "cash" });
+    simulate(testProfile, { name: `Test ${i}`, amount: Math.random() * 100000, mode: "cash" });
   }
   const loadElapsed = Date.now() - loadStart;
   assert(loadElapsed < 10000, `1000 simulations < 10s (${loadElapsed}ms)`);
@@ -104,13 +104,15 @@ function runTests() {
   assert(!serverCode.includes("password") && !serverCode.includes("secret"), "No hardcoded passwords/secrets");
   assert(serverCode.includes("express.json()"), "express.json() middleware present");
 
-  const mockData = fs.readFileSync(__dirname + "/data/mock.js", "utf-8");
-  assert(!mockData.includes("4111"), "No real account numbers in mock");
+  const serverCode2 = fs.readFileSync(__dirname + "/ledger/ledger.js", "utf-8");
+  assert(!serverCode2.includes("demo-fallback") && !serverCode2.includes("mockProfile") && !serverCode2.includes("data/mock"), "No demo fallback in ledger (production mode)");
+  const tspCode = fs.readFileSync(__dirname + "/aa/tsp.js", "utf-8");
+  assert(!tspCode.includes("generateMockTransactions"), "No mock TSP transactions (production mode)");
 
   // ═══ Test 7: Manual Gates ═══
   console.log("\n  ─── Manual Gates ───");
   console.log("  ⏳ Beta 50+ users: Pending");
-  console.log("  ⏳ AA accuracy >95%: Pending (mock only)");
+  console.log("  ⏳ AA accuracy >95%: Pending (real provider required, CSV supported)");
   console.log("  ⏳ Security audit signed off: Pending");
   console.log("  ℹ️  (Manual gates not automated)\n");
 

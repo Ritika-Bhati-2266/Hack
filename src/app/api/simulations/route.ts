@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // In-memory history (replace with Supabase/Prisma for prod)
-// Persists per server instance - demo-ready
+// Persists per server instance
 interface SimEntry {
   id: string;
   timestamp: string;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
+import { useFinanceStore } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
 import TrajectoryChart from '@/components/TrajectoryChart';
 import DataSourceBanner from '@/components/DataSourceBanner';
@@ -21,7 +21,8 @@ export default function SimulatorPage() {
   const [backendVerdict, setBackendVerdict] = useState<BackendVerdict | null>(null);
   const [backendLoading, setBackendLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
-  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : 'mock';
+  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : 'none';
+  const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
 
   const handleVerifyBackend = async () => {
     setBackendLoading(true);
@@ -78,20 +79,14 @@ export default function SimulatorPage() {
       <DataSourceBanner source={liveSource} />
       <div className="glass rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
         <span className="text-xs text-mist shrink-0">
-          Simulating for <b className="text-primary">{activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV real' : 'AA mock'})` : CUSTOMERS[activeCustomer]?.label || activeCustomer}</b>
+          Simulating for <b className="text-primary">{activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV' : 'AA'})` : 'Custom profile'}</b>
           <span className="text-dusk"> • Bal {inr(user.totalBalance)}</span>
         </span>
-        <div className="flex gap-2 sm:ml-auto overflow-x-auto max-w-full pb-0.5">
-          {(Object.keys(CUSTOMERS) as CustomerId[]).map((id) => (
-            <button
-              key={id}
-              onClick={() => switchCustomer(id)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 whitespace-nowrap ${activeCustomer === id ? 'bg-primary text-white border-primary' : 'bg-white/5 text-mist border-white/[0.08] hover:text-white'}`}
-            >
-              {CUSTOMERS[id].label.split(' ')[0]}
-            </button>
-          ))}
-        </div>
+        {!hasData && (
+          <Link href="/connect" className="sm:ml-auto px-4 py-1.5 rounded-full text-xs font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 whitespace-nowrap">
+            Connect bank first →
+          </Link>
+        )}
       </div>
 
       {/* Input hero */}

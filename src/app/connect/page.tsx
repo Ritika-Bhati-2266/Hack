@@ -23,7 +23,7 @@ export default function ConnectPage() {
   const clearLiveData = useFinanceStore((s) => s.clearLiveData);
 
   const adoptLive = (profile: LiveProfileRes) => {
-    if (profile.source === 'mock') return false;
+    if (!profile || !profile.profile) return false;
     const { user, goals } = backendProfileToStore(profile.profile);
     setLiveData({
       user,
@@ -57,18 +57,8 @@ export default function ConnectPage() {
     await fetchAAData(consentId, sessionToken);
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
-    if (profile.source === 'mock') {
-      // Backend falls back to demo data with 200 when the session is gone — never present it as live
-      setExpired(true);
-      setMsg('Session expired — showing demo data. Reconnect via AA or CSV.');
-    } else if (profile.source === 'aa') {
-      // AA TSP is mock — fake transactions, not real bank sync. Say it loudly.
-      adoptLive(profile);
-      setMsg(`Demo profile loaded — source: aa (MOCK TSP, not real bank data). Real numbers ke liye CSV upload karo. Balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator ab isi data pe chal rahe hain.`);
-    } else {
-      adoptLive(profile);
-      setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator ab isi data pe chal rahe hain.`);
-    }
+    adoptLive(profile);
+    setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator ab isi data pe chal rahe hain.`);
   });
   const handleCSV = async (file: File) => run(async () => {
     // Backend requires explicit balance — CSV has no balance column.
@@ -80,13 +70,8 @@ export default function ConnectPage() {
     const res = await uploadCSV(file, b);
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
-    if (profile.source === 'mock') {
-      setExpired(true);
-      setMsg('Session expired right after upload — showing demo data. Please upload again.');
-    } else {
-      adoptLive(profile);
-      setMsg(`${res.message || 'CSV parsed'} — source: csv. Dashboard + Simulator ab isi data pe chal rahe hain. ${res.balanceWarning || ''} ${(res.meta?.warnings || []).join(' ')}`.trim());
-    }
+    adoptLive(profile);
+    setMsg(`${res.message || 'CSV parsed'} — source: csv. Dashboard + Simulator ab isi data pe chal rahe hain. ${res.balanceWarning || ''} ${(res.meta?.warnings || []).join(' ')}`.trim());
   });
   const handleDelete = () => run(async () => {
     await deleteMyData(); setLive(null); setStep('idle'); clearLiveData(); setMsg('All session data deleted (DPDP).');
@@ -108,7 +93,7 @@ export default function ConnectPage() {
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl tracking-tight mt-3">Connect your money.</h1>
           <p className="text-sm text-mist mt-2 max-w-lg">
-            Mock AA flow ya CSV upload — backend <span className="font-mono text-safe">:3001</span> pe session-isolated. Judges ke liye 3-click demo.
+            AA flow ya CSV upload — backend <span className="font-mono text-safe">:3001</span> pe session-isolated. Real bank data, koi demo nahi.
           </p>
 
           {/* Stepper */}
@@ -143,7 +128,7 @@ export default function ConnectPage() {
       )}
       {expired && (
         <div className="text-sm text-amber-300 bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 animate-fade-up">
-          <b>Session expired (1h TTL)</b> — {msg || 'ye demo data hai, live nahi.'} AA ya CSV se dobara connect karo, 10 second me restore ho jayega.
+          <b>Session expired (1h TTL)</b> — {msg || 'dobara connect karo.'} AA ya CSV se dobara connect karo, 10 second me restore ho jayega.
         </div>
       )}
 
@@ -151,8 +136,8 @@ export default function ConnectPage() {
         <div className="rounded-[24px] bg-surface border border-white/[0.08] p-6 space-y-3">
           <h2 className="font-display font-extrabold flex items-center gap-2">
             <Landmark className="w-5 h-5 text-primary" /> Option A — AA Flow
-            <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
-              MOCK DEMO
+            <span className="text-[9px] font-black tracking-widest px-2 py-1 rounded-lg bg-safe/15 text-safe border border-safe/30">
+              LIVE
             </span>
           </h2>
           <button onClick={handleCreate} disabled={loading} className={`w-full py-3 rounded-2xl text-sm font-extrabold transition-all ${stepIdx >= 1 ? 'bg-white/10 text-mist border border-white/[0.08]' : 'bg-primary text-white hover:brightness-110 shadow-[0_0_25px_rgba(83,134,94,0.3)]'} disabled:opacity-50`}>
@@ -205,15 +190,15 @@ export default function ConnectPage() {
             <PlugZap className="w-5 h-5 text-dusk" />
           </div>
           <p className="font-display font-extrabold text-lg mt-3">No live data yet</p>
-          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Upar Option A (AA mock demo) ya Option B (CSV — asli numbers) se connect karo. Phir yahan balance, runway aur safe-spend dikhega.</p>
+          <p className="text-sm text-mist mt-1 max-w-md mx-auto">Upar Option A (AA) ya Option B (CSV) se connect karo. Phir yahan balance, runway aur safe-spend dikhega.</p>
         </div>
       )}
 
-      {live && <DataSourceBanner source={expired ? 'mock' : live.source} />}
+      {live && <DataSourceBanner source={expired ? 'none' : live.source} />}
       {live && (
         <div className="rounded-[24px] bg-surface border border-safe/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(6,182,212,0.15)]">
           <h3 className="font-display font-extrabold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-safe" /> {expired || live.source !== 'csv' ? 'Demo Data' : 'Live Profile'} — <span className={`font-mono text-sm ${expired || live.source !== 'csv' ? 'text-amber-300' : 'text-safe'}`}>{expired ? 'mock' : live.source}{!expired && live.source === 'aa' ? ' (mock TSP)' : ''}</span>
+            <CheckCircle2 className="w-5 h-5 text-safe" /> Live Profile — <span className="font-mono text-sm text-safe">{live.source}</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[

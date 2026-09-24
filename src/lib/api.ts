@@ -67,7 +67,7 @@ export interface BackendProfile {
 export function toBackendProfile(
   user: UserFinancialState,
   goals: Goal[],
-  name = 'Demo User'
+  name = 'Live User'
 ): BackendProfile {
   const dayOfMonth = { rent: 1, sip: 5, bill: 10, emi: 1 } as const;
   return {

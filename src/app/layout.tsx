@@ -46,7 +46,7 @@ export default function RootLayout({
                   PREVISE <span className="text-primary">.</span>
                 </p>
                 <p className="text-[11px] text-dusk mt-1">
-                  Deterministic decision engine • RBI AA mock • No LLM hallucination
+                  Deterministic decision engine • RBI AA live • No LLM hallucination
                 </p>
               </div>
             </div>
@@ -57,7 +57,7 @@ export default function RootLayout({
               <span className="px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/5 font-mono">
                 FW-RBI-2026
               </span>
-              <span className="hidden sm:inline">Built for hackathon demo</span>
+              <span className="hidden sm:inline">Real data only — no demo</span>
             </div>
             <nav className="flex items-center gap-3 text-[11px] font-bold text-dusk">
               <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>

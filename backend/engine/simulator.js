@@ -88,7 +88,7 @@ function simulate(profile, proposal) {
     impact,
     verdict,
     goalImpact,
-    profileSource: "mock",
+    profileSource: "custom",
   };
 }
 

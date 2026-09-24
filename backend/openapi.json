@@ -11,11 +11,11 @@
       "get": { "summary": "Health check", "responses": { "200": { "description": "ok" } } }
     },
     "/api/profile": {
-      "get": { "summary": "Mock profile + state (Phase 1)", "responses": { "200": { "description": "profile" } } }
+      "get": { "summary": "Removed (410) — use /api/profile/live", "responses": { "410": { "description": "removed" } } }
     },
     "/api/profile/live": {
       "get": {
-        "summary": "Live profile (AA/CSV) or mock fallback, incl. parsed transactions",
+        "summary": "Live profile (AA/CSV), 404 when no session — no demo fallback",
         "parameters": [
           { "name": "x-session-id", "in": "header", "schema": { "type": "string" } },
           { "name": "day", "in": "query", "schema": { "type": "integer" } }
@@ -25,7 +25,7 @@
     },
     "/api/simulate": {
       "post": {
-        "summary": "Simulate with session/mock profile",
+        "summary": "Simulate with live session profile (404 when no session)",
         "requestBody": {
           "required": true,
           "content": {

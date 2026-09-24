@@ -1,10 +1,10 @@
 /**
- * Previse — Mock Data
- * Hardcoded profile for Phase 1 testing
+ * Previse — Test Profile (QA / engine tests ONLY)
+ * Never served by the API. Production has no demo data — see ledger.js.
  */
 
-const mockProfile = {
-  name: "Priya Sharma",
+const testProfile = {
+  name: "Test User",
   balance: 185000,
   monthlyInflow: 65000,
   commitments: [
@@ -22,4 +22,4 @@ const mockProfile = {
   ],
 };
 
-module.exports = { mockProfile };
+module.exports = { testProfile };

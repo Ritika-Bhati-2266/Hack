@@ -15,7 +15,6 @@ const fs = require("fs");
 const { calculateFinancialState } = require("./engine/rules");
 const { simulate, calculateEMI } = require("./engine/simulator");
 const { applyFirewall } = require("./engine/firewall");
-const { mockProfile } = require("./data/mock");
 
 // Phase 2 imports
 const { createConsent, approveConsent, getConsent, fetchLiveData } = require("./aa/consent");
@@ -156,28 +155,29 @@ app.get("/api/health", (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  MOCK PROFILE (Phase 1 — always available)
+//  LEGACY PROFILE (removed — production mode, no demo data)
+//  GET /api/profile and /api/firewall required a mock profile.
+//  Use /api/profile/live (session) + /api/simulate/custom instead.
 // ═══════════════════════════════════════════════════════════════
 
 app.get("/api/profile", (req, res) => {
-  const dayOfMonth = parseInt(req.query.day) || new Date().getDate();
-  const state = calculateFinancialState(mockProfile, dayOfMonth);
-  res.json({
-    profile: {
-      name: mockProfile.name,
-      balance: mockProfile.balance,
-      monthlyInflow: mockProfile.monthlyInflow,
-      commitments: mockProfile.commitments,
-      goals: mockProfile.goals,
-    },
-    state,
-    source: "mock",
+  res.status(410).json({
+    error: "Removed — connect via AA or CSV, then use GET /api/profile/live with x-session-id.",
+    code: "MOCK_REMOVED",
   });
 });
 
 app.get("/api/firewall", (req, res) => {
+  const sessionId = req.headers["x-session-id"];
+  const stored = getSession(sessionId);
+  if (!stored) {
+    return res.status(404).json({
+      error: "No live data — connect via AA or CSV first.",
+      code: "NO_LIVE_DATA",
+    });
+  }
   const dayOfMonth = parseInt(req.query.day) || new Date().getDate();
-  const firewall = applyFirewall(mockProfile.balance, mockProfile.commitments, dayOfMonth);
+  const firewall = applyFirewall(stored.profile.balance, stored.profile.commitments, dayOfMonth);
   res.json(firewall);
 });
 
@@ -358,6 +358,7 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
 
     res.json({ message: `Parsed ${txns.length} transactions`, liveProfile: profile, meta, sessionId, balanceWarning });
   } catch (err) {
+    if (err.code === "NO_EXPENSES") return res.status(400).json({ error: err.message, code: err.code });
     res.status(500).json({ error: err.message });
   }
 });
@@ -368,8 +369,8 @@ app.post("/api/upload/csv", apiLimiter, upload.single("statement"), (req, res) =
 
 /**
  * GET /api/profile/live
- * Return the live profile built from AA/CSV data
- * Falls back to mock if no live data available.
+ * Return the live profile built from AA/CSV data.
+ * Production mode: NO mock fallback — 404 when no session.
  * Also returns parsed transactions + accounts so the UI can show a
  * category breakdown (additive fields — old clients ignore them).
  */
@@ -399,19 +400,10 @@ app.get("/api/profile/live", (req, res) => {
     });
   }
 
-  // Fallback to mock
-  const state = calculateFinancialState(mockProfile, dayOfMonth);
-  res.json({
-    profile: {
-      name: mockProfile.name,
-      balance: mockProfile.balance,
-      monthlyInflow: mockProfile.monthlyInflow,
-      commitments: mockProfile.commitments,
-      goals: mockProfile.goals,
-    },
-    state,
-    source: "mock",
-    meta: null,
+  // Production mode: no demo fallback — client must connect first.
+  return res.status(404).json({
+    error: "No live data — connect via AA or CSV first.",
+    code: "NO_LIVE_DATA",
   });
 });
 
@@ -421,7 +413,7 @@ app.get("/api/profile/live", (req, res) => {
 
 /**
  * POST /api/simulate
- * Simulate a purchase. Uses live profile if available, else mock.
+ * Simulate a purchase. Requires a live profile session (AA/CSV).
  * Body: { name, amount, mode, emiMonths?, interestRate? }
  */
 app.post("/api/simulate", apiLimiter, (req, res) => {
@@ -447,11 +439,17 @@ app.post("/api/simulate", apiLimiter, (req, res) => {
 
   const sessionId = req.headers["x-session-id"];
   const stored = getSession(sessionId);
-  const profile = stored ? stored.profile : mockProfile;
+  if (!stored) {
+    return res.status(404).json({
+      error: "No live data — connect via AA or CSV first, or use POST /api/simulate/custom with a profile.",
+      code: "NO_LIVE_DATA",
+    });
+  }
+  const profile = stored.profile;
 
   const proposal = { name, amount: Number(amount), mode, emiMonths: Number(emiMonths), interestRate: Number(interestRate) };
   const result = simulate(profile, proposal);
-  result.profileSource = stored ? stored.source : "mock";
+  result.profileSource = stored.source;
   res.json(result);
 });
 
@@ -638,8 +636,8 @@ app.get("/", (req, res) => {
 });
 
 // ─── Beta admin: list signups (token-gated, rate-limited) ───
-// Header: x-admin-token === BETA_ADMIN_TOKEN (default only for local demo).
-const BETA_ADMIN_TOKEN = process.env.BETA_ADMIN_TOKEN || "previse-demo-admin";
+// Header: x-admin-token === BETA_ADMIN_TOKEN (set env in prod).
+const BETA_ADMIN_TOKEN = process.env.BETA_ADMIN_TOKEN || "change-me-in-prod";
 app.get("/api/beta/signups", apiLimiter, (req, res) => {
   if (req.headers["x-admin-token"] !== BETA_ADMIN_TOKEN) {
     return res.status(401).json({ error: "unauthorized" });
@@ -672,6 +670,6 @@ app.use((req, res) => {
 // ─── Start ───────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n  ⚡ Previse Engine running at http://localhost:${PORT}`);
-  console.log(`  📡 AA Provider: ${process.env.AA_PROVIDER || "mock"}`);
+  console.log(`  📡 AA Provider: ${process.env.AA_PROVIDER || "not-configured (CSV only)"}`);
   console.log(`  🔧 Phase: 2 (India Stack)\n`);
 });

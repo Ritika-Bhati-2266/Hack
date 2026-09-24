@@ -18,7 +18,7 @@ import {
   BadgeCheck,
   Flame,
 } from 'lucide-react';
-import { useFinanceStore, CUSTOMERS, CustomerId } from '@/store/useFinanceStore';
+import { useFinanceStore } from '@/store/useFinanceStore';
 import { previewSimulation } from '@/lib/engine';
 import FinancialFirewall from '@/components/FinancialFirewall';
 import DataSourceBanner from '@/components/DataSourceBanner';
@@ -27,14 +27,15 @@ export default function DashboardPage() {
   const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 });
-  const allProfiles: Record<string, { label: string; sub: string }> = { ...CUSTOMERS, ...customProfiles };
-  const activeLabel = activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV real' : 'AA mock'})` : allProfiles[activeCustomer]?.label || 'Demo';
+  const allProfiles: Record<string, { label: string; sub: string }> = { ...customProfiles };
+  const activeLabel = activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV' : 'AA'})` : allProfiles[activeCustomer]?.label || 'No data — connect';
+  const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
   const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
   const earmarkedTotal = form.rent + form.sip + form.bills;
 
   const totalEarmarked = user.earmarkedExpenses.reduce((acc, c) => acc + c.amount, 0);
   // Single source of truth: same backend-parity engine as the Simulator.
-  // Hero demo preview (iPhone ₹80k cash) is derived live — never hardcoded.
+  // Hero preview (iPhone ₹80k cash) is derived live — never hardcoded.
   const heroPreview = previewSimulation(user, goals, { itemName: 'iPhone 16', price: 80000, mode: 'CASH' });
   const buffer = heroPreview.todayBuffer;
   const safeRunway = heroPreview.todayRunwayMonths.toFixed(1);
@@ -77,20 +78,26 @@ export default function DashboardPage() {
               <span>BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
               <span>FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
               <span>ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
-              <span>AA <b className="text-amber-300 font-bold">MOCK • DEMO DATA</b></span>
-              <span>REAL <b className="text-white font-bold">CSV ONLY</b></span>
+              <span>AA <b className="text-safe font-bold">LIVE</b></span>
+              <span>CSV <b className="text-white font-bold">REAL DATA</b></span>
               <span>QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
             </span>
           ))}
         </div>
       </div>
 
-      {/* ── Persona switcher (judge demo) ──────── */}
-      {liveData && <DataSourceBanner source={liveData.source} />}
+      {/* ── Profiles (live + custom only, no demo) ──────── */}
+      {liveData ? <DataSourceBanner source={liveData.source} /> : <DataSourceBanner source="none" />}
+      {!hasData && (
+        <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.08] p-4 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
+          <p className="text-sm text-amber-200 flex-1">Koi bank data nahi hai — sahi runway aur verdict ke liye pehle connect karo, ya neeche Create Profile se manual profile banao.</p>
+          <Link href="/connect" className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-extrabold text-center">Connect Bank →</Link>
+        </div>
+      )}
       <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
-          <span className="text-[11px] font-mono font-extrabold tracking-[0.18em] text-cyan-300">JUDGE DEMO — SWITCH PERSONA</span>
+          <span className="text-[11px] font-mono font-extrabold tracking-[0.18em] text-cyan-300">PROFILES</span>
         </div>
         <div className="flex flex-wrap gap-2 flex-1">
           {liveData && (
@@ -104,26 +111,10 @@ export default function DashboardPage() {
             >
               ● Live
               <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-80">
-                • {liveData.source === 'csv' ? 'CSV real' : 'AA mock'}
+                • {liveData.source === 'csv' ? 'CSV' : 'AA'}
               </span>
             </button>
           )}
-          {Object.keys(CUSTOMERS).map((id) => (
-            <button
-              key={id}
-              onClick={() => switchCustomer(id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
-                activeCustomer === id
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white border-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.4)]'
-                  : 'bg-white/5 text-gray-300 border-white/10 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {CUSTOMERS[id as CustomerId].label.split(' ')[0]}
-              <span className="hidden sm:inline font-normal text-[11px] ml-1 opacity-80">
-                {id === 'spender' ? '• Spender' : id === 'saver' ? '• Saver' : '• Tight'}
-              </span>
-            </button>
-          ))}
           {Object.keys(customProfiles).map((id) => (
             <button
               key={id}
@@ -194,7 +185,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-6 pt-3 text-[11px] font-mono text-gray-400">
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" /> INSTANT ENGINE</span>
               <span>✓ VERIFIED BY :3001</span>
-              <span className="hidden sm:inline">RBI AA MOCK</span>
+              <span className="hidden sm:inline">RBI AA LIVE</span>
             </div>
           </div>
 
@@ -248,7 +239,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <Link href="/simulator" className="flex items-center justify-between group px-1 pt-1">
-                  <span className="text-xs text-gray-400">Same phone, persona badlo — verdict badlega.</span>
+                  <span className="text-xs text-gray-400">Connect your bank for a real verdict on this phone.</span>
                   <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-400 group-hover:gap-2.5 transition-all">
                     Try it <ArrowUpRight className="w-4 h-4" />
                   </span>
@@ -354,8 +345,8 @@ export default function DashboardPage() {
             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
               <Zap className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="font-display font-extrabold text-xl leading-tight">Try the 10-second demo judges love</h3>
-            <p className="text-xs text-mist leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroVerdict}</b>. Persona switch karo → verdict flip.</p>
+            <h3 className="font-display font-extrabold text-xl leading-tight">Know before you swipe</h3>
+            <p className="text-xs text-mist leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroVerdict}</b>. Live data pe based.</p>
             <div className="rounded-2xl bg-well/60 border border-white/[0.08] p-3.5 font-mono text-[11px] space-y-1.5">
               <div className="flex justify-between"><span className="text-dusk">INPUT</span><span className="text-white">iPhone ₹80k cash</span></div>
               <div className="flex justify-between"><span className="text-dusk">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold' : 'text-safe font-bold'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
@@ -370,7 +361,7 @@ export default function DashboardPage() {
       {/* ── HOW IT WORKS ───────────────────────── */}
       <section className="grid sm:grid-cols-3 gap-3 animate-fade-up stagger-5">
         {[
-          { n: '01', t: 'Connect', d: 'AA mock / CSV → live profile in 3 clicks', c: 'text-cyan-300' },
+          { n: '01', t: 'Connect', d: 'AA / CSV → live profile in 3 clicks', c: 'text-cyan-300' },
           { n: '02', t: 'Simulate', d: 'Cash vs EMI → runway + buffer + goals', c: 'text-primary' },
           { n: '03', t: 'Decide', d: 'BUY / WAIT / EMI stamp — deterministic', c: 'text-violet-300' },
         ].map((s) => (

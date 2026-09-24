@@ -4,27 +4,21 @@
  */
 
 const { parseTransactions, detectMonthlyInflow, detectCommitments } = require("./parser");
-const { mockProfile } = require("../data/mock");
 
 function buildLiveProfile({ accounts, transactions }) {
   const { transactions: parsed, accuracy, warnings } = parseTransactions(transactions);
 
   const rawBalance = accounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-  // A genuine 0 balance (broke user) must stay 0 — only fall back to demo
-  // when there are no accounts at all. (`rawBalance || mock` silently turned
-  // every broke user into the ₹1.85L demo profile.)
-  const balance = accounts.length > 0 ? rawBalance : mockProfile.balance;
+  // No demo fallback: a genuine 0 stays 0, and no accounts => 0.
+  const balance = rawBalance;
   const monthlyInflow = detectMonthlyInflow(parsed);
   const detected = detectCommitments(parsed);
 
-  // Engine safety: 0 commitments => infinite runway => every verdict BUY.
-  // So a fallback is required — but it must NEVER silently substitute demo
-  // data when the user gave us real expenses. Three tiers:
+  // Production mode: NEVER invent commitments.
   //   1. "detected" — repeating narrations found (normal case).
   //   2. "single-sample" — thin file, no repeats, but REAL debits exist:
   //      aggregate actual debits by category as the monthly estimate.
-  //   3. "demo-fallback" — zero debits at all (credits-only file): only
-  //      here is demo data used, with an explicit warning.
+  //   3. credits-only file => throw: caller returns 400, no fake data.
   const debits = parsed.filter((t) => t.amount < 0);
   let commitments;
   let commitmentsSource;
@@ -52,19 +46,19 @@ function buildLiveProfile({ accounts, transactions }) {
       `Only ${parsed.length} transactions — no repeating expenses found, using your actual ${debits.length} expense(s) as monthly estimate. Upload 1-3 months of statements for accurate recurring detection.`
     );
   } else {
-    commitments = mockProfile.commitments;
-    commitmentsSource = "demo-fallback";
-    warnings.push(
-      `Only ${parsed.length} transactions — not enough history to detect recurring expenses, showing demo commitments. Upload 1-3 months of statements for accurate results.`
+    const err = new Error(
+      "No debit transactions found — upload a statement with expenses (1-3 months) so commitments can be detected. No demo data substituted."
     );
+    err.code = "NO_EXPENSES";
+    throw err;
   }
 
   const profile = {
-    name: mockProfile.name,
+    name: "Live User",
     balance,
     monthlyInflow,
     commitments,
-    goals: mockProfile.goals,
+    goals: [],
   };
 
   if (monthlyInflow === 0) {
@@ -73,8 +67,7 @@ function buildLiveProfile({ accounts, transactions }) {
 
   const meta = {
     parsingAccuracy: accuracy,
-    // What the engine actually simulates with (detected OR demo fallback) —
-    // never 0-while-profile-uses-mock again.
+    // What the engine actually simulates with (detected or single-sample).
     monthlyExpenses: commitments.reduce((sum, c) => sum + c.amount, 0),
     commitmentsSource,
     parsedCount: parsed.filter((t) => t.parsedCategory !== "other").length,

@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { UserFinancialState, Goal, SimulationInput, SimulationResult, PaymentMode } from '@/types';
 import { previewSimulation } from '@/lib/engine';
 
-export type CustomerId = 'spender' | 'saver' | 'chaser' | 'live' | string;
+export type CustomerId = 'live' | 'empty' | string;
 
 export interface LiveData {
   user: UserFinancialState;
@@ -50,73 +50,25 @@ interface FinanceStore {
 }
 
 export type CustomerRecord = { label: string; sub: string; user: UserFinancialState; goals: Goal[] };
-export const CUSTOMERS: Record<string, CustomerRecord> = {
-  spender: {
-    label: 'Rahul Verma',
-    sub: 'Spender • Food 32% ↑',
-    user: {
-      totalBalance: 240000,
-      monthlyIncome: 85000,
-      dailyBurnRate: 1500,
-      earmarkedExpenses: [
-        { id: '1', name: 'Apartment Rent', amount: 35000, category: 'rent', dueDate: '1st of month', autoDebit: true },
-        { id: '2', name: 'Mutual Fund SIPs', amount: 15000, category: 'sip', dueDate: '5th of month', autoDebit: true },
-        { id: '3', name: 'Electricity & Wifi', amount: 10000, category: 'bill', dueDate: '10th of month', autoDebit: true },
-      ],
-    },
-    goals: [
-      { id: 'g1', name: 'Emergency Shield Fund', targetAmount: 300000, currentAmount: 210000, monthlyContribution: 15000, targetDate: '2026-12-31', category: 'emergency', delayInMonths: 0 },
-      { id: 'g2', name: 'iPhone 16 Pro Max', targetAmount: 80000, currentAmount: 35000, monthlyContribution: 8000, targetDate: '2026-10-15', category: 'tech', delayInMonths: 0 },
-      { id: 'g3', name: 'Bali Retreat Trip', targetAmount: 120000, currentAmount: 60000, monthlyContribution: 6000, targetDate: '2026-11-20', category: 'travel', delayInMonths: 0 },
-    ],
-  },
-  saver: {
-    label: 'Priya Sharma',
-    sub: 'Saver • SIP Regular',
-    user: {
-      totalBalance: 290000,
-      monthlyIncome: 95000,
-      dailyBurnRate: 1266,
-      earmarkedExpenses: [
-        { id: '1', name: 'Apartment Rent', amount: 28000, category: 'rent', dueDate: '1st of month', autoDebit: true },
-        { id: '2', name: 'Mutual Fund SIPs', amount: 30000, category: 'sip', dueDate: '5th of month', autoDebit: true },
-        { id: '3', name: 'Electricity & Wifi', amount: 8800, category: 'bill', dueDate: '10th of month', autoDebit: true },
-      ],
-    },
-    goals: [
-      { id: 'g1', name: 'Emergency Shield Fund', targetAmount: 300000, currentAmount: 245000, monthlyContribution: 15000, targetDate: '2026-12-31', category: 'emergency', delayInMonths: 0 },
-      { id: 'g2', name: 'Europe Trip', targetAmount: 250000, currentAmount: 180000, monthlyContribution: 12000, targetDate: '2026-10-15', category: 'travel', delayInMonths: 0 },
-      { id: 'g3', name: 'iPhone 16 Pro Max', targetAmount: 80000, currentAmount: 65000, monthlyContribution: 5000, targetDate: '2026-11-20', category: 'tech', delayInMonths: 0 },
-    ],
-  },
-  chaser: {
-    label: 'Aman Singh',
-    sub: 'Chaser • Tight Buffer',
-    user: {
-      totalBalance: 98000,
-      monthlyIncome: 65000,
-      dailyBurnRate: 1166,
-      earmarkedExpenses: [
-        { id: '1', name: 'Apartment Rent', amount: 22000, category: 'rent', dueDate: '1st of month', autoDebit: true },
-        { id: '2', name: 'Mutual Fund SIPs', amount: 10000, category: 'sip', dueDate: '5th of month', autoDebit: true },
-        { id: '3', name: 'Electricity & Wifi', amount: 12000, category: 'bill', dueDate: '10th of month', autoDebit: true },
-      ],
-    },
-    goals: [
-      { id: 'g1', name: 'Emergency Shield Fund', targetAmount: 200000, currentAmount: 98000, monthlyContribution: 10000, targetDate: '2026-12-31', category: 'emergency', delayInMonths: 0 },
-      { id: 'g2', name: 'Bike Downpayment', targetAmount: 60000, currentAmount: 48000, monthlyContribution: 8000, targetDate: '2026-10-15', category: 'asset', delayInMonths: 0 },
-      { id: 'g3', name: 'Bali Retreat Trip', targetAmount: 120000, currentAmount: 30000, monthlyContribution: 5000, targetDate: '2026-11-20', category: 'travel', delayInMonths: 0 },
-    ],
-  },
+// Production mode: no demo personas. Live (AA/CSV) + user-created profiles only.
+export const CUSTOMERS: Record<string, CustomerRecord> = {};
+
+export const EMPTY_USER: UserFinancialState = {
+  totalBalance: 0,
+  monthlyIncome: 0,
+  dailyBurnRate: 0,
+  earmarkedExpenses: [],
 };
+export const EMPTY_GOALS: Goal[] = [];
+export const hasLiveBalance = (u: UserFinancialState) => u.totalBalance > 0 || u.earmarkedExpenses.length > 0;
 
 export const useFinanceStore = create<FinanceStore>()(
   persist(
     (set, get) => ({
-  user: CUSTOMERS.spender.user,
-  goals: CUSTOMERS.spender.goals,
+  user: EMPTY_USER,
+  goals: EMPTY_GOALS,
   currentSimulation: null,
-  activeCustomer: 'spender',
+  activeCustomer: 'empty',
   customProfiles: {},
   liveData: null,
   history: [],
@@ -139,7 +91,7 @@ export const useFinanceStore = create<FinanceStore>()(
     const { activeCustomer } = get();
     set({ liveData: null });
     if (activeCustomer === 'live') {
-      set({ activeCustomer: 'spender', user: CUSTOMERS.spender.user, goals: CUSTOMERS.spender.goals, currentSimulation: null });
+      set({ activeCustomer: 'empty', user: EMPTY_USER, goals: EMPTY_GOALS, currentSimulation: null });
     }
   },
   addGoal: (g) => {
@@ -196,7 +148,7 @@ export const useFinanceStore = create<FinanceStore>()(
     const next = { ...customProfiles };
     delete next[id];
     if (activeCustomer === id) {
-      set({ customProfiles: next, activeCustomer: 'spender', user: CUSTOMERS.spender.user, goals: CUSTOMERS.spender.goals, currentSimulation: null });
+      set({ customProfiles: next, activeCustomer: 'empty', user: EMPTY_USER, goals: EMPTY_GOALS, currentSimulation: null });
     } else {
       set({ customProfiles: next });
     }
