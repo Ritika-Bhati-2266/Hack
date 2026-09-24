@@ -87,11 +87,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-8 relative min-w-0">
       {/* Background Cyber Lights */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-gradient-to-r from-primary/15 via-safe/20 to-violet-500/15 blur-[140px] pointer-events-none rounded-full" />
 
       {/* ── Profiles (live + custom only, no demo) ──────── */}
       {liveData ? <DataSourceBanner source={liveData.source} /> : customProfiles[activeCustomer] ? null : <DataSourceBanner source="none" />}
-      <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+      <div className="rounded-2xl border border-white/10 bg-surface/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
           <span className="text-[11px] font-mono font-extrabold tracking-[0.18em] text-cyan-300">PROFILES</span>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
               key={id}
               onClick={() => switchCustomer(id)}
               className={`px-4 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all active:scale-95 ${
-                activeCustomer === id ? 'bg-cyan-400 text-black border-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.5)]' : 'bg-white/5 text-cyan-300 border-cyan-500/20'
+                activeCustomer === id ? 'bg-primary text-white border-primary shadow-[0_0_20px_rgba(83,134,94,0.3)]' : 'bg-white/5 text-mist border-white/[0.08] hover:bg-white/10 hover:text-white'
               }`}
             >
               {customProfiles[id].label.split(' ')[0]}
@@ -136,22 +136,22 @@ export default function DashboardPage() {
       </div>
 
       {/* ── HERO (landing-first) ───────────────── */}
-      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#070b14]/90 backdrop-blur-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)] animate-fade-up stagger-1">
+      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-surface/90 backdrop-blur-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)] animate-fade-up stagger-1">
         <div className="absolute inset-0 bg-framer-grid opacity-30" />
-        <div className="absolute -top-32 left-1/4 w-[600px] h-[350px] bg-blue-600/20 blur-[140px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-24 right-0 w-[500px] h-[350px] bg-cyan-400/15 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute -top-32 left-1/4 w-[600px] h-[350px] bg-primary/20 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 right-0 w-[500px] h-[350px] bg-safe/15 blur-[140px] rounded-full pointer-events-none" />
 
         <div className="relative grid lg:grid-cols-[1.15fr_0.85fr] gap-6 sm:gap-8 p-6 sm:p-12 items-center">
           {/* Left copy */}
           <div className="space-y-5 sm:space-y-6 min-w-0">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-[11px] font-mono font-bold tracking-wide shadow-[0_0_20px_rgba(0,240,255,0.2)]">
-              <BadgeCheck className="w-4 h-4 text-cyan-400" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-mono font-bold tracking-wide">
+              <BadgeCheck className="w-4 h-4 text-primary" />
               EXPENSE TRACKERS SHOW PAST • PREVISE SIMULATES FUTURE
             </div>
             <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2rem,9vw,4.5rem)] text-white break-words">
               Buy it or
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300 drop-shadow-[0_0_35px_rgba(0,240,255,0.4)]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-safe to-cyan-300">
                 park it?
               </span>
               <br />
@@ -167,7 +167,7 @@ export default function DashboardPage() {
                 <>
                   <Link
                     href="/connect"
-                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 min-h-[48px] rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 min-h-[48px] rounded-2xl bg-primary text-white font-extrabold text-sm shadow-[0_0_35px_rgba(83,134,94,0.4)] hover:shadow-[0_0_55px_rgba(83,134,94,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
                   >
                     <Lock className="w-4 h-4 text-white" />
                     Connect Bank (AA)
@@ -185,7 +185,7 @@ export default function DashboardPage() {
                 <>
                   <Link
                     href="/simulator"
-                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 min-h-[48px] rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 min-h-[48px] rounded-2xl bg-primary text-white font-extrabold text-sm shadow-[0_0_35px_rgba(83,134,94,0.4)] hover:shadow-[0_0_55px_rgba(83,134,94,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
                   >
                     <Zap className="w-4 h-4 fill-white text-white" />
                     Launch What-If Simulator
@@ -211,7 +211,7 @@ export default function DashboardPage() {
           {/* Right — interactive TRY-IT-NOW widget (no navigation needed) */}
           <div className="relative min-w-0">
             {/* Decorative back glow frame */}
-            <div className="absolute -inset-1 rounded-[32px] bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-600 blur-xl opacity-30 animate-pulse" />
+            <div className="absolute -inset-1 rounded-[32px] bg-gradient-to-r from-primary via-safe to-cyan-400 blur-xl opacity-30 animate-pulse" />
 
             <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-[#0e1424]/90 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] p-6 space-y-4">
               <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export default function DashboardPage() {
               </div>
               <button
                 onClick={() => setTried(true)}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] active:scale-[0.98] transition-all"
+                className="w-full py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-[0_0_25px_rgba(83,134,94,0.3)] hover:shadow-[0_0_40px_rgba(83,134,94,0.5)] active:scale-[0.98] transition-all"
               >
                 ⚡ SIMULATE
               </button>
@@ -294,7 +294,7 @@ export default function DashboardPage() {
       <div className={!liveData ? 'opacity-80 space-y-8' : 'space-y-8'}>
       {/* ── STATS BENTO ────────────────────────── */}
       <section className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-fade-up stagger-2">
-        <div className={`cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group min-w-0 min-[420px]:col-span-2 lg:col-span-1 ${hasData ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(0,240,255,0.18)] bg-cyan-500/[0.06]' : 'border-white/10 opacity-70'}`}>
+        <div className={`cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group min-w-0 min-[420px]:col-span-2 lg:col-span-1 ${hasData ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(6,182,212,0.18)] bg-cyan-500/[0.06]' : 'border-white/10 opacity-70'}`}>
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-cyan-300">SPEND TODAY ★</span>
             <Wallet className="w-5 h-5 text-cyan-300 group-hover:scale-110 transition-transform" />
@@ -311,7 +311,7 @@ export default function DashboardPage() {
           <p className="font-display font-black text-2xl sm:text-[32px] leading-none text-white break-words">{hasData ? `₹${(buffer / 100000).toFixed(1)}L` : '₹--'}</p>
           <p className="text-[11px] text-gray-400 mt-2 font-mono break-words">{hasData ? `of ${inr(user.totalBalance)} • ${inr(totalEarmarked)} locked` : 'Connect bank to view liquid buffer'}</p>
           <div className="mt-4 h-1.5 rounded-full bg-white/5 overflow-hidden p-0.5">
-            <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${hasData ? Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100)) : 0}%` }} />
+            <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-full" style={{ width: `${hasData ? Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100)) : 0}%` }} />
           </div>
         </div>
 
@@ -329,7 +329,7 @@ export default function DashboardPage() {
         <div className="cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group opacity-80 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">GOALS</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
           </div>
           <p className="font-display font-black text-2xl sm:text-[32px] leading-none text-white break-words">{hasData ? goalsOnTrack : '--'} <span className="text-base font-bold text-cyan-400">{hasData ? 'on track' : 'connected'}</span></p>
           <p className="text-[11px] text-gray-400 mt-2 font-mono truncate">{hasData && goals.length > 0 ? goals.map((g) => g.name.split(' ')[0]).join(' • ') : 'Connect data to track goals'}</p>
@@ -415,7 +415,7 @@ export default function DashboardPage() {
       {showGate && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-base/85 backdrop-blur-md p-4 pb-safe animate-fade-up overscroll-contain">
           <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-5 text-center shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-500 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(0,240,255,0.4)]">
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(83,134,94,0.4)]">
               <span className="font-display font-black text-white text-2xl leading-none">P</span>
             </div>
             <div>
@@ -425,7 +425,7 @@ export default function DashboardPage() {
             <div className="space-y-2.5">
               <Link
                 href="/connect"
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(0,240,255,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm shadow-[0_0_25px_rgba(83,134,94,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
               >
                 <Lock className="w-4 h-4 text-white" />
                 Connect Data (AA / CSV)

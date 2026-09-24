@@ -32,7 +32,7 @@ export default function FinancialFirewall() {
 
   if (!hasData) {
     return (
-      <div className="relative overflow-hidden rounded-[32px] border border-dashed border-white/15 bg-[#0b0f19]/80 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+      <div className="relative overflow-hidden rounded-[32px] border border-dashed border-white/15 bg-surface/80 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
         <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0">
@@ -62,7 +62,7 @@ export default function FinancialFirewall() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#0b0f19]/90 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-surface/90 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
       <div className="absolute -top-24 right-0 w-[450px] h-[280px] bg-amber-400/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute -bottom-24 left-0 w-[450px] h-[280px] bg-cyan-400/10 blur-[120px] rounded-full pointer-events-none" />
 
@@ -75,7 +75,7 @@ export default function FinancialFirewall() {
             <div>
               <div className="flex items-center gap-2.5">
                 <h2 className="font-display font-black text-xl text-white">Financial Firewall</h2>
-                <span className="text-[10px] font-mono font-black tracking-widest px-2.5 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+                <span className="text-[10px] font-mono font-black tracking-widest px-2.5 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.3)]">
                   ● ACTIVE
                 </span>
               </div>
