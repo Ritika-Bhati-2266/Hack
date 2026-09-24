@@ -328,6 +328,14 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="divide-y divide-white/[0.08]">
+            {user.earmarkedExpenses.length === 0 && (
+              <div className="py-8 text-center">
+                <p className="text-sm text-mist">Abhi kuch lock nahi hai — bank connect karo, earmarked funds yahan dikhenge.</p>
+                <Link href="/connect" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400/15 text-amber-300 border border-amber-400/30 text-xs font-extrabold hover:bg-amber-400/25 transition-colors">
+                  <Lock className="w-3.5 h-3.5" /> Connect bank to see earmarked funds
+                </Link>
+              </div>
+            )}
             {user.earmarkedExpenses.map((e) => (
               <div key={e.id} className="flex items-center justify-between gap-3 py-4 group rounded-xl px-2 -mx-2 transition-colors hover:bg-white/[0.03]">
                 <div className="flex items-center gap-3">

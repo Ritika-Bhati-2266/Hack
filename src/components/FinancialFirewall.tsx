@@ -62,6 +62,15 @@ export default function FinancialFirewall() {
           )}
           <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-r-full border-l border-base shadow-[0_0_20px_rgba(6,182,212,0.4)] flex-1" title={`Buffer ${inr(safeBuffer)}`} />
         </div>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-dusk">
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" /> Rent</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-violet-400" /> SIP</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400" /> Bills</span>
+          {emi > 0 && (
+            <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-400" /> EMI</span>
+          )}
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-safe" /> Free buffer</span>
+        </div>
 
         <div className={`grid grid-cols-1 gap-3 mt-5 ${emi > 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
           {[

@@ -8,10 +8,16 @@ import { usableBalance } from '@/lib/engine';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user } = useFinanceStore();
+  const { user, activeCustomer, customProfiles, liveData } = useFinanceStore();
 
   // Firewall-aware: commitments due till today are locked (matches engine).
   const buffer = usableBalance(user);
+
+  const displayName =
+    activeCustomer === 'live' && liveData
+      ? `Live (${liveData.source === 'csv' ? 'CSV' : 'AA'})`
+      : customProfiles[activeCustomer]?.label || 'Guest';
+  const initial = (displayName.trim().charAt(0) || 'G').toUpperCase();
 
   const navLinks = [
     { href: '/', label: 'Home', icon: LayoutDashboard },
@@ -74,6 +80,12 @@ export default function Navbar() {
 
         {/* Buffer pill */}
         <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2.5 pr-1">
+            <span className="w-8 h-8 rounded-full bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-xs font-black text-cyan-300">
+              {initial}
+            </span>
+            <span className="text-xs font-bold text-gray-200 max-w-[90px] truncate">{displayName}</span>
+          </div>
           <div className="hidden sm:block text-right leading-none">
             <p className="text-[10px] font-mono font-bold tracking-widest text-gray-400">SAFE BUFFER</p>
             <p className="font-mono font-bold text-[15px] text-cyan-300 mt-1 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
