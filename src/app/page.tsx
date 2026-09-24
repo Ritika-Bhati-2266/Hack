@@ -28,9 +28,6 @@ import DataSourceBanner from '@/components/DataSourceBanner';
 export default function DashboardPage() {
   const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
-  const [gateDismissed, setGateDismissed] = useState(
-    () => typeof window !== 'undefined' && localStorage.getItem('previse-gate-dismissed') === '1'
-  );
   // Hydration guard: zustand persist restores after first paint — gate only
   // evaluates once restored state is in, so returning users see no flash.
   const [hydrated, setHydrated] = useState(
@@ -39,12 +36,8 @@ export default function DashboardPage() {
   useEffect(() => useFinanceStore.persist?.onFinishHydration(() => setHydrated(true)), []);
   const [form, setForm] = useState({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 });
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
-  // First-visit gate: no bank data + no saved profiles + not guest-dismissed.
-  const showGate = hydrated && !liveData && Object.keys(customProfiles).length === 0 && !gateDismissed;
-  const dismissGate = () => {
-    try { localStorage.setItem('previse-gate-dismissed', '1'); } catch { /* private mode — ignore */ }
-    setGateDismissed(true);
-  };
+  // First-visit gate: no bank data + no saved profiles.
+  const showGate = hydrated && !liveData && Object.keys(customProfiles).length === 0;
   const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
   const earmarkedTotal = form.rent + form.sip + form.bills;
 
