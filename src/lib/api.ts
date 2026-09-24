@@ -40,8 +40,13 @@ async function req<T>(path: string, opts: RequestInit = {}): Promise<T> {
     }
   } catch { /* non-browser / opaque — ignore */ }
   if (!res.ok) {
+    // Backend-down / proxy failures return HTML, not JSON — json() fails and
+    // body.error is missing. Say exactly what to start instead of "API 500".
     const body = await res.json().catch(() => ({}));
-    throw new Error((body as { error?: string }).error || `API ${res.status}`);
+    throw new Error(
+      (body as { error?: string }).error ||
+        `Backend unreachable (HTTP ${res.status}) — start it: cd backend && node server.js (:3001)`
+    );
   }
   return res.json() as Promise<T>;
 }
@@ -260,7 +265,13 @@ export async function uploadCSV(file: File, balance: number) {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error((body as { error?: string }).error || `Upload ${res.status}`);
+    const msg = (body as { error?: string }).error;
+    if (!msg) {
+      throw new Error(
+        `Backend unreachable (HTTP ${res.status}) — start it: cd backend && node server.js (:3001)`
+      );
+    }
+    throw new Error(msg);
   }
   return res.json();
 }

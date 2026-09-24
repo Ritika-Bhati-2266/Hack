@@ -52,7 +52,10 @@ export default function SimulatorPage() {
     }
   };
 
-  const priceError = price <= 0 ? 'Amount must be > ₹0' : price > user.totalBalance * 3 ? 'Amount unusually high vs balance' : null;
+  const priceError = price <= 0 ? 'Amount must be > ₹0' : null;
+  // High-vs-balance is a warning (still simulatable → WAIT verdict), not a blocker.
+  // Only price <= 0 or empty name blocks simulation.
+  const priceWarning = !priceError && user.totalBalance > 0 && price > user.totalBalance * 3 ? 'Amount unusually high vs balance' : null;
   const nameError = !itemName.trim() ? 'Item name required' : null;
   const canSimulate = !priceError && !nameError;
 
@@ -62,7 +65,9 @@ export default function SimulatorPage() {
   };
 
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
-  const pct = Math.min(100, Math.max(0, (price / Math.max(1, user.totalBalance)) * 100));
+  // True ratio for text (never capped — capping hid 4000× as "100%").
+  const rawPct = user.totalBalance > 0 ? (price / user.totalBalance) * 100 : null;
+  const pctLabel = rawPct === null ? 'no balance yet' : rawPct < 1000 ? `${rawPct.toFixed(0)}% of balance` : `${Math.round(rawPct / 100).toLocaleString('en-IN')}× of balance`;
 
   // Displayed estimates use the same reducing-balance formula as the verdict engine
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
@@ -149,7 +154,7 @@ export default function SimulatorPage() {
                 </button>
                 <div className="flex-1 min-w-0 text-center bg-well/70 border border-white/[0.08] rounded-2xl py-2.5 px-2">
                   <p className="font-mono font-black text-lg sm:text-xl leading-none break-words">{inr(price)}</p>
-                  <p className="text-[10px] font-mono text-dusk mt-1">{pct.toFixed(0)}% of balance</p>
+                  <p className="text-[10px] font-mono text-dusk mt-1">{pctLabel}</p>
                 </div>
                 <button onClick={() => setPrice(price + 5000)} aria-label="Increase amount" className="w-11 h-[52px] min-h-[44px] rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center hover:bg-white/10 active:scale-95 shrink-0">
                   <Plus className="w-4 h-4" />
@@ -223,7 +228,15 @@ export default function SimulatorPage() {
               <AlertTriangle className="w-3.5 h-3.5 text-red-300 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[11px] font-bold text-red-300">{priceError}</p>
-                <p className="text-[11px] text-mist mt-0.5">That&apos;s {pct.toFixed(0)}% of your balance ({inr(user.totalBalance)}) — lower the amount or try an EMI / Loan mode.</p>
+              </div>
+            </div>
+          )}
+          {priceWarning && (
+            <div className="mt-2 flex items-start gap-2 rounded-2xl border border-amber-400/25 bg-amber-400/[0.06] px-3.5 py-2.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-bold text-amber-300">{priceWarning}</p>
+                <p className="text-[11px] text-mist mt-0.5">That&apos;s {pctLabel} ({inr(user.totalBalance)}) — simulation still runs, expect a WAIT verdict. Or lower the amount / try EMI / Loan.</p>
               </div>
             </div>
           )}
