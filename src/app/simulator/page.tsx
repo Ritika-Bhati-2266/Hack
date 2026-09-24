@@ -12,7 +12,7 @@ import { simulateOnBackend, BackendVerdict } from '@/lib/api';
 import { backendEMI } from '@/lib/engine';
 
 export default function SimulatorPage() {
-  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
+  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, customProfiles, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
   const [itemName, setItemName] = useState('iPhone 16 Pro Max');
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
@@ -21,7 +21,7 @@ export default function SimulatorPage() {
   const [backendVerdict, setBackendVerdict] = useState<BackendVerdict | null>(null);
   const [backendLoading, setBackendLoading] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
-  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : 'none';
+  const liveSource = activeCustomer === 'live' && liveData ? liveData.source : customProfiles[activeCustomer] ? 'custom' : 'none';
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
 
   const handleVerifyBackend = async () => {

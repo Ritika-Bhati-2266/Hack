@@ -8,13 +8,14 @@ import {
   Clock,
   Zap,
   ArrowRight,
-  ArrowUpRight,
   Lock,
   Wallet,
   Plus,
   X,
   Trash2,
   Smartphone,
+  Laptop,
+  Plane,
   BadgeCheck,
   Flame,
 } from 'lucide-react';
@@ -26,10 +27,9 @@ import DataSourceBanner from '@/components/DataSourceBanner';
 export default function DashboardPage() {
   const { user, goals, activeCustomer, switchCustomer, customProfiles, createProfile, deleteProfile, liveData } = useFinanceStore();
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 });
-  const allProfiles: Record<string, { label: string; sub: string }> = { ...customProfiles };
-  const activeLabel = activeCustomer === 'live' && liveData ? `Live (${liveData.source === 'csv' ? 'CSV' : 'AA'})` : allProfiles[activeCustomer]?.label || 'No data — connect';
+  const [form, setForm] = useState({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 });
   const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
+  const bannerSource = liveData ? liveData.source : customProfiles[activeCustomer] ? 'custom' : 'none';
   const canCreate = form.name.trim().length >= 2 && form.monthlyIncome > 0 && form.monthlyIncome <= 100000000 && form.totalBalance > 0 && form.totalBalance <= 100000000 && form.dailyBurnRate >= 0 && form.rent >= 0 && form.sip >= 0 && form.bills >= 0;
   const earmarkedTotal = form.rent + form.sip + form.bills;
 
@@ -40,8 +40,18 @@ export default function DashboardPage() {
   const buffer = heroPreview.todayBuffer;
   const safeRunway = heroPreview.todayRunwayMonths.toFixed(1);
   const safeToSpendToday = heroPreview.todaySafeSpendToday;
-  const heroVerdict = heroPreview.verdict;
-  const heroAfterRunway = heroPreview.simulatedRunwayMonths.toFixed(1);
+
+  // ── TRY-IT-NOW widget (simulator-first): local state, no store/history writes.
+  const TRY_PRESETS = [
+    { label: 'iPhone 16', price: 80000, Icon: Smartphone },
+    { label: 'MacBook Air', price: 120000, Icon: Laptop },
+    { label: 'Bali Trip', price: 60000, Icon: Plane },
+  ] as const;
+  const [tryItem, setTryItem] = useState('iPhone 16');
+  const [tryPrice, setTryPrice] = useState(80000);
+  const [tried, setTried] = useState(false);
+  const tryPreview = previewSimulation(user, goals, { itemName: tryItem.trim() || 'Item', price: Math.max(1000, tryPrice), mode: 'CASH' });
+  const tryPct = user.totalBalance > 0 ? Math.min(999, Math.round((tryPrice / user.totalBalance) * 100)) : null;
 
   // Honest goal tracking: months-to-goal (income − commitments) vs months until targetDate
   const monthlySavingsForGoals = user.monthlyIncome - totalEarmarked;
@@ -74,20 +84,32 @@ export default function DashboardPage() {
         <div className="flex whitespace-nowrap animate-ticker gap-10 sm:gap-12 text-[11px] sm:text-xs font-mono text-cyan-300/80 w-max">
           {[0, 1].map((k) => (
             <span key={k} className="flex gap-10 sm:gap-12 shrink-0 pr-10 sm:pr-12">
-              <span className="shrink-0">RUNWAY <b className="text-cyan-400 font-bold">{safeRunway} MO</b></span>
-              <span className="shrink-0">BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
-              <span className="shrink-0">FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
-              <span className="shrink-0">ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
-              <span className="shrink-0">AA <b className="text-safe font-bold">LIVE</b></span>
-              <span className="shrink-0">CSV <b className="text-white font-bold">REAL DATA</b></span>
-              <span className="shrink-0">QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
+              {hasData ? (
+                <>
+                  <span className="shrink-0">RUNWAY <b className="text-cyan-400 font-bold">{safeRunway} MO</b></span>
+                  <span className="shrink-0">BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
+                  <span className="shrink-0">FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
+                  <span className="shrink-0">ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
+                  <span className="shrink-0">AA <b className="text-safe font-bold">LIVE</b></span>
+                  <span className="shrink-0">CSV <b className="text-white font-bold">REAL DATA</b></span>
+                  <span className="shrink-0">QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
+                </>
+              ) : (
+                <>
+                  <span className="shrink-0">STATUS <b className="text-amber-300 font-bold">NO DATA CONNECTED</b></span>
+                  <span className="shrink-0">CONNECT <b className="text-cyan-400 font-bold">AA / CSV REQUIRED</b></span>
+                  <span className="shrink-0">ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO MOCK NUMBERS</b></span>
+                  <span className="shrink-0">FIREWALL <b className="text-white font-bold">LOCKS EXPENSES AUTOMATICALLY</b></span>
+                  <span className="shrink-0">QA <b className="text-emerald-400 font-bold">SYSTEM ACTIVE</b></span>
+                </>
+              )}
             </span>
           ))}
         </div>
       </div>
 
       {/* ── Profiles (live + custom only, no demo) ──────── */}
-      {liveData ? <DataSourceBanner source={liveData.source} /> : <DataSourceBanner source="none" />}
+      {<DataSourceBanner source={bannerSource} />}
       <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
@@ -205,60 +227,70 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right — live verdict card (Framer dark frame look) */}
+          {/* Right — interactive TRY-IT-NOW widget (no navigation needed) */}
           <div className="relative min-w-0">
             {/* Decorative back glow frame */}
             <div className="absolute -inset-1 rounded-[32px] bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-600 blur-xl opacity-30 animate-pulse" />
 
-            <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-[#0e1424]/90 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/30 to-cyan-500/20 border border-cyan-400/30 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                    <Smartphone className="w-5 h-5 text-cyan-300" />
-                  </div>
-                  <div className="leading-tight">
-                    <p className="text-[14px] font-bold text-white">iPhone 16 • ₹80,000</p>
-                    <p className="text-[11px] text-gray-400 font-mono">CASH • {activeLabel}</p>
-                  </div>
-                </div>
-                <span className={`text-[11px] font-black tracking-widest px-3 py-1 rounded-xl border animate-stamp-in shadow-lg ${
-                  heroVerdict === 'WAIT' ? 'bg-red-500/20 text-red-300 border-red-500/40 shadow-red-500/20' :
-                  heroVerdict === 'EMI' ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow-amber-400/20' :
-                   'bg-cyan-400/20 text-cyan-300 border-cyan-400/40 shadow-cyan-400/20'
-                }`}>
-                  {heroVerdict}
-                </span>
+            <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-[#0e1424]/90 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-cyan-300 fill-cyan-300" />
+                <p className="text-[11px] font-mono font-black tracking-[0.18em] text-cyan-300">TRY IT NOW — NO NAVIGATION</p>
               </div>
-              <div className="p-6 space-y-5">
-                <div>
-                  <div className="flex justify-between text-[11px] font-mono font-bold tracking-widest text-gray-400 mb-2">
-                    <span>RUNWAY IMPACT</span>
-                    <span className="text-gray-300">{safeRunway} MO → <b className={heroVerdict === 'WAIT' ? 'text-red-400' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-cyan-300'}>{heroAfterRunway} MO</b></span>
-                  </div>
-                  <div className="h-3 rounded-full bg-white/5 border border-white/10 overflow-hidden flex p-0.5">
-                    <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full" style={{ width: `${Math.min(70, Number(safeRunway) * 18)}%` }} />
-                    <div className="h-full bg-red-500/80 rounded-full ml-1" style={{ width: '18%' }} />
-                  </div>
-                  <div className="flex justify-between mt-2 text-[11px] font-mono">
-                    <span className="text-cyan-400">● before {safeRunway}mo</span>
-                    <span className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-cyan-300'}>● after {heroAfterRunway}mo</span>
+              <div className="flex gap-1.5 flex-wrap">
+                {TRY_PRESETS.map(({ label, price, Icon }) => (
+                  <button
+                    key={label}
+                    onClick={() => { setTryItem(label); setTryPrice(price); }}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all active:scale-95 ${tryItem === label ? 'bg-cyan-400 text-black border-cyan-300' : 'bg-white/5 text-mist border-white/[0.08] hover:text-white'}`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <p className="font-mono font-black text-2xl text-white">{inr(tryPrice)}</p>
+                  <p className="text-[10px] font-mono text-dusk">{tryPct === null ? 'no balance yet' : `${tryPct}% of balance`}</p>
+                </div>
+                <input
+                  type="range" min={5000} max={Math.max(300000, user.totalBalance)} step={1000} value={tryPrice}
+                  onChange={(e) => setTryPrice(Number(e.target.value))}
+                  className="volt-range w-full mt-2"
+                  style={{ ['--fill' as string]: `${(tryPrice / Math.max(300000, user.totalBalance)) * 100}%` }}
+                  aria-label="Try amount"
+                />
+              </div>
+              <button
+                onClick={() => setTried(true)}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] active:scale-[0.98] transition-all"
+              >
+                ⚡ SIMULATE
+              </button>
+              {tried && (
+                <div className="rounded-2xl bg-well/60 border border-white/[0.08] p-4 animate-fade-up">
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1.5 rounded-xl text-sm font-black tracking-widest border shrink-0 ${
+                      tryPreview.verdict === 'WAIT' ? 'bg-red-500/20 text-red-300 border-red-500/40' :
+                      tryPreview.verdict === 'EMI' ? 'bg-amber-400/20 text-amber-300 border-amber-400/40' :
+                      'bg-cyan-400/20 text-cyan-300 border-cyan-400/40'
+                    }`}>
+                      {tryPreview.verdict}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-white truncate">{tryPreview.verdictTitle}</p>
+                      <p className="text-[11px] font-mono text-dusk mt-0.5">
+                        runway {tryPreview.todayRunwayMonths.toFixed(1)} → {tryPreview.simulatedRunwayMonths.toFixed(1)} mo • buffer {inr(tryPreview.todayBuffer)} → {inr(tryPreview.simulatedBuffer)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-4">
-                    <p className="text-[10px] font-mono font-bold tracking-widest text-gray-400">BUFFER LEFT</p>
-                    <p className="font-mono font-black text-xl mt-1 text-white">{inr(buffer)}</p>
-                  </div>
-                  <div className="rounded-2xl bg-cyan-500/10 border border-cyan-400/30 p-4 shadow-[0_0_20px_rgba(0,240,255,0.15)]">
-                    <p className="text-[10px] font-mono font-bold tracking-widest text-cyan-300">SAFE TODAY</p>
-                    <p className="font-mono font-black text-xl mt-1 text-cyan-300">{inr(safeToSpendToday)}</p>
-                  </div>
-                </div>
-                <Link href="/simulator" className="flex items-center justify-between group px-1 pt-1">
-                  <span className="text-xs text-gray-400">{hasData ? 'Live numbers pe based — apna amount try karo.' : 'Bina bank data ke preview hai — real verdict ke liye connect karo.'}</span>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-400 group-hover:gap-2.5 transition-all">
-                    Try it <ArrowUpRight className="w-4 h-4" />
-                  </span>
+              )}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] text-dusk">{hasData ? 'Live numbers pe based.' : 'Demo numbers — real ke liye connect karo.'}</span>
+                <Link href="/simulator" className="inline-flex items-center gap-1 text-xs font-extrabold text-cyan-400 hover:gap-2 transition-all">
+                  Full simulator <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -266,15 +298,25 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* ── FULL TRACKING (teaser when no bank data) ── */}
+      {!liveData && (
+        <div className="flex items-center gap-2.5 px-1 animate-fade-up">
+          <Lock className="w-4 h-4 text-amber-300 shrink-0" />
+          <p className="text-xs font-bold text-mist">
+            Full tracking — <Link href="/connect" className="text-cyan-300 hover:underline">connect your bank</Link> to unlock live numbers
+          </p>
+        </div>
+      )}
+      <div className={!liveData ? 'opacity-80 space-y-8' : 'space-y-8'}>
       {/* ── STATS BENTO ────────────────────────── */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up stagger-2">
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group col-span-2 lg:col-span-1 border-cyan-400/40 shadow-[0_0_35px_rgba(0,240,255,0.18)] bg-cyan-500/[0.06]">
+        <div className={`cyber-card rounded-3xl p-6 relative overflow-hidden group col-span-2 lg:col-span-1 ${hasData ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(0,240,255,0.18)] bg-cyan-500/[0.06]' : 'border-white/10 opacity-70'}`}>
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-cyan-300">SPEND TODAY ★</span>
             <Wallet className="w-5 h-5 text-cyan-300 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[40px] leading-none text-cyan-300 font-mono">{inr(safeToSpendToday)}</p>
-          <p className="text-[11px] mt-2 font-mono text-gray-300">after {daysRemainingInMonth}d burn {inr(remainingBurn)}</p>
+          <p className="font-display font-black text-[40px] leading-none text-cyan-300 font-mono">{hasData ? inr(safeToSpendToday) : '₹--'}</p>
+          <p className="text-[11px] mt-2 font-mono text-gray-300">{hasData ? `after ${daysRemainingInMonth}d burn ${inr(remainingBurn)}` : 'Connect bank to compute safe daily spend'}</p>
         </div>
 
         <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
@@ -282,10 +324,10 @@ export default function DashboardPage() {
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">SAFE BUFFER</span>
             <ShieldCheck className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[32px] leading-none text-white">₹{(buffer / 100000).toFixed(1)}L</p>
-          <p className="text-[11px] text-gray-400 mt-2 font-mono">of {inr(user.totalBalance)} • {inr(totalEarmarked)} locked</p>
+          <p className="font-display font-black text-[32px] leading-none text-white">{hasData ? `₹${(buffer / 100000).toFixed(1)}L` : '₹--'}</p>
+          <p className="text-[11px] text-gray-400 mt-2 font-mono">{hasData ? `of ${inr(user.totalBalance)} • ${inr(totalEarmarked)} locked` : 'Connect bank to view liquid buffer'}</p>
           <div className="mt-4 h-1.5 rounded-full bg-white/5 overflow-hidden p-0.5">
-            <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100))}%` }} />
+            <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${hasData ? Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100)) : 0}%` }} />
           </div>
         </div>
 
@@ -294,9 +336,9 @@ export default function DashboardPage() {
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">RUNWAY</span>
             <Clock className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[32px] leading-none text-white">{safeRunway}<span className="text-base font-bold text-gray-400 ml-1">mo</span></p>
+          <p className="font-display font-black text-[32px] leading-none text-white">{hasData ? safeRunway : '--'}<span className="text-base font-bold text-gray-400 ml-1">mo</span></p>
           <p className="text-[11px] mt-2 font-bold text-cyan-300 flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5 text-cyan-400" /> Target &gt;3.0 mo
+            <TrendingUp className="w-3.5 h-3.5 text-cyan-400" /> {hasData ? 'Target >3.0 mo' : 'Connect bank for burn rate'}
           </p>
         </div>
 
@@ -305,8 +347,8 @@ export default function DashboardPage() {
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">GOALS</span>
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
           </div>
-          <p className="font-display font-black text-[32px] leading-none text-white">{goalsOnTrack} <span className="text-base font-bold text-cyan-400">on track</span></p>
-          <p className="text-[11px] text-gray-400 mt-2 font-mono truncate">{goals.map((g) => g.name.split(' ')[0]).join(' • ')}</p>
+          <p className="font-display font-black text-[32px] leading-none text-white">{hasData ? goalsOnTrack : '--'} <span className="text-base font-bold text-cyan-400">{hasData ? 'on track' : 'connected'}</span></p>
+          <p className="text-[11px] text-gray-400 mt-2 font-mono truncate">{hasData && goals.length > 0 ? goals.map((g) => g.name.split(' ')[0]).join(' • ') : 'Connect data to track goals'}</p>
         </div>
       </section>
 
@@ -315,17 +357,23 @@ export default function DashboardPage() {
         <FinancialFirewall />
       </div>
 
-      {/* ── LEDGER + CTA ───────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-up stagger-4">
-        <div className="lg:col-span-2 glass rounded-3xl p-6">
+      {/* ── LEDGER ───────────────────────────── */}
+      <div className="animate-fade-up stagger-4">
+        <div className="glass rounded-3xl p-6">
           <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
             <div>
               <h3 className="font-display font-extrabold text-lg">Earmarked Ledger</h3>
               <p className="text-xs text-dusk">Rent + SIP + bills — firewall locked, spend me count nahi</p>
             </div>
-            <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
-              {inr(totalEarmarked)} locked
-            </span>
+            {hasData ? (
+              <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 px-3 py-1.5 rounded-full border border-amber-400/20">
+                {inr(totalEarmarked)} locked
+              </span>
+            ) : (
+              <span className="text-xs font-mono font-bold text-gray-400 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                No Data
+              </span>
+            )}
           </div>
           <div className="divide-y divide-white/[0.08]">
             {user.earmarkedExpenses.length === 0 && (
@@ -362,25 +410,7 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
-
-        <div className="rounded-3xl overflow-hidden border border-white/[0.08] bg-gradient-to-b from-surface to-well p-7 flex flex-col justify-between relative">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="font-display font-extrabold text-xl leading-tight">Know before you swipe</h3>
-            <p className="text-xs text-mist leading-relaxed">iPhone ₹80k cash → runway {safeRunway} → {heroAfterRunway}mo → <b className={heroVerdict === 'WAIT' ? 'text-red-300' : heroVerdict === 'EMI' ? 'text-amber-300' : 'text-safe'}>{heroVerdict}</b>. Live data pe based.</p>
-            <div className="rounded-2xl bg-well/60 border border-white/[0.08] p-4 font-mono text-[11px] space-y-2.5">
-              <div className="flex justify-between gap-4"><span className="text-dusk shrink-0">INPUT</span><span className="text-white text-right">iPhone ₹80k cash</span></div>
-              <div className="h-px bg-white/[0.06]" />
-              <div className="flex justify-between gap-4"><span className="text-dusk shrink-0">OUTPUT</span><span className={heroVerdict === 'WAIT' ? 'text-red-300 font-bold text-right' : heroVerdict === 'EMI' ? 'text-amber-300 font-bold text-right' : 'text-safe font-bold text-right'}>{heroVerdict} • {heroPreview.verdictTitle}</span></div>
-            </div>
-          </div>
-          <Link href="/simulator" className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-white font-extrabold text-sm hover:brightness-110 transition-colors">
-            Simulate a purchase <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+      </div>
       </div>
 
       {/* ── HOW IT WORKS ───────────────────────── */}
@@ -422,7 +452,7 @@ export default function DashboardPage() {
             )}
             <button
               disabled={!canCreate}
-              onClick={() => { createProfile(form); setShowCreate(false); setForm({ name: '', monthlyIncome: 80000, totalBalance: 150000, dailyBurnRate: 1200, rent: 25000, sip: 15000, bills: 8000 }); }}
+              onClick={() => { createProfile(form); setShowCreate(false); setForm({ name: '', monthlyIncome: 0, totalBalance: 0, dailyBurnRate: 0, rent: 0, sip: 0, bills: 0 }); }}
               className={`w-full py-3 rounded-xl font-bold text-sm ${canCreate ? 'bg-primary text-white hover:brightness-110' : 'bg-white/5 text-dusk cursor-not-allowed'}`}
             >
               Create & Switch

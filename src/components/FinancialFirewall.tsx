@@ -1,21 +1,53 @@
-'use client';
-
-import { ShieldCheck, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { ShieldCheck, Lock, PlugZap } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 
 export default function FinancialFirewall() {
-  const { user } = useFinanceStore();
+  const { user, liveData } = useFinanceStore();
 
-  const rent = user.earmarkedExpenses.find((e) => e.category === 'rent')?.amount || 35000;
-  const sips = user.earmarkedExpenses.find((e) => e.category === 'sip')?.amount || 15000;
-  const bills = user.earmarkedExpenses.find((e) => e.category === 'bill')?.amount || 10000;
+  const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
+
+  const rent = user.earmarkedExpenses.find((e) => e.category === 'rent')?.amount || 0;
+  const sips = user.earmarkedExpenses.find((e) => e.category === 'sip')?.amount || 0;
+  const bills = user.earmarkedExpenses.find((e) => e.category === 'bill')?.amount || 0;
   const emi = user.earmarkedExpenses.filter((e) => e.category === 'emi').reduce((s, e) => s + e.amount, 0);
 
   const totalEarmarked = user.earmarkedExpenses.reduce((s, e) => s + e.amount, 0);
-  const safeBuffer = user.totalBalance - totalEarmarked;
+  const safeBuffer = Math.max(0, user.totalBalance - totalEarmarked);
 
-  const earmarkedPct = Math.round((totalEarmarked / Math.max(1, user.totalBalance)) * 100);
+  const earmarkedPct = user.totalBalance > 0 ? Math.round((totalEarmarked / user.totalBalance) * 100) : 0;
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+
+  if (!hasData) {
+    return (
+      <div className="relative overflow-hidden rounded-[32px] border border-dashed border-white/15 bg-[#0b0f19]/80 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-6 h-6 text-amber-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-display font-black text-xl text-white">Financial Firewall</h2>
+                <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
+                  NO DATA CONNECTED
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1 max-w-lg leading-relaxed">
+                Connect your bank statement via Account Aggregator or CSV to automatically lock your Rent, SIPs, and essential bills before computing safe-to-spend buffer.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/connect"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-300 font-extrabold text-xs hover:bg-amber-400/25 transition-all shrink-0"
+          >
+            <PlugZap className="w-4 h-4 text-amber-300" /> Connect Bank to Activate Firewall
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#0b0f19]/90 backdrop-blur-2xl p-6 sm:p-8 min-w-0 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">

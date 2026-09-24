@@ -10,14 +10,15 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, activeCustomer, customProfiles, liveData } = useFinanceStore();
 
+  const hasData = !!liveData || user.totalBalance > 0 || user.earmarkedExpenses.length > 0;
   // Firewall-aware: commitments due till today are locked (matches engine).
   const buffer = usableBalance(user);
 
   const displayName =
     activeCustomer === 'live' && liveData
       ? `Live (${liveData.source === 'csv' ? 'CSV' : 'AA'})`
-      : customProfiles[activeCustomer]?.label || 'Guest';
-  const initial = (displayName.trim().charAt(0) || 'G').toUpperCase();
+      : customProfiles[activeCustomer]?.label || 'No Data';
+  const initial = (displayName.trim().charAt(0) || 'N').toUpperCase();
 
   const navLinks = [
     { href: '/', label: 'Home', icon: LayoutDashboard },
@@ -88,9 +89,15 @@ export default function Navbar() {
           </div>
           <div className="hidden sm:block text-right leading-none">
             <p className="text-[10px] font-mono font-bold tracking-widest text-gray-400">SAFE BUFFER</p>
-            <p className="font-mono font-bold text-[15px] text-cyan-300 mt-1 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-              ₹{(buffer / 1000).toFixed(1)}k
-            </p>
+            {hasData ? (
+              <p className="font-mono font-bold text-[15px] text-cyan-300 mt-1 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+                ₹{(buffer / 1000).toFixed(1)}k
+              </p>
+            ) : (
+              <p className="font-mono font-bold text-[12px] text-amber-300/90 mt-1">
+                --
+              </p>
+            )}
           </div>
           <Link
             href="/simulator"

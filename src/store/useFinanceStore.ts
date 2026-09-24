@@ -120,9 +120,9 @@ export const useFinanceStore = create<FinanceStore>()(
       monthlyIncome: income,
       dailyBurnRate: clamp(data.dailyBurnRate),
       earmarkedExpenses: [
-        { id: '1', name: 'Apartment Rent', amount: clamp(data.rent), category: 'rent', dueDate: '1st of month', autoDebit: true },
-        { id: '2', name: 'Mutual Fund SIPs', amount: clamp(data.sip), category: 'sip', dueDate: '5th of month', autoDebit: true },
-        { id: '3', name: 'Electricity & Wifi', amount: clamp(data.bills), category: 'bill', dueDate: '10th of month', autoDebit: true },
+        ...(data.rent > 0 ? [{ id: '1', name: 'Apartment Rent', amount: clamp(data.rent), category: 'rent' as const, dueDate: '1st of month', autoDebit: true }] : []),
+        ...(data.sip > 0 ? [{ id: '2', name: 'Mutual Fund SIPs', amount: clamp(data.sip), category: 'sip' as const, dueDate: '5th of month', autoDebit: true }] : []),
+        ...(data.bills > 0 ? [{ id: '3', name: 'Electricity & Wifi', amount: clamp(data.bills), category: 'bill' as const, dueDate: '10th of month', autoDebit: true }] : []),
       ],
     };
     // Goals start at 0 saved — we don't know the user's real split, so we
