@@ -173,8 +173,8 @@ export default function GoalsPage() {
       </div>
 
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 backdrop-blur-sm p-4" onClick={() => setShowAdd(false)}>
-          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 backdrop-blur-sm p-4 pb-safe" onClick={() => setShowAdd(false)}>
+          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90dvh] overflow-y-auto overscroll-contain animate-fade-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-extrabold">New goal</h3>
               <button onClick={() => setShowAdd(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-mist" /></button>

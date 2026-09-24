@@ -127,7 +127,7 @@ export default function ConnectPage() {
           </p>
 
           {/* Stepper */}
-          <div className="mt-6 overflow-x-auto max-w-full pb-1 -mx-1 px-1">
+          <div className="mt-6 overflow-x-auto no-scrollbar touch-scroll max-w-full pb-1 -mx-1 px-1">
           <div className="flex items-center gap-2 min-w-[480px]">
             {['Consent', 'Approve', 'Fetch'].map((s, i) => (
               <div key={s} className="flex items-center gap-2 flex-1 min-w-0">

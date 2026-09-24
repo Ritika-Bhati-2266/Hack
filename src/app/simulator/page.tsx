@@ -143,14 +143,14 @@ export default function SimulatorPage() {
             <div>
               <label className="text-[10px] font-black tracking-[0.18em] text-dusk">AMOUNT</label>
               <div className="mt-2 flex items-center gap-2">
-                <button onClick={() => setPrice(Math.max(1000, price - 5000))} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center hover:bg-white/10 shrink-0">
+                <button onClick={() => setPrice(Math.max(1000, price - 5000))} aria-label="Decrease amount" className="w-11 h-[52px] min-h-[44px] rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center hover:bg-white/10 active:scale-95 shrink-0">
                   <Minus className="w-4 h-4" />
                 </button>
-                <div className="flex-1 text-center bg-well/70 border border-white/[0.08] rounded-2xl py-2.5">
-                  <p className="font-mono font-black text-xl leading-none">{inr(price)}</p>
+                <div className="flex-1 min-w-0 text-center bg-well/70 border border-white/[0.08] rounded-2xl py-2.5 px-2">
+                  <p className="font-mono font-black text-lg sm:text-xl leading-none break-words">{inr(price)}</p>
                   <p className="text-[10px] font-mono text-dusk mt-1">{pct.toFixed(0)}% of balance</p>
                 </div>
-                <button onClick={() => setPrice(price + 5000)} className="w-10 h-[52px] rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center hover:bg-white/10 shrink-0">
+                <button onClick={() => setPrice(price + 5000)} aria-label="Increase amount" className="w-11 h-[52px] min-h-[44px] rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center hover:bg-white/10 active:scale-95 shrink-0">
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
@@ -230,14 +230,14 @@ export default function SimulatorPage() {
           <button
             onClick={handleSimulate}
             disabled={!canSimulate}
-            className={`mt-6 w-full py-4 rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-primary text-white hover:brightness-110 shadow-[0_0_40px_rgba(83,134,94,0.35)] hover:-translate-y-0.5' : 'bg-white/5 text-dusk cursor-not-allowed border border-white/[0.08]'}`}
+            className={`mt-6 w-full py-4 min-h-[52px] rounded-2xl font-display font-black text-[15px] tracking-tight transition-all ${canSimulate ? 'bg-primary text-white hover:brightness-110 shadow-[0_0_40px_rgba(83,134,94,0.35)] hover:-translate-y-0.5 active:scale-[0.99]' : 'bg-white/5 text-dusk cursor-not-allowed border border-white/[0.08]'}`}
           >
             ⚡ SIMULATE BEFORE YOU SWIPE
           </button>
           <button
             onClick={handleVerifyBackend}
             disabled={!canSimulate || backendLoading}
-            className="mt-2.5 w-full py-3.5 rounded-2xl font-bold text-xs border border-safe/45 bg-safe/[0.14] text-safe hover:bg-safe/20 hover:border-safe/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+            className="mt-2.5 w-full py-3.5 min-h-[48px] rounded-2xl font-bold text-xs border border-safe/45 bg-safe/[0.14] text-safe hover:bg-safe/20 hover:border-safe/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 px-3 text-center"
           >
             {backendLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Server className="w-4 h-4" />}
             {backendLoading ? 'Verifying with backend engine…' : 'Verify with backend engine (:3001) — single source of truth'}
@@ -291,10 +291,10 @@ export default function SimulatorPage() {
           {/* ── DRAMATIC VERDICT ── */}
           <div className={`relative overflow-hidden rounded-[28px] border ${verdictStyle.border} bg-surface p-6 sm:p-8 ${verdictStyle.glow} animate-fade-up`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className={`verdict-stamp animate-stamp-in px-6 py-3 rounded-2xl text-4xl font-black tracking-tight ${verdictStyle.text} bg-well/50 shrink-0`}>
+              <div className={`verdict-stamp animate-stamp-in px-5 sm:px-6 py-3 rounded-2xl text-3xl sm:text-4xl font-black tracking-tight break-words max-w-full ${verdictStyle.text} bg-well/50 shrink-0`}>
                 {currentSimulation.verdict}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="font-display font-extrabold text-xl">{currentSimulation.verdictTitle}</p>
                 <p className="text-[13px] text-mist mt-1.5 leading-relaxed">{currentSimulation.verdictReasoning}</p>
                 <p className="text-[13px] mt-2 italic text-mist">→ {currentSimulation.recommendation}</p>

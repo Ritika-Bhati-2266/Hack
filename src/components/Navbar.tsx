@@ -31,8 +31,8 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-3">
+    <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[#030712]/80 border-b border-white/[0.08] pt-safe">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 flex items-center justify-between gap-3 min-w-0">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-500 flex items-center justify-center shadow-[0_0_25px_rgba(0,240,255,0.4)] group-hover:scale-105 group-hover:rotate-6 transition-all">
@@ -96,7 +96,7 @@ export default function Navbar() {
           </div>
           <Link
             href="/simulator"
-            className="md:hidden px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[13px] font-extrabold shadow-[0_0_20px_rgba(0,240,255,0.4)]"
+            className="md:hidden px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[13px] font-extrabold shadow-[0_0_20px_rgba(0,240,255,0.4)] shrink-0"
           >
             Simulate
           </Link>
@@ -111,7 +111,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile nav */}
-      <div className="md:hidden border-t border-white/[0.08] px-4 py-2 flex gap-1 overflow-x-auto">
+      <div className="md:hidden border-t border-white/[0.08] px-4 py-2 flex gap-1.5 overflow-x-auto no-scrollbar touch-scroll">
         {navLinks.map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
@@ -119,7 +119,7 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg text-xs font-bold whitespace-nowrap shrink-0 ${
                 isActive ? 'bg-cyan-500 text-white shadow-[0_0_12px_rgba(0,240,255,0.4)]' : 'text-gray-300 bg-white/5'
               }`}
             >

@@ -78,12 +78,15 @@
 html {
   scroll-behavior: smooth;
   background: var(--bg-base);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html,
 body {
   overflow-x: clip;
   min-height: 100%;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -726,4 +729,96 @@ input[type="range"].volt-range::-webkit-slider-thumb:hover {
 .neon-glow-btn:hover {
   box-shadow: 0 0 40px rgba(0, 240, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transform: translateY(-2px) scale(1.02);
+}
+
+/* ─────────────────────────────────────────────
+   DEVICE COMPATIBILITY (mobile / tablet / touch)
+   ───────────────────────────────────────────── */
+
+/* Remove tap delay + gray flash on touch devices */
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Media never overflows its card on narrow screens */
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+/* Long numbers / INR values wrap instead of breaking layout */
+.font-mono {
+  overflow-wrap: anywhere;
+}
+
+/* Hide scrollbars on horizontal chip rails, keep scroll */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 1rem;
+}
+
+/* Notch / gesture-bar safe areas */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevent iOS Safari auto-zoom on focus (<16px inputs) */
+@media (max-width: 640px) {
+  input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Bigger, thumb-friendly sliders on touch devices */
+@media (pointer: coarse) {
+  input[type="range"].volt-range {
+    height: 12px;
+  }
+  input[type="range"].volt-range::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+    border-width: 4px;
+  }
+  input[type="range"].volt-range::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #0f0e47;
+    border: 4px solid #783646;
+  }
+  input[type="range"].volt-range::-moz-range-track {
+    height: 12px;
+    border-radius: 999px;
+  }
+
+  /* No lift-on-hover for touch — prevents sticky hover states */
+  .card-hover:hover,
+  .cyber-card:hover {
+    transform: none;
+  }
+}
+
+/* Very small phones (320–360px): tighten gutters + type */
+@media (max-width: 380px) {
+  .verdict-stamp {
+    border-width: 2px;
+  }
 }

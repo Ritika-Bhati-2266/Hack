@@ -49,22 +49,22 @@ export default function TrajectoryChart({ simulation }: { simulation: Simulation
         <div className="flex items-center gap-2 text-[11px]">
           <button
             onClick={() => setShowFirewall(!showFirewall)}
-            className={`px-2.5 py-1.5 rounded-full border font-bold ${showFirewall ? 'bg-amber-400/10 border-amber-400/30 text-amber-300' : 'bg-white/5 border-white/[0.08] text-dusk'}`}
+            className={`px-2.5 py-2 min-h-[44px] rounded-full border font-bold ${showFirewall ? 'bg-amber-400/10 border-amber-400/30 text-amber-300' : 'bg-white/5 border-white/[0.08] text-dusk'}`}
           >
             Firewall {showFirewall ? 'ON' : 'OFF'}
           </button>
-          <button onClick={handleExport} className="px-2.5 py-1.5 rounded-full bg-white/5 border border-white/[0.08] text-mist font-bold hover:bg-white/10">
+          <button onClick={handleExport} className="px-2.5 py-2 min-h-[44px] rounded-full bg-white/5 border border-white/[0.08] text-mist font-bold hover:bg-white/10">
             ⤓ PNG
           </button>
         </div>
       </div>
 
-      <div ref={chartRef} className="h-[260px] sm:h-[300px] w-full min-w-0">
+      <div ref={chartRef} className="h-[240px] min-[420px]:h-[260px] sm:h-[300px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-            <XAxis dataKey="month" stroke="#6B699E" tick={{ fontSize: 11, fill: '#6B699E' }} />
-            <YAxis stroke="#6B699E" tick={{ fontSize: 11, fill: '#6B699E' }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={70} />
+            <XAxis dataKey="month" stroke="#6B699E" tick={{ fontSize: 10, fill: '#6B699E' }} interval="preserveStartEnd" minTickGap={24} />
+            <YAxis stroke="#6B699E" tick={{ fontSize: 10, fill: '#6B699E' }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={52} />
             <Tooltip
               contentStyle={{ backgroundColor: '#191854', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
               formatter={(value: unknown, _name: unknown, entry: unknown) => {

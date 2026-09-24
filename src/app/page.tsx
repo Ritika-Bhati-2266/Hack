@@ -85,9 +85,9 @@ export default function DashboardPage() {
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
   return (
-    <div className="space-y-8 relative">
+    <div className="space-y-6 sm:space-y-8 relative min-w-0">
       {/* Background Cyber Lights */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
 
       {/* ── Profiles (live + custom only, no demo) ──────── */}
       {liveData ? <DataSourceBanner source={liveData.source} /> : customProfiles[activeCustomer] ? null : <DataSourceBanner source="none" />}
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               <BadgeCheck className="w-4 h-4 text-cyan-400" />
               EXPENSE TRACKERS SHOW PAST • PREVISE SIMULATES FUTURE
             </div>
-            <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2.6rem,8vw,4.5rem)] text-white">
+            <h1 className="font-display font-black tracking-tight leading-[0.95] text-[clamp(2rem,9vw,4.5rem)] text-white break-words">
               Buy it or
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300 drop-shadow-[0_0_35px_rgba(0,240,255,0.4)]">
@@ -162,12 +162,12 @@ export default function DashboardPage() {
               simulates runway, buffer and goal-delay <b className="text-cyan-300 font-semibold">before you swipe</b>.
               Deterministic rules. Zero hallucination.
             </p>
-            <div className="flex flex-wrap gap-3.5 pt-2">
+            <div className="flex flex-col min-[420px]:flex-row min-[420px]:flex-wrap gap-3 sm:gap-3.5 pt-2">
               {!hasData ? (
                 <>
                   <Link
                     href="/connect"
-                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 min-h-[48px] rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
                   >
                     <Lock className="w-4 h-4 text-white" />
                     Connect Bank (AA)
@@ -175,7 +175,7 @@ export default function DashboardPage() {
                   </Link>
                   <Link
                     href="/simulator"
-                    className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10"
+                    className="inline-flex items-center justify-center gap-2 px-7 py-4 min-h-[48px] rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10"
                   >
                     <Zap className="w-4 h-4 text-dusk" />
                     Try Simulator anyway
@@ -185,7 +185,7 @@ export default function DashboardPage() {
                 <>
                   <Link
                     href="/simulator"
-                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 min-h-[48px] rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
                   >
                     <Zap className="w-4 h-4 fill-white text-white" />
                     Launch What-If Simulator
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                   </Link>
                   <Link
                     href="/connect"
-                    className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10 hover:border-cyan-500/40"
+                    className="inline-flex items-center justify-center gap-2 px-7 py-4 min-h-[48px] rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10 hover:border-cyan-500/40"
                   >
                     <Lock className="w-4 h-4 text-amber-300" />
                     Connect Bank (AA)
@@ -293,45 +293,45 @@ export default function DashboardPage() {
       )}
       <div className={!liveData ? 'opacity-80 space-y-8' : 'space-y-8'}>
       {/* ── STATS BENTO ────────────────────────── */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up stagger-2">
-        <div className={`cyber-card rounded-3xl p-6 relative overflow-hidden group col-span-2 lg:col-span-1 ${hasData ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(0,240,255,0.18)] bg-cyan-500/[0.06]' : 'border-white/10 opacity-70'}`}>
+      <section className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-fade-up stagger-2">
+        <div className={`cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group min-w-0 min-[420px]:col-span-2 lg:col-span-1 ${hasData ? 'border-cyan-400/40 shadow-[0_0_35px_rgba(0,240,255,0.18)] bg-cyan-500/[0.06]' : 'border-white/10 opacity-70'}`}>
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-cyan-300">SPEND TODAY ★</span>
             <Wallet className="w-5 h-5 text-cyan-300 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[40px] leading-none text-cyan-300 font-mono">{hasData ? inr(safeToSpendToday) : '₹--'}</p>
-          <p className="text-[11px] mt-2 font-mono text-gray-300">{hasData ? `after ${daysRemainingInMonth}d burn ${inr(remainingBurn)}` : 'Connect bank to compute safe daily spend'}</p>
+          <p className="font-display font-black text-3xl sm:text-[40px] leading-none text-cyan-300 font-mono break-words">{hasData ? inr(safeToSpendToday) : '₹--'}</p>
+          <p className="text-[11px] mt-2 font-mono text-gray-300 break-words">{hasData ? `after ${daysRemainingInMonth}d burn ${inr(remainingBurn)}` : 'Connect bank to compute safe daily spend'}</p>
         </div>
 
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
+        <div className="cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group opacity-80 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">SAFE BUFFER</span>
             <ShieldCheck className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[32px] leading-none text-white">{hasData ? `₹${(buffer / 100000).toFixed(1)}L` : '₹--'}</p>
-          <p className="text-[11px] text-gray-400 mt-2 font-mono">{hasData ? `of ${inr(user.totalBalance)} • ${inr(totalEarmarked)} locked` : 'Connect bank to view liquid buffer'}</p>
+          <p className="font-display font-black text-2xl sm:text-[32px] leading-none text-white break-words">{hasData ? `₹${(buffer / 100000).toFixed(1)}L` : '₹--'}</p>
+          <p className="text-[11px] text-gray-400 mt-2 font-mono break-words">{hasData ? `of ${inr(user.totalBalance)} • ${inr(totalEarmarked)} locked` : 'Connect bank to view liquid buffer'}</p>
           <div className="mt-4 h-1.5 rounded-full bg-white/5 overflow-hidden p-0.5">
             <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${hasData ? Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100)) : 0}%` }} />
           </div>
         </div>
 
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
+        <div className="cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group opacity-80 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">RUNWAY</span>
             <Clock className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="font-display font-black text-[32px] leading-none text-white">{hasData ? safeRunway : '--'}<span className="text-base font-bold text-gray-400 ml-1">mo</span></p>
+          <p className="font-display font-black text-2xl sm:text-[32px] leading-none text-white break-words">{hasData ? safeRunway : '--'}<span className="text-base font-bold text-gray-400 ml-1">mo</span></p>
           <p className="text-[11px] mt-2 font-bold text-cyan-300 flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5 text-cyan-400" /> {hasData ? 'Target >3.0 mo' : 'Connect bank for burn rate'}
           </p>
         </div>
 
-        <div className="cyber-card rounded-3xl p-6 relative overflow-hidden group opacity-80">
+        <div className="cyber-card rounded-3xl p-5 sm:p-6 relative overflow-hidden group opacity-80 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-mono font-black tracking-[0.16em] text-gray-400">GOALS</span>
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
           </div>
-          <p className="font-display font-black text-[32px] leading-none text-white">{hasData ? goalsOnTrack : '--'} <span className="text-base font-bold text-cyan-400">{hasData ? 'on track' : 'connected'}</span></p>
+          <p className="font-display font-black text-2xl sm:text-[32px] leading-none text-white break-words">{hasData ? goalsOnTrack : '--'} <span className="text-base font-bold text-cyan-400">{hasData ? 'on track' : 'connected'}</span></p>
           <p className="text-[11px] text-gray-400 mt-2 font-mono truncate">{hasData && goals.length > 0 ? goals.map((g) => g.name.split(' ')[0]).join(' • ') : 'Connect data to track goals'}</p>
         </div>
       </section>
@@ -413,7 +413,7 @@ export default function DashboardPage() {
 
       {/* Profile gate (first visit only) */}
       {showGate && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-base/85 backdrop-blur-md p-4 animate-fade-up">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-base/85 backdrop-blur-md p-4 pb-safe animate-fade-up overscroll-contain">
           <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-5 text-center shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-400 to-indigo-500 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(0,240,255,0.4)]">
               <span className="font-display font-black text-white text-2xl leading-none">P</span>
@@ -443,8 +443,8 @@ export default function DashboardPage() {
 
       {/* Create profile modal */}
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 backdrop-blur-sm p-4" onClick={() => setShowCreate(false)}>
-          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto animate-fade-up" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-base/80 backdrop-blur-sm p-4 pb-safe" onClick={() => setShowCreate(false)}>
+          <div className="bg-surface border border-white/[0.08] rounded-3xl p-6 w-full max-w-lg space-y-4 max-h-[90dvh] overflow-y-auto overscroll-contain animate-fade-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-extrabold">Create Profile</h3>
               <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-full hover:bg-white/10"><X className="w-5 h-5 text-mist" /></button>

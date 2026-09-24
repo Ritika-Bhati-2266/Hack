@@ -1,5 +1,5 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 
@@ -22,6 +22,14 @@ export const metadata: Metadata = {
     'Expense trackers show the past. Previse simulates the future — runway, buffer & goal impact before you swipe. Deterministic engine on RBI Account Aggregator.',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#030712',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,14 +37,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} dark bg-base`} style={{ backgroundColor: 'var(--color-base)' }}>
-      <body className="bg-base text-frost font-sans antialiased min-h-screen flex flex-col">
+      <body className="bg-base text-frost font-sans antialiased min-h-dvh flex flex-col overflow-x-clip">
         <Navbar />
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 md:py-10 min-w-0">
           {children}
         </main>
 
-        <footer className="border-t border-white/[0.08] bg-well/50 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <footer className="border-t border-white/[0.08] bg-well/50 backdrop-blur-xl pb-safe">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-display font-black text-white text-lg">
                 P
