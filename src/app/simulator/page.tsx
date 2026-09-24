@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus, Loader2, Smartphone, Laptop, Plane, ShoppingBag } from 'lucide-react';
+import { Zap, AlertTriangle, Clock, ArrowLeft, Server, Minus, Plus, Loader2, Smartphone, Laptop, Plane, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
@@ -218,7 +218,15 @@ export default function SimulatorPage() {
             </div>
           </div>
 
-          {priceError && <p className="text-[11px] text-red-300 mt-2">{priceError}</p>}
+          {priceError && (
+            <div className="mt-2 flex items-start gap-2 rounded-2xl border border-red-500/25 bg-red-500/[0.06] px-3.5 py-2.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-300 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-bold text-red-300">{priceError}</p>
+                <p className="text-[11px] text-mist mt-0.5">Ye {pct.toFixed(0)}% of balance ({inr(user.totalBalance)}) hai — amount kam karo ya EMI / Loan mode try karo.</p>
+              </div>
+            </div>
+          )}
 
           <button
             onClick={handleSimulate}
@@ -230,7 +238,7 @@ export default function SimulatorPage() {
           <button
             onClick={handleVerifyBackend}
             disabled={!canSimulate || backendLoading}
-            className="mt-2.5 w-full py-3 rounded-2xl font-bold text-xs border border-safe/25 bg-safe/[0.07] text-safe hover:bg-safe/15 active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+            className="mt-2.5 w-full py-3.5 rounded-2xl font-bold text-xs border border-safe/45 bg-safe/[0.14] text-safe hover:bg-safe/20 hover:border-safe/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
           >
             {backendLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Server className="w-4 h-4" />}
             {backendLoading ? 'Verifying with backend engine…' : 'Verify with backend engine (:3001) — single source of truth'}
@@ -332,12 +340,27 @@ export default function SimulatorPage() {
 
       {!currentSimulation && (
         <div className="rounded-[28px] border border-dashed border-white/[0.08] bg-white/[0.02] p-8 sm:p-10 text-center animate-fade-up">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
-            {verdict ? <CheckCircle2 className="w-6 h-6 text-primary" /> : <Clock className="w-6 h-6 text-dusk" />}
+          <div className="flex items-center justify-center gap-3">
+            <span className="w-11 h-11 rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-mist" />
+            </span>
+            <span className="text-dusk font-black">→</span>
+            <span className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-[0_0_25px_rgba(83,134,94,0.25)]">
+              <Clock className="w-6 h-6 text-dusk" />
+            </span>
+            <span className="text-dusk font-black">→</span>
+            <span className="w-11 h-11 rounded-2xl bg-white/5 border border-white/[0.08] flex items-center justify-center">
+              <Zap className="w-5 h-5 text-primary" />
+            </span>
           </div>
           <p className="font-display font-extrabold text-lg mt-4">No simulation yet</p>
           <p className="text-sm text-mist mt-1">Item + amount + mode chuno, phir SIMULATE dabao — 5 second me verdict.</p>
-          <p className="text-xs text-dusk mt-2">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
+          <div className="mt-4 inline-flex flex-wrap justify-center gap-2 font-mono text-[11px] text-dusk">
+            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">1 • Item likho</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">2 • Amount set karo</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">3 • SIMULATE dabao</span>
+          </div>
+          <p className="text-xs text-dusk mt-3">Judge tip: iPhone ₹80k cash → <b className="text-red-300">WAIT</b>. Phir 6 EMI try karo → <b className="text-amber-300">EMI OK</b>.</p>
         </div>
       )}
 
