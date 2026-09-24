@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
 import TrajectoryChart from '@/components/TrajectoryChart';
+import CountUp from '@/components/CountUp';
 import DataSourceBanner from '@/components/DataSourceBanner';
 import { PaymentMode } from '@/types';
 import { simulateOnBackend, BackendVerdict } from '@/lib/api';
@@ -299,9 +300,9 @@ export default function SimulatorPage() {
                 <p className="text-[13px] text-mist mt-1.5 leading-relaxed">{currentSimulation.verdictReasoning}</p>
                 <p className="text-[13px] mt-2 italic text-mist">→ {currentSimulation.recommendation}</p>
                 <div className="flex flex-wrap gap-2 mt-3 font-mono text-[11px]">
-                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/[0.08]">runway {currentSimulation.todayRunwayMonths} → {currentSimulation.simulatedRunwayMonths} mo</span>
-                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/[0.08]">buffer {inr(currentSimulation.todayBuffer)} → {inr(currentSimulation.simulatedBuffer)}</span>
-                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/[0.08]">goals +{currentSimulation.goalDelayMonths} mo</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/[0.08]">runway {currentSimulation.todayRunwayMonths} → <CountUp value={currentSimulation.simulatedRunwayMonths} from={currentSimulation.todayRunwayMonths} format={(n) => n.toFixed(1)} /> mo</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/[0.08]">buffer {inr(currentSimulation.todayBuffer)} → <CountUp value={currentSimulation.simulatedBuffer} from={currentSimulation.todayBuffer} format={(n) => inr(Math.round(n))} /></span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/[0.08]">goals +<CountUp value={currentSimulation.goalDelayMonths} from={0} /> mo</span>
                 </div>
               </div>
             </div>

@@ -311,7 +311,7 @@ export default function DashboardPage() {
           <p className="font-display font-black text-2xl sm:text-[32px] leading-none text-white break-words">{hasData ? `₹${(buffer / 100000).toFixed(1)}L` : '₹--'}</p>
           <p className="text-[11px] text-gray-400 mt-2 font-mono break-words">{hasData ? `of ${inr(user.totalBalance)} • ${inr(totalEarmarked)} locked` : 'Connect bank to view liquid buffer'}</p>
           <div className="mt-4 h-1.5 rounded-full bg-white/5 overflow-hidden p-0.5">
-            <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-full" style={{ width: `${hasData ? Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100)) : 0}%` }} />
+            <div className="h-full bg-gradient-to-r from-safe to-cyan-300 rounded-full transition-[width] duration-700 ease-out" style={{ width: `${hasData ? Math.max(4, Math.min(100, (buffer / Math.max(1, user.totalBalance)) * 100)) : 0}%` }} />
           </div>
         </div>
 
