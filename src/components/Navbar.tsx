@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FlaskConical, PlugZap, Target, Sparkles, List, History, Star } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, PlugZap, Target, List, History, Star } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { usableBalance } from '@/lib/engine';
 
@@ -74,7 +74,7 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Buffer pill — shrink-0 + nowrap: value must never wrap or stack */}
+        {/* Profile cluster (right) — Simulator lives in the pill nav, no extra CTA */}
         <div className="flex items-center gap-3 shrink-0">
           <div className="hidden sm:flex items-center gap-2.5 pr-1 shrink-0">
             <span className="w-8 h-8 rounded-full bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-xs font-black text-cyan-300 shrink-0">
@@ -94,19 +94,6 @@ export default function Navbar() {
               </p>
             )}
           </div>
-          <Link
-            href="/simulator"
-            className="md:hidden px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[13px] font-extrabold shadow-[0_0_20px_rgba(0,240,255,0.4)] shrink-0"
-          >
-            Simulate
-          </Link>
-          <Link
-            href="/simulator"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white text-[13px] font-extrabold hover:brightness-125 hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all transform hover:-translate-y-0.5 active:scale-95 shrink-0"
-          >
-            <Sparkles className="w-4 h-4" />
-            Try Simulator
-          </Link>
         </div>
       </div>
 
