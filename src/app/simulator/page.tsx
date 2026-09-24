@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus, Loader2 } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle2, Clock, ArrowLeft, Server, Minus, Plus, Loader2, Smartphone, Laptop, Plane, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import SplitViewComparison from '@/components/SplitViewComparison';
@@ -12,7 +12,7 @@ import { simulateOnBackend, BackendVerdict } from '@/lib/api';
 import { backendEMI } from '@/lib/engine';
 
 export default function SimulatorPage() {
-  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, switchCustomer, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
+  const { runSimulation, currentSimulation, clearSimulation, activeCustomer, user, goals, liveData, history, feedbackHistory, acceptWaitRecommendation, confirmPurchaseAnyway } = useFinanceStore();
   const [itemName, setItemName] = useState('iPhone 16 Pro Max');
   const [price, setPrice] = useState(80000);
   const [mode, setMode] = useState<PaymentMode>('CASH');
@@ -48,6 +48,21 @@ export default function SimulatorPage() {
 
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
   const pct = Math.min(100, Math.max(0, (price / Math.max(1, user.totalBalance)) * 100));
+
+  const PRESETS = [
+    { label: 'iPhone 16 Pro Max', Icon: Smartphone },
+    { label: 'MacBook Air', Icon: Laptop },
+    { label: 'Bali Trip', Icon: Plane },
+  ] as const;
+
+  const itemIconFor = (name: string) => {
+    const n = name.toLowerCase();
+    if (/(iphone|phone|mobile|pixel|galaxy)/.test(n)) return Smartphone;
+    if (/(macbook|laptop|tablet|ipad|computer)/.test(n)) return Laptop;
+    if (/(trip|bali|flight|travel|vacation|goa)/.test(n)) return Plane;
+    return ShoppingBag;
+  };
+  const ActiveItemIcon = itemIconFor(itemName);
 
   // Displayed estimates use the same reducing-balance formula as the verdict engine
   const modeOptions: { id: PaymentMode; label: string; sub: string }[] = [
@@ -107,16 +122,20 @@ export default function SimulatorPage() {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_1fr_1.2fr] gap-5">
             <div>
               <label className="text-[10px] font-black tracking-[0.18em] text-dusk">WHAT ARE YOU BUYING?</label>
-              <input
-                value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
-                className={`mt-2 w-full bg-well/70 border rounded-2xl px-4 py-3.5 text-[15px] font-bold focus:outline-none transition-colors ${nameError ? 'border-red-500' : 'border-white/[0.08] focus:border-primary'}`}
-                placeholder="e.g., iPhone 16 Pro"
-              />
+              <div className="relative mt-2">
+                <ActiveItemIcon className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-dusk pointer-events-none" />
+                <input
+                  value={itemName}
+                  onChange={(e) => setItemName(e.target.value)}
+                  className={`w-full bg-well/70 border rounded-2xl pl-11 pr-4 py-3.5 text-[15px] font-bold focus:outline-none transition-colors ${nameError ? 'border-red-500' : 'border-white/[0.08] focus:border-primary'}`}
+                  placeholder="e.g., iPhone 16 Pro"
+                />
+              </div>
               <div className="flex gap-1.5 mt-2.5 flex-wrap">
-                {['iPhone 16 Pro Max', 'MacBook Air', 'Bali Trip'].map((v) => (
-                  <button key={v} onClick={() => setItemName(v)} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === v ? 'bg-primary text-white border-primary' : 'bg-white/5 text-mist border-white/[0.08] hover:text-white'}`}>
-                    {v}
+                {PRESETS.map(({ label, Icon }) => (
+                  <button key={label} onClick={() => setItemName(label)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all ${itemName === label ? 'bg-primary text-white border-primary' : 'bg-white/5 text-mist border-white/[0.08] hover:text-white'}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                    {label}
                   </button>
                 ))}
               </div>

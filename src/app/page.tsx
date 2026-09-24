@@ -88,12 +88,6 @@ export default function DashboardPage() {
 
       {/* ── Profiles (live + custom only, no demo) ──────── */}
       {liveData ? <DataSourceBanner source={liveData.source} /> : <DataSourceBanner source="none" />}
-      {!hasData && (
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.08] p-4 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up">
-          <p className="text-sm text-amber-200 flex-1">Koi bank data nahi hai — sahi runway aur verdict ke liye pehle connect karo, ya neeche Create Profile se manual profile banao.</p>
-          <Link href="/connect" className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-extrabold text-center">Connect Bank →</Link>
-        </div>
-      )}
       <div className="rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-up shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 px-1 shrink-0">
           <Flame className="w-4 h-4 text-cyan-400 animate-pulse" />
@@ -166,21 +160,43 @@ export default function DashboardPage() {
               Deterministic rules. Zero hallucination.
             </p>
             <div className="flex flex-wrap gap-3.5 pt-2">
-              <Link
-                href="/simulator"
-                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
-              >
-                <Zap className="w-4 h-4 fill-white text-white" />
-                Launch What-If Simulator
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/connect"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10 hover:border-cyan-500/40"
-              >
-                <Lock className="w-4 h-4 text-amber-300" />
-                Connect Bank (AA)
-              </Link>
+              {!hasData ? (
+                <>
+                  <Link
+                    href="/connect"
+                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                  >
+                    <Lock className="w-4 h-4 text-white" />
+                    Connect Bank (AA)
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/simulator"
+                    className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10"
+                  >
+                    <Zap className="w-4 h-4 text-dusk" />
+                    Try Simulator anyway
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/simulator"
+                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(0,240,255,0.4)] hover:shadow-[0_0_55px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                  >
+                    <Zap className="w-4 h-4 fill-white text-white" />
+                    Launch What-If Simulator
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/connect"
+                    className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold text-white transition-all active:scale-[0.98] hover:bg-white/10 hover:border-cyan-500/40"
+                  >
+                    <Lock className="w-4 h-4 text-amber-300" />
+                    Connect Bank (AA)
+                  </Link>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-6 pt-3 text-[11px] font-mono text-gray-400">
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" /> INSTANT ENGINE</span>
@@ -239,7 +255,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <Link href="/simulator" className="flex items-center justify-between group px-1 pt-1">
-                  <span className="text-xs text-gray-400">Connect your bank for a real verdict on this phone.</span>
+                  <span className="text-xs text-gray-400">{hasData ? 'Live numbers pe based — apna amount try karo.' : 'Bina bank data ke preview hai — real verdict ke liye connect karo.'}</span>
                   <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-400 group-hover:gap-2.5 transition-all">
                     Try it <ArrowUpRight className="w-4 h-4" />
                   </span>
