@@ -98,7 +98,7 @@ export default function SimulatorPage() {
           <span className="text-dusk"> • Bal {inr(user.totalBalance)}</span>
         </span>
         {!hasData && (
-          <Link href="/connect" className="sm:ml-auto px-4 py-1.5 rounded-full text-xs font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 whitespace-nowrap">
+          <Link href="/connect" className="sm:ml-auto text-xs font-bold text-amber-300/80 hover:text-amber-200 underline-offset-4 hover:underline whitespace-nowrap">
             Connect bank first →
           </Link>
         )}
@@ -115,7 +115,7 @@ export default function SimulatorPage() {
             </div>
             <div>
               <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight">What-If Simulator</h1>
-              <p className="text-[13px] text-dusk">Swipe se pehle — runway, buffer, goals. 5 second me verdict.</p>
+              <p className="text-[13px] text-dusk">Swipe se pehle — runway, buffer, goals. Instant verdict.</p>
             </div>
           </div>
 
@@ -354,7 +354,7 @@ export default function SimulatorPage() {
             </span>
           </div>
           <p className="font-display font-extrabold text-lg mt-4">No simulation yet</p>
-          <p className="text-sm text-mist mt-1">Item + amount + mode chuno, phir SIMULATE dabao — 5 second me verdict.</p>
+          <p className="text-sm text-mist mt-1">Item + amount + mode chuno, phir SIMULATE dabao — instant verdict.</p>
           <div className="mt-4 inline-flex flex-wrap justify-center gap-2 font-mono text-[11px] text-dusk">
             <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">1 • Item likho</span>
             <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/[0.08]">2 • Amount set karo</span>

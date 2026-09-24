@@ -26,8 +26,8 @@
   --color-safe: #00f0ff;
 
   --color-frost: #f9fafb;
-  --color-mist: #9ca3af;
-  --color-dusk: #6b7280;
+  --color-mist: #b8bfcb;
+  --color-dusk: #939cab;
 
   --color-volt-300: #60a5fa;
   --color-volt-400: #3b82f6;
@@ -61,8 +61,8 @@
   --status-critical: #f87171;
 
   --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --text-secondary: #b8bfcb;
+  --text-muted: #939cab;
 
   --border-default: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.2);

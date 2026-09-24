@@ -152,7 +152,7 @@ export default function DashboardPage() {
                 park it?
               </span>
               <br />
-              Know in 5 sec.
+              Know instantly.
             </h1>
             <p className="text-gray-300 text-[16px] leading-relaxed max-w-xl font-normal">
               <b className="text-white font-semibold">“Mere paise ka kya hoga agar main ye kharidu?”</b> — Previse
@@ -384,18 +384,15 @@ export default function DashboardPage() {
       </div>
 
       {/* ── HOW IT WORKS ───────────────────────── */}
-      <section className="grid sm:grid-cols-3 gap-3 animate-fade-up stagger-5">
+      <section className="flex flex-wrap items-center gap-x-6 gap-y-2 px-1 animate-fade-up stagger-5 opacity-70" aria-label="How it works">
         {[
-          { n: '01', t: 'Connect', d: 'AA / CSV → live profile in 3 clicks', c: 'text-cyan-300' },
-          { n: '02', t: 'Simulate', d: 'Cash vs EMI → runway + buffer + goals', c: 'text-primary' },
-          { n: '03', t: 'Decide', d: 'BUY / WAIT / EMI stamp — deterministic', c: 'text-violet-300' },
+          { n: '01', t: 'Connect', d: 'AA / CSV → live profile' },
+          { n: '02', t: 'Simulate', d: 'Cash vs EMI → runway + buffer' },
+          { n: '03', t: 'Decide', d: 'BUY / WAIT / EMI stamp' },
         ].map((s) => (
-          <div key={s.n} className="glass rounded-2xl p-5 flex gap-4 items-start">
-            <span className={`font-display font-black text-2xl ${s.c}`}>{s.n}</span>
-            <div>
-              <p className="font-bold text-sm">{s.t}</p>
-              <p className="text-xs text-dusk mt-1 leading-relaxed">{s.d}</p>
-            </div>
+          <div key={s.n} className="flex items-baseline gap-2 text-xs">
+            <span className="font-mono font-black text-[11px] text-dusk">{s.n}</span>
+            <p className="font-bold text-mist">{s.t} <span className="font-normal text-dusk">— {s.d}</span></p>
           </div>
         ))}
       </section>
