@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 
@@ -12,6 +13,8 @@ const inputCls =
 export default function CreateProfileModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const createProfile = useFinanceStore((s) => s.createProfile);
   const [form, setForm] = useState(EMPTY);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // String-backed inputs so fields can be cleared/typed freely; parsed only for validation/submit.
   const toNum = (v: string) => (v.trim() === '' ? 0 : Number(v));
@@ -27,14 +30,17 @@ export default function CreateProfileModal({ open, onClose }: { open: boolean; o
     });
   const earmarkedTotal = toNum(form.rent) + toNum(form.sip) + toNum(form.bills);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const close = () => {
     setForm(EMPTY);
     onClose();
   };
 
-  return (
+  // Portal to <body>: the navbar (and other parents) use backdrop-blur, which
+  // redefines the containing block for position:fixed descendants. Without a
+  // portal the overlay gets trapped in the tiny header box (cut-off modal).
+  return createPortal(
     <div className="fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-base/80 backdrop-blur-sm" onClick={close}>
       {/* m-auto centering: short cards center, tall cards top-align + page scrolls — never clipped */}
       <div className="min-h-full flex p-4 pb-safe">
@@ -67,6 +73,7 @@ export default function CreateProfileModal({ open, onClose }: { open: boolean; o
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
