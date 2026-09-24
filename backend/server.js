@@ -33,7 +33,10 @@ const { parseTransactions } = require("./ledger/parser");
 const { setupMandate, getMandate } = require("./autopay/stub");
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+// Render/Docker: the platform injects $PORT for the public web process (Next.js
+// honors it automatically). The API keeps its own fixed port so the Next
+// rewrite (/api/* → localhost:3001) never breaks.
+const PORT = process.env.BACKEND_PORT || 3001;
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // DPDP: every consent records which policy version the user agreed to.

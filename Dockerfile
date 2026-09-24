@@ -6,7 +6,6 @@ COPY package*.json ./
 RUN npm ci
 COPY src ./src
 COPY public ./public
-COPY *.ts *.mjs *.css ./ 2>/dev/null || true
 COPY next.config.ts tsconfig.json postcss.config.mjs ./
 RUN npm run build
 
