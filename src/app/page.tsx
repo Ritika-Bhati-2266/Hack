@@ -70,17 +70,17 @@ export default function DashboardPage() {
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-600/15 via-cyan-500/20 to-purple-600/15 blur-[140px] pointer-events-none rounded-full" />
 
       {/* ── Ticker ─────────────────────────────── */}
-      <div className="overflow-hidden max-w-full rounded-full border border-cyan-500/20 bg-cyan-950/20 backdrop-blur-md py-2.5 select-none shadow-[0_0_20px_rgba(0,240,255,0.1)]" aria-hidden="true">
-        <div className="flex whitespace-nowrap animate-ticker gap-8 text-[11px] font-mono text-cyan-300/80 w-max">
+      <div className="overflow-hidden max-w-full rounded-full border border-cyan-500/20 bg-cyan-950/20 backdrop-blur-md py-3 px-5 select-none shadow-[0_0_20px_rgba(0,240,255,0.1)]" aria-hidden="true">
+        <div className="flex whitespace-nowrap animate-ticker gap-10 sm:gap-12 text-[11px] sm:text-xs font-mono text-cyan-300/80 w-max">
           {[0, 1].map((k) => (
-            <span key={k} className="flex gap-8">
-              <span>RUNWAY <b className="text-cyan-400 font-bold">{safeRunway} MO</b></span>
-              <span>BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
-              <span>FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
-              <span>ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
-              <span>AA <b className="text-safe font-bold">LIVE</b></span>
-              <span>CSV <b className="text-white font-bold">REAL DATA</b></span>
-              <span>QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
+            <span key={k} className="flex gap-10 sm:gap-12 shrink-0 pr-10 sm:pr-12">
+              <span className="shrink-0">RUNWAY <b className="text-cyan-400 font-bold">{safeRunway} MO</b></span>
+              <span className="shrink-0">BUFFER <b className="text-white font-bold">{inr(buffer)}</b></span>
+              <span className="shrink-0">FIREWALL <b className="text-amber-300 font-bold">{inr(totalEarmarked)} LOCKED</b></span>
+              <span className="shrink-0">ENGINE <b className="text-cyan-300 font-bold">DETERMINISTIC • NO LLM</b></span>
+              <span className="shrink-0">AA <b className="text-safe font-bold">LIVE</b></span>
+              <span className="shrink-0">CSV <b className="text-white font-bold">REAL DATA</b></span>
+              <span className="shrink-0">QA <b className="text-emerald-400 font-bold">24/24 PASS</b></span>
             </span>
           ))}
         </div>
