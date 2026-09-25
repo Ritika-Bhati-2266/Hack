@@ -3,19 +3,22 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FlaskConical, PlugZap, Target, List, History, Star, Plus } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, PlugZap, Target, List, History, Star, Plus, Trash2 } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import CreateProfileModal from '@/components/CreateProfileModal';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { activeCustomer, customProfiles, liveData } = useFinanceStore();
+  const deleteProfile = useFinanceStore((s) => s.deleteProfile);
   const [showCreate, setShowCreate] = useState(false);
 
   const pillLabel =
     activeCustomer === 'live' && liveData
       ? `Live • ${liveData.source === 'csv' ? 'CSV' : 'AA'}`
       : customProfiles[activeCustomer]?.label || 'No Data';
+  // Manual profiles can be deleted from here; live data goes via /connect (DPDP).
+  const isCustomProfile = !!customProfiles[activeCustomer];
 
   const navLinks = [
     { href: '/', label: 'Home', icon: LayoutDashboard },
@@ -79,6 +82,19 @@ export default function Navbar() {
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             {pillLabel}
           </div>
+          {isCustomProfile && (
+            <button
+              onClick={() => {
+                if (window.confirm(`Delete profile "${pillLabel}"? This cannot be undone.`)) {
+                  deleteProfile(activeCustomer);
+                }
+              }}
+              title="Delete active profile"
+              className="inline-flex items-center p-2 rounded-xl border border-red-400/30 text-red-300 text-xs transition-all active:scale-95 hover:bg-red-500/20"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
           <button
             onClick={() => setShowCreate(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dashed border-cyan-500/40 text-cyan-300 text-xs font-bold transition-all active:scale-95 hover:border-cyan-400 hover:bg-cyan-500/10"

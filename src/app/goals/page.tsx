@@ -12,20 +12,18 @@ export default function GoalsPage() {
   const { goals, currentSimulation, addGoal, updateGoal, deleteGoal } = useFinanceStore();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const blankForm = { name: '', targetAmount: 100000, currentAmount: 0, monthlyContribution: 10000, targetDate: '', category: 'emergency' as Goal['category'] };
+  const blankForm = { name: '', targetAmount: 0, currentAmount: 0, monthlyContribution: 0, targetDate: '', category: '' as Goal['category'] | '' };
   const [form, setForm] = useState(blankForm);
   const [editForm, setEditForm] = useState({ currentAmount: 0, monthlyContribution: 0, targetAmount: 0, targetDate: '' });
   // Frozen "today" for days-left math (stable across re-renders).
   const [nowMs] = useState(() => Date.now());
   const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
-  const canAdd = form.name.trim().length >= 2 && form.targetAmount > 0 && form.monthlyContribution >= 0 && form.currentAmount >= 0 && form.targetDate !== '';
+  const canAdd = form.name.trim().length >= 2 && form.targetAmount > 0 && form.monthlyContribution >= 0 && form.currentAmount >= 0 && form.targetDate !== '' && form.category !== '';
 
   const openAdd = () => {
-    // Default date computed in the event handler (not render) — +180 days out.
-    const d = new Date();
-    d.setDate(d.getDate() + 180);
-    setForm({ ...blankForm, targetDate: d.toISOString().slice(0, 10) });
+    // No pre-filled values — user starts from a clean slate every time.
+    setForm(blankForm);
     setShowAdd(true);
   };
 
@@ -181,13 +179,13 @@ export default function GoalsPage() {
             </div>
             <div>
               <label className="text-[11px] font-bold tracking-widest text-dusk">GOAL NAME</label>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
+              <input value={form.name} placeholder="e.g. Emergency fund" onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none placeholder:text-dusk/60" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {([['targetAmount', 'TARGET (₹)'], ['currentAmount', 'SAVED SO FAR (₹)'], ['monthlyContribution', 'MONTHLY (₹)']] as const).map(([k, label]) => (
+              {([['targetAmount', 'TARGET (₹)', 'e.g. 300000'], ['currentAmount', 'SAVED SO FAR (₹)', 'e.g. 50000'], ['monthlyContribution', 'MONTHLY (₹)', 'e.g. 10000']] as const).map(([k, label, ph]) => (
                 <div key={k} className={k === 'monthlyContribution' ? 'col-span-2' : ''}>
                   <label className="text-[11px] font-bold tracking-widest text-dusk">{label}</label>
-                  <input type="number" min={0} value={form[k]} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm font-mono focus:border-primary outline-none" />
+                  <input type="number" min={0} value={form[k] || ''} placeholder={ph} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) || 0 })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm font-mono focus:border-primary outline-none placeholder:text-dusk/60" />
                 </div>
               ))}
               <div>
@@ -197,13 +195,14 @@ export default function GoalsPage() {
               <div>
                 <label className="text-[11px] font-bold tracking-widest text-dusk">CATEGORY</label>
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as Goal['category'] })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none">
+                  <option value="" disabled>Select category</option>
                   {CATS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </div>
             <button
               disabled={!canAdd}
-              onClick={() => { addGoal(form); setShowAdd(false); setForm(blankForm); }}
+              onClick={() => { addGoal({ ...form, category: form.category as Goal['category'] }); setShowAdd(false); setForm(blankForm); }}
               className={`w-full py-3 rounded-xl font-bold text-sm ${canAdd ? 'bg-primary text-white hover:brightness-110' : 'bg-white/5 text-dusk cursor-not-allowed'}`}
             >
               Add goal
