@@ -10,6 +10,9 @@ const BACKEND_INTERNAL_URL =
   process.env.BACKEND_INTERNAL_URL || "http://localhost:3001";
 
 const nextConfig: NextConfig = {
+  // Dev on LAN (phone/other laptop via 10.173.13.9:3000): Next blocks
+  // cross-origin dev assets (HMR/fonts) by default — allow the LAN host.
+  allowedDevOrigins: ['10.173.13.9'],
   async rewrites() {
     return [
       {
