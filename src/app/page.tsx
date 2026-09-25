@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import {
   ShieldCheck,
   TrendingUp,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useFinanceStore } from '@/store/useFinanceStore';
 import { previewSimulation } from '@/lib/engine';
+import { backendProfileToStore, getLiveProfile } from '@/lib/api';
 import FinancialFirewall from '@/components/FinancialFirewall';
 import InsightsPanel from '@/components/InsightsPanel';
 import DataSourceBanner from '@/components/DataSourceBanner';
@@ -24,7 +25,42 @@ import CreateProfileModal from '@/components/CreateProfileModal';
 
 export default function DashboardPage() {
   const { user, goals, activeCustomer, customProfiles, liveData } = useFinanceStore();
+  const setLiveData = useFinanceStore((s) => s.setLiveData);
+  const clearLiveData = useFinanceStore((s) => s.clearLiveData);
   const [showCreate, setShowCreate] = useState(false);
+  // Revalidate persisted live data against the backend session (:3001).
+  // Backend sessions expire after 1h — without this, a refresh would keep
+  // showing stale mock numbers from localStorage forever. Only runs when
+  // the active profile is 'live'; manual profiles are never overridden.
+  // Backend-down errors keep the local copy; explicit NO_LIVE_DATA clears it.
+  useEffect(() => {
+    if (activeCustomer !== 'live') return;
+    let cancelled = false;
+    getLiveProfile()
+      .then((profile) => {
+        if (cancelled || !profile?.profile) return;
+        const { user: u, goals: g } = backendProfileToStore(profile.profile);
+        setLiveData({
+          user: u,
+          goals: g,
+          source: profile.source,
+          meta: profile.meta,
+          accounts: profile.accounts || [],
+          transactions: profile.transactions || [],
+          fetchedAt: profile.fetchedAt,
+        });
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        const msg = e instanceof Error ? e.message : '';
+        if (msg.includes('NO_LIVE_DATA') || msg.includes('No live data')) {
+          clearLiveData();
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCustomer, setLiveData, clearLiveData]);
   // Hydration-safe: server snapshot is always false, so server HTML and the
   // first client render both omit the gate. After zustand persist restores,
   // the subscription re-reads and the gate appears only for true first-timers.
