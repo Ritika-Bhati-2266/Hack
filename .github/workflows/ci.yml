@@ -34,6 +34,7 @@ jobs:
       # Backend uses CommonJS require() by convention — lint only the Next.js app
       - run: npx eslint src
       - run: npx tsc --noEmit
+      - run: npx vitest run
       - run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
