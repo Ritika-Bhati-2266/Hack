@@ -59,6 +59,12 @@
     "/api/aa/fetch": {
       "post": { "summary": "Fetch AA accounts + transactions (rate-limited)", "responses": { "200": { "description": "live data" }, "400": { "description": "consent error" } } }
     },
+    "/api/aa/callback": {
+      "get": { "summary": "Setu redirect after approve/reject (real mode; verifies + activates, redirects to /connect/callback)", "responses": { "302": { "description": "redirect to UI" }, "400": { "description": "verification error" } } }
+    },
+    "/api/aa/webhook": {
+      "post": { "summary": "Setu notifications: consent updates + FI_DATA_READY (x-webhook-secret when configured)", "responses": { "200": { "description": "ack" }, "401": { "description": "bad secret" } } }
+    },
     "/api/upload/csv": {
       "post": { "summary": "Upload bank CSV (multipart: statement + balance)", "responses": { "200": { "description": "parsed profile" }, "400": { "description": "validation error" } } }
     },

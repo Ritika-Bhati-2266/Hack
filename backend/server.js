@@ -27,7 +27,7 @@ const { simulate, calculateEMI } = require("./engine/simulator");
 const { applyFirewall } = require("./engine/firewall");
 
 // Phase 2 imports
-const { createConsent, approveConsent, getConsent, fetchLiveData, providerMode: aaMode } = require("./aa/consent");
+const { createConsent, approveConsent, getConsent, fetchLiveData, providerMode: aaMode, activateConsentBySetu, getSetuLink } = require("./aa/consent");
 const { buildLiveProfile } = require("./ledger/ledger");
 const { parseTransactions } = require("./ledger/parser");
 const { setupMandate, getMandate } = require("./autopay/stub");
@@ -240,6 +240,67 @@ app.get("/api/aa/consent/:consentId", (req, res) => {
   const session = getConsent(req.params.consentId);
   if (!session) return res.status(404).json({ error: "consent not found" });
   res.json(session);
+});
+
+/**
+ * GET /api/aa/callback
+ * Setu (real mode) redirects the user here after approve/reject on Setu
+ * screens (SETU_REDIRECT_URI — must be whitelisted in Bridge dashboard).
+ * Query carries the Setu consent id (param name is Bridge-version specific —
+ * consentId / id / requestId all accepted). Verifies against Setu, activates
+ * the linked local session, then hands the user back to the UI.
+ * Mock mode: unused (1-click flow has no redirect).
+ */
+app.get("/api/aa/callback", apiLimiter, async (req, res) => {
+  try {
+    if (aaMode() === "mock") return res.redirect("/connect");
+    const setuId = req.query.consentId || req.query.id || req.query.requestId;
+    if (!setuId) return res.status(400).json({ error: "consent id missing in callback query" });
+    const { setuConsentStatus } = require("./aa/tsp");
+    const consent = await setuConsentStatus(String(setuId));
+    const session = activateConsentBySetu(String(setuId), consent.status || "PENDING");
+    if (!session) return res.status(404).json({ error: "unknown consent — create it via POST /api/aa/consent first" });
+    const s = String(consent.status || "").toUpperCase();
+    return res.redirect(`/connect/callback?status=${encodeURIComponent(s)}&local=${encodeURIComponent(session.consentId)}`);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/aa/webhook
+ * Setu notification endpoint (URL registered in Bridge dashboard):
+ * consent updates (APPROVED/REJECTED) + FI notifications (FI_DATA_READY).
+ * When SETU_WEBHOOK_SECRET is set, requests must carry it as
+ * x-webhook-secret — else 401. FI fetch itself happens on user Fetch
+ * (POST /api/aa/fetch) via the sessions API; the webhook only records status.
+ */
+app.post("/api/aa/webhook", apiLimiter, (req, res) => {
+  try {
+    const secret = process.env.SETU_WEBHOOK_SECRET || "";
+    if (secret && req.headers["x-webhook-secret"] !== secret) {
+      return res.status(401).json({ error: "bad webhook secret" });
+    }
+    const body = req.body || {};
+    const setuId = body.consentId || body.id || body.consent_id;
+    const type = String(body.type || "");
+    if (type === "FI_DATA_READY" && setuId) {
+      const link = getSetuLink(String(setuId));
+      if (link) {
+        link.fiReady = true;
+        link.fiStatus = body.status || "COMPLETED";
+        link.updatedAt = new Date().toISOString();
+      }
+      return res.json({ ok: true });
+    }
+    const status = body.status || (type.toUpperCase().includes("REJECT") ? "REJECTED" : "APPROVED");
+    if (!setuId) return res.status(400).json({ error: "consent id missing in webhook body" });
+    const session = activateConsentBySetu(String(setuId), status);
+    if (!session) return res.status(404).json({ error: "unknown consent" });
+    res.json({ ok: true, status: session.status });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 /**

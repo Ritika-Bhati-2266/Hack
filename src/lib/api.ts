@@ -237,10 +237,13 @@ export interface ConsentSession {
   sessionToken: string;
   status: string;
   createdAt: string;
+  // Setu real mode only (absent in mock): approval URL on Setu screens.
+  approvalUrl?: string | null;
+  setuStatus?: string;
 }
 
-export const createConsent = () =>
-  req<ConsentSession>('/api/aa/consent', { method: 'POST', body: JSON.stringify({}) });
+export const createConsent = (opts: { vua?: string; mobile?: string; purpose?: string } = {}) =>
+  req<ConsentSession>('/api/aa/consent', { method: 'POST', body: JSON.stringify(opts) });
 
 export const approveConsent = (consentId: string, sessionToken: string) =>
   req<ConsentSession>(`/api/aa/consent/${consentId}/approve`, {
@@ -249,7 +252,7 @@ export const approveConsent = (consentId: string, sessionToken: string) =>
   });
 
 export const fetchAAData = (consentId: string, sessionToken: string) =>
-  req<{ liveProfile: BackendProfile; meta: LiveProfileRes['meta']; sessionId: string }>('/api/aa/fetch', {
+  req<{ liveProfile: BackendProfile; meta: LiveProfileRes['meta']; sessionId: string; source?: string }>('/api/aa/fetch', {
     method: 'POST',
     body: JSON.stringify({ consentId, sessionToken }),
   });

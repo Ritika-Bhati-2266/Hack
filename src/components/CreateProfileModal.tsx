@@ -14,7 +14,10 @@ export default function CreateProfileModal({ open, onClose }: { open: boolean; o
   const createProfile = useFinanceStore((s) => s.createProfile);
   const [form, setForm] = useState(EMPTY);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   // String-backed inputs so fields can be cleared/typed freely; parsed only for validation/submit.
   const toNum = (v: string) => (v.trim() === '' ? 0 : Number(v));

@@ -13,6 +13,9 @@ export default function ConnectPage() {
   const [step, setStep] = useState<'idle' | 'consent' | 'active' | 'fetched'>('idle');
   const [consentId, setConsentId] = useState('');
   const [sessionToken, setSessionToken] = useState('');
+  // Setu real mode only: approval happens on Setu's screens (redirect).
+  // Mock mode never sets this — 1-click flow unchanged.
+  const [approvalUrl, setApprovalUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState<LiveProfileRes | null>(null);
@@ -71,9 +74,22 @@ export default function ConnectPage() {
   const handleCreate = () => run(async () => {
     const s = await createConsent();
     setConsentId(s.consentId); setSessionToken(s.sessionToken); setStep('consent');
+    // Real Setu mode: backend returns the Setu approval URL — user approves
+    // on Setu's screens (bank select + login/OTP), then returns via callback.
+    if (s.approvalUrl) {
+      setApprovalUrl(s.approvalUrl);
+      setMsg('Setu approval page khul raha hai — apna bank select karke approve karo, phir wapas yahan Fetch dabao.');
+      window.location.href = s.approvalUrl;
+      return;
+    }
     setMsg(`Consent created — now approve it.`);
   });
   const handleApprove = () => run(async () => {
+    // Real Setu mode: no local approve — re-open Setu approval screens.
+    if (approvalUrl) {
+      window.location.href = approvalUrl;
+      return;
+    }
     await approveConsent(consentId, sessionToken); setStep('active');
     setMsg('Consent approved — now fetch live data.');
   });
