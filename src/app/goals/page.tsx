@@ -181,7 +181,7 @@ export default function GoalsPage() {
             </div>
             <div>
               <label className="text-[11px] font-bold tracking-widest text-dusk">GOAL NAME</label>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., Japan Trip" className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
+              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full bg-well/60 border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               {([['targetAmount', 'TARGET (₹)'], ['currentAmount', 'SAVED SO FAR (₹)'], ['monthlyContribution', 'MONTHLY (₹)']] as const).map(([k, label]) => (
