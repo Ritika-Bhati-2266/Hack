@@ -43,7 +43,7 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="border-t border-white/[0.08] bg-well/50 backdrop-blur-xl pb-safe">
+        <footer className="mt-auto shrink-0 border-t border-white/[0.08] bg-well/50 backdrop-blur-xl pb-safe">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-display font-black text-white text-lg">
