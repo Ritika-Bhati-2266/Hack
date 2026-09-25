@@ -99,14 +99,18 @@ function deleteSession(sessionId) {
 
 loadSessions();
 
-// Evict expired sessions every 5 minutes
+// Evict expired sessions every 5 minutes (and persist, so sessions.json
+// never keeps dead sessions on disk — no DB needed for auto-delete)
 setInterval(() => {
   const now = Date.now();
+  let evicted = false;
   for (const [key, val] of liveProfiles) {
     if (now - new Date(val.fetchedAt).getTime() > SESSION_TTL_MS) {
       liveProfiles.delete(key);
+      evicted = true;
     }
   }
+  if (evicted) saveSessions();
 }, 5 * 60 * 1000);
 
 // Generate a unique session ID for each user

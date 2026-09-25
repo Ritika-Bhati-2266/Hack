@@ -62,6 +62,64 @@ export const EMPTY_USER: UserFinancialState = {
 export const EMPTY_GOALS: Goal[] = [];
 export const hasLiveBalance = (u: UserFinancialState) => u.totalBalance > 0 || u.earmarkedExpenses.length > 0;
 
+// ─── Persist self-heal (regression-guarded, see persist.test.ts) ───
+// No-DB rule: ANY stored state whose version !== STORE_VERSION is wiped to
+// clean defaults on load. Manual "clear site data" must never be needed.
+export const STORE_VERSION = 3;
+// Mirrors backend SESSION_TTL_MS (server.js) — bank data dies after 1h.
+export const LIVE_TTL_MS = 60 * 60 * 1000;
+
+// Full persisted slice — zustand v5 migrate must return the complete shape.
+export interface PersistedSlice {
+  activeCustomer: CustomerId;
+  customProfiles: Record<string, { label: string; sub: string; user: UserFinancialState; goals: Goal[] }>;
+  user: UserFinancialState;
+  goals: Goal[];
+  liveData: LiveData | null;
+  history: HistoryEntry[];
+  currentSimulation: SimulationResult | null;
+}
+
+export function migratePersistedState(persisted: unknown, version: unknown): PersistedSlice {
+  const p = (persisted || {}) as Partial<FinanceStore>;
+  const history = Array.isArray(p.history) ? p.history : [];
+  // Wrong version (or no version) → hard reset, keep history only.
+  if (version !== STORE_VERSION) {
+    return { activeCustomer: 'empty', customProfiles: {}, user: EMPTY_USER, goals: EMPTY_GOALS, liveData: null, currentSimulation: null, history };
+  }
+  const valid =
+    p.activeCustomer === 'empty' ||
+    (p.activeCustomer === 'live' && !!p.liveData) ||
+    (!!p.activeCustomer && !!p.customProfiles && !!p.customProfiles[p.activeCustomer]);
+  if (!valid) {
+    return { activeCustomer: 'empty', customProfiles: p.customProfiles ?? {}, user: EMPTY_USER, goals: EMPTY_GOALS, liveData: p.liveData ?? null, currentSimulation: null, history };
+  }
+  return {
+    activeCustomer: p.activeCustomer ?? 'empty',
+    customProfiles: p.customProfiles ?? {},
+    user: p.user ?? EMPTY_USER,
+    goals: p.goals ?? EMPTY_GOALS,
+    liveData: p.liveData ?? null,
+    currentSimulation: p.currentSimulation ?? null,
+    history,
+  };
+}
+
+// Drops expired liveData (TTL) — pure so tests can pin it.
+export function applyLiveExpiry(s: { liveData: LiveData | null; activeCustomer: CustomerId; user: UserFinancialState; goals: Goal[]; currentSimulation: SimulationResult | null }): boolean {
+  if (s.liveData?.fetchedAt && Date.now() - new Date(s.liveData.fetchedAt).getTime() > LIVE_TTL_MS) {
+    s.liveData = null;
+    if (s.activeCustomer === 'live') {
+      s.activeCustomer = 'empty';
+      s.user = EMPTY_USER;
+      s.goals = EMPTY_GOALS;
+      s.currentSimulation = null;
+    }
+    return true;
+  }
+  return false;
+}
+
 export const useFinanceStore = create<FinanceStore>()(
   persist(
     (set, get) => ({
@@ -236,21 +294,16 @@ export const useFinanceStore = create<FinanceStore>()(
       name: 'previse-customer',
       // Bump version so judges/sir on stale localStorage (old demo personas
       // like spender/saver/chaser) auto-migrate instead of manual refresh.
-      version: 2,
-      migrate: (persisted: unknown) => {
-        const p = (persisted || {}) as Partial<FinanceStore>;
-        const valid =
-          p.activeCustomer === 'empty' ||
-          (p.activeCustomer === 'live' && !!p.liveData) ||
-          (!!p.activeCustomer && !!p.customProfiles && !!p.customProfiles[p.activeCustomer]);
-        if (!valid) {
-          return { ...p, activeCustomer: 'empty', user: EMPTY_USER, goals: EMPTY_GOALS, currentSimulation: null };
-        }
-        return p;
-      },
+      // v3: force-reset ANY pre-v3 stored state (old bundles had no migrate
+      // fn, which caused the "couldn't be migrated" console error).
+      version: STORE_VERSION,
+      migrate: (persisted, version) => migratePersistedState(persisted, version),
       partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles, user: state.user, goals: state.goals, liveData: state.liveData, history: state.history }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
+        // No-DB auto-delete: liveData mirrors the backend 1h session TTL.
+        // Stale bank data must never survive a reload past expiry.
+        applyLiveExpiry(state);
         // Self-heal: stale demo ids (spender/saver/chaser) no longer exist in
         // CUSTOMERS — reset to empty so sir always lands on a clean gate.
         const valid =
