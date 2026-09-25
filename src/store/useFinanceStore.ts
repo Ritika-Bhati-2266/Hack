@@ -234,11 +234,39 @@ export const useFinanceStore = create<FinanceStore>()(
 }),
     {
       name: 'previse-customer',
+      // Bump version so judges/sir on stale localStorage (old demo personas
+      // like spender/saver/chaser) auto-migrate instead of manual refresh.
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const p = (persisted || {}) as Partial<FinanceStore>;
+        const valid =
+          p.activeCustomer === 'empty' ||
+          (p.activeCustomer === 'live' && !!p.liveData) ||
+          (!!p.activeCustomer && !!p.customProfiles && !!p.customProfiles[p.activeCustomer]);
+        if (!valid) {
+          return { ...p, activeCustomer: 'empty', user: EMPTY_USER, goals: EMPTY_GOALS, currentSimulation: null };
+        }
+        return p;
+      },
       partialize: (state) => ({ activeCustomer: state.activeCustomer, customProfiles: state.customProfiles, user: state.user, goals: state.goals, liveData: state.liveData, history: state.history }),
       onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // Self-heal: stale demo ids (spender/saver/chaser) no longer exist in
+        // CUSTOMERS — reset to empty so sir always lands on a clean gate.
+        const valid =
+          state.activeCustomer === 'empty' ||
+          (state.activeCustomer === 'live' && !!state.liveData) ||
+          (!!state.customProfiles[state.activeCustomer] || !!(CUSTOMERS as Record<string, CustomerRecord>)[state.activeCustomer]);
+        if (!valid) {
+          state.activeCustomer = 'empty';
+          state.user = EMPTY_USER;
+          state.goals = EMPTY_GOALS;
+          state.currentSimulation = null;
+          return;
+        }
         // Keep persisted user/goals when present (e.g. EMI added via
         // confirmPurchaseAnyway) — else they were silently lost on reload.
-        if (state && state.activeCustomer && (!state.user || !state.goals)) {
+        if (state.activeCustomer && (!state.user || !state.goals)) {
           const c = (CUSTOMERS as Record<string, CustomerRecord>)[state.activeCustomer] || state.customProfiles[state.activeCustomer];
           if (c) {
             state.user = c.user;
