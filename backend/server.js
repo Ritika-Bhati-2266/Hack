@@ -258,9 +258,11 @@ app.post("/api/aa/fetch", apiLimiter, async (req, res) => {
     const { profile, meta } = buildLiveProfile({ accounts, transactions });
 
     const sessionId = getOrCreateSessionId(req);
-    putSession(sessionId, { profile, meta, accounts, transactions, source: "aa", fetchedAt: new Date().toISOString() });
+    // Honest source stamping: mock TSP is demo data, never real bank data.
+    const source = aaMode() === "mock" ? "aa-mock" : "aa";
+    putSession(sessionId, { profile, meta, accounts, transactions, source, fetchedAt: new Date().toISOString() });
 
-    res.json({ accounts, transactions, liveProfile: profile, meta, sessionId });
+    res.json({ accounts, transactions, liveProfile: profile, meta, sessionId, source });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

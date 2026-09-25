@@ -133,7 +133,7 @@ export default function SimulatorPage() {
                   value={itemName}
                   onChange={(e) => setItemName(e.target.value)}
                   className={`w-full bg-well/70 border rounded-2xl pl-11 pr-4 py-3.5 text-[15px] font-bold focus:outline-none transition-colors ${nameError ? 'border-red-500' : 'border-white/[0.08] focus:border-primary'}`}
-                  placeholder="e.g., iPhone 16 Pro"
+                  placeholder="Type item name..."
                 />
               </div>
               <div className="flex gap-1.5 mt-2.5 flex-wrap">

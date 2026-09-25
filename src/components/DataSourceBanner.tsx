@@ -28,6 +28,27 @@ export default function DataSourceBanner({ source }: { source: Source }) {
     );
   }
 
+  if (source === 'aa-mock') {
+    return (
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/[0.08] px-4 py-3.5">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-400/15 border border-amber-400/30">
+          <Landmark className="h-4 w-4 text-amber-300" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-black tracking-[0.18em] text-amber-300">
+            DEMO DATA — MOCK BANK ⚠ NOT REAL
+          </p>
+          <p className="mt-1 text-[13px] leading-relaxed text-mist">
+            Ye <b className="text-white">real bank data nahi hai</b> — demo HDFC (Mock)
+            account hai (₹1,50,000 balance, ₹65,000 salary). Flow test karne ke liye hai.
+            Real numbers ke liye <b className="text-white">Option B (CSV)</b> se apna
+            statement upload karo.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (source === 'aa') {
     return (
       <div className="flex items-start gap-3 rounded-2xl border border-safe/30 bg-safe/[0.08] px-4 py-3.5">

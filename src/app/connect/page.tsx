@@ -82,7 +82,10 @@ export default function ConnectPage() {
     const profile = await getLiveProfile();
     setLive(profile); setStep('fetched');
     adoptLive(profile);
-    setMsg(`Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator now run on this data.`);
+    const isMock = profile.source === 'aa-mock';
+    setMsg(isMock
+      ? `Demo data loaded (MOCK bank — NOT real bank data): balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Flow test ke liye hai — real numbers ke liye Option B (CSV) use karo.`
+      : `Live profile loaded — source: ${profile.source}, balance ₹${profile.profile.balance.toLocaleString('en-IN')}. Dashboard + Simulator now run on this data.`);
   });
   const handleCSV = async (file: File) => run(async () => {
     // Backend requires explicit balance — CSV has no balance column.
@@ -274,7 +277,7 @@ export default function ConnectPage() {
       {live && (
         <div className="rounded-[24px] bg-surface border border-safe/25 p-6 space-y-4 animate-fade-up shadow-[0_0_40px_rgba(6,182,212,0.15)]">
           <h3 className="font-display font-extrabold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-safe" /> Live Profile — <span className="font-mono text-sm text-safe">{live.source}</span>
+            <CheckCircle2 className="w-5 h-5 text-safe" /> {live.source === 'aa-mock' ? 'Demo Profile' : 'Live Profile'} — <span className="font-mono text-sm text-safe">{live.source === 'aa-mock' ? 'mock (NOT real bank)' : live.source}</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
